@@ -1,0 +1,59 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+  noNav?: boolean;
+  noFooter?: boolean;
+}
+const {
+  title,
+  description = 'Sports photography based in Valdosta, GA.',
+  noNav = false,
+  noFooter = false,
+} = Astro.props;
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{title}</title>
+  <meta name="description" content={description}/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+{!noNav && (
+  <nav class="nav">
+    <a href="/" class="nav-logo">ZRP</a>
+    <div class="nav-links">
+      <a href="/#portfolio">Work</a>
+      <a href="/#about">About</a>
+      <a href="tel:2293001006">229-300-1006</a>
+      <a href="https://instagram.com/zacharyroutsongphotos" target="_blank" rel="noopener">Instagram</a>
+    </div>
+    <a href="/book" class="btn" style="font-size:12px;padding:7px 16px;">Book a session</a>
+  </nav>
+)}
+
+<slot/>
+
+{!noFooter && (
+  <footer>
+    <span>© 2025 Zachary Routsong Photography</span>
+    <div class="foot-links">
+      <a href="tel:2293001006">229-300-1006</a>
+      <a href="https://instagram.com/zacharyroutsongphotos" target="_blank" rel="noopener">@zacharyroutsongphotos</a>
+      <a href="/book">Book now</a>
+    </div>
+  </footer>
+)}
+
+<div class="toast" id="toast"></div>
+
+</body>
+</html>

@@ -1,0 +1,357 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+<Layout title="Zachary Routsong Photography">
+
+<style is:global>
+.hero {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 72px 28px 56px;
+  border-bottom: 1px solid var(--border);
+}
+.hero-eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 18px;
+}
+.hero-title {
+  font-size: clamp(32px, 5.5vw, 52px);
+  font-weight: 300;
+  letter-spacing: -.025em;
+  line-height: 1.15;
+  color: var(--text);
+  margin-bottom: 28px;
+}
+.hero-sub {
+  font-size: 14px;
+  color: var(--text-2);
+  margin-bottom: 32px;
+  max-width: 440px;
+  line-height: 1.7;
+}
+
+.section { max-width: 860px; margin: 0 auto; padding: 0 28px 72px }
+@media (max-width: 600px) { .section { padding: 0 18px 56px } }
+
+/* PORTFOLIO GRID */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3px;
+}
+@media (max-width: 560px) { .grid { grid-template-columns: repeat(2, 1fr) } }
+
+.grid-item {
+  aspect-ratio: 4/3;
+  background: var(--surface-dim);
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+}
+.grid-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform .5s ease;
+}
+.grid-item:hover img { transform: scale(1.04) }
+.grid-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(26,25,24,.45);
+  opacity: 0;
+  transition: opacity .25s;
+  display: flex;
+  align-items: flex-end;
+  padding: 12px;
+}
+.grid-item:hover .grid-overlay { opacity: 1 }
+.grid-overlay span {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.85);
+}
+.placeholder-cell {
+  aspect-ratio: 4/3;
+  background: var(--surface-dim);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.placeholder-cell span {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--text-3);
+}
+
+/* SPORT TAGS */
+.sports-strip {
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 28px 0;
+}
+.sports-inner { max-width: 860px; margin: 0 auto; padding: 0 28px }
+@media (max-width: 600px) { .sports-inner { padding: 0 18px } }
+
+.sport-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px }
+.sport-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .09em;
+  color: var(--text-2);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 5px 11px;
+  cursor: pointer;
+  transition: all .15s;
+  background: var(--surface);
+  user-select: none;
+}
+.sport-tag:hover { border-color: var(--border-2); color: var(--text) }
+.sport-tag.active { border-color: var(--text); color: var(--text); background: var(--surface-dim) }
+.sport-tag.disabled { opacity: .35; cursor: default; pointer-events: none }
+
+.port-nudge { font-size: 12px; color: var(--text-3); text-align: center; margin-top: 16px; transition: opacity .3s }
+.port-count { font-size: 11px; color: var(--text-3); text-align: center; margin-top: 8px; font-family: 'DM Mono', monospace }
+.port-sport-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--text-2);
+  margin-bottom: 8px;
+  display: none;
+}
+
+/* ABOUT */
+.about-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 56px;
+  align-items: start;
+}
+@media (max-width: 620px) { .about-grid { grid-template-columns: 1fr; gap: 32px } }
+
+.about-text h2 {
+  font-size: 22px;
+  font-weight: 400;
+  letter-spacing: -.02em;
+  margin-bottom: 14px;
+}
+.about-text p {
+  font-size: 13px;
+  color: var(--text-2);
+  line-height: 1.85;
+  margin-bottom: 10px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.stat { background: var(--surface); padding: 20px }
+.stat-n {
+  font-size: 26px;
+  font-weight: 300;
+  color: var(--text);
+  letter-spacing: -.03em;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.stat-l {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+</style>
+
+<!-- HERO -->
+<div class="hero">
+  <p class="hero-eyebrow">Sports Photography · Valdosta, Georgia</p>
+  <h1 class="hero-title">Zachary Routsong<br/>Photography</h1>
+  <p class="hero-sub">Capturing action, celebrations, and the moments in between. Affordable packages, fast turnaround, delivered via private gallery.</p>
+  <a href="/book" class="btn">Book a session</a>
+</div>
+
+<!-- PORTFOLIO -->
+<div class="section" id="portfolio" style="padding-top: 56px">
+  <div class="sec-label">portfolio</div>
+  <div class="port-sport-label" id="port-sport-label"></div>
+  <div class="grid" id="portfolio-grid">
+    <div class="placeholder-cell"><span>Loading…</span></div>
+    <div class="placeholder-cell"><span>Loading…</span></div>
+    <div class="placeholder-cell"><span>Loading…</span></div>
+  </div>
+  <p class="port-nudge" id="port-nudge">Click a sport below to filter →</p>
+  <p class="port-count" id="port-count"></p>
+</div>
+
+<!-- SPORT FILTER -->
+<div class="sports-strip">
+  <div class="sports-inner">
+    <div class="sec-label">sports covered</div>
+    <div class="sport-tags" id="sports-tags">
+      <span class="sport-tag disabled">Loading…</span>
+    </div>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<div class="section" id="about" style="padding-top: 64px">
+  <div class="sec-label">about</div>
+  <div class="about-grid">
+    <div class="about-text">
+      <h2>About Zachary</h2>
+      <p>Based in Valdosta, Georgia, Zachary has spent the last year building a reputation for capturing the moments that matter most — the big plays, the celebrations, and everything in between.</p>
+      <p>What started as a passion quickly turned into a craft. Over the past year Zachary has sharpened his eye for action photography and developed a strong hand for post-processing — delivering clean, polished edits that look great on your wall or your feed.</p>
+      <p>Fast turnaround, affordable pricing, and photos delivered via private gallery link.</p>
+      <div style="margin-top: 22px">
+        <a href="/book" class="btn">Book your event</a>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="stat-n">$40</div><div class="stat-l">Starting price</div></div>
+      <div class="stat"><div class="stat-n">5–7</div><div class="stat-l">Day turnaround</div></div>
+      <div class="stat"><div class="stat-n">25+</div><div class="stat-l">Edited photos</div></div>
+      <div class="stat"><div class="stat-n">All</div><div class="stat-l">Sports covered</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lb" onclick="closeLB()">
+  <button class="lb-close" onclick="closeLB()">×</button>
+  <img id="lb-img" src="" alt=""/>
+</div>
+
+<script>
+import { createClient } from '@supabase/supabase-js';
+
+const sb = createClient(
+  import.meta.env.PUBLIC_SUPABASE_URL,
+  import.meta.env.PUBLIC_SUPABASE_ANON_KEY
+);
+
+let allPhotos = [], activeSport = null;
+
+async function loadPortfolio() {
+  const { data, error } = await sb
+    .from('portfolio_photos')
+    .select('*')
+    .eq('show_on_homepage', true)
+    .order('created_at', { ascending: false });
+
+  if (error || !data || !data.length) {
+    document.getElementById('portfolio-grid').innerHTML =
+      '<div class="placeholder-cell"><span>Coming soon</span></div>'.repeat(3);
+    document.getElementById('port-nudge').style.display = 'none';
+    document.getElementById('sports-tags').innerHTML =
+      '<span class="sport-tag disabled">No photos yet</span>';
+    return;
+  }
+
+  allPhotos = data;
+
+  // Build sport counts
+  const sportCounts = {};
+  data.forEach(p => { if (p.sport) sportCounts[p.sport] = (sportCounts[p.sport] || 0) + 1; });
+  const sports = Object.keys(sportCounts).sort();
+
+  const tagsEl = document.getElementById('sports-tags');
+  if (!sports.length) {
+    tagsEl.innerHTML = '<span class="sport-tag disabled">No tagged photos yet</span>';
+  } else {
+    tagsEl.innerHTML =
+      sports.map(s =>
+        `<span class="sport-tag" onclick="filterSport('${s}')">${s} <span style="opacity:.55;font-size:8px">(${sportCounts[s]})</span></span>`
+      ).join('') +
+      '<span class="sport-tag" onclick="filterSport(null)" id="tag-all" style="display:none">Show all</span>';
+  }
+
+  showRandom();
+}
+
+function showRandom() {
+  activeSport = null;
+  const shuffled = [...allPhotos].sort(() => Math.random() - .5).slice(0, 3);
+  renderGrid(shuffled);
+  const nudge = document.getElementById('port-nudge');
+  nudge.style.opacity = '1';
+  nudge.textContent = 'Click a sport below to filter →';
+  document.getElementById('port-count').textContent = '';
+  document.getElementById('port-sport-label').style.display = 'none';
+  document.querySelectorAll('.sport-tag').forEach(t => t.classList.remove('active'));
+  const tagAll = document.getElementById('tag-all');
+  if (tagAll) tagAll.style.display = 'none';
+}
+
+function filterSport(sport) {
+  activeSport = sport;
+  if (!sport) { showRandom(); return; }
+  const filtered = allPhotos.filter(p => p.sport === sport);
+  renderGrid(filtered);
+  const label = document.getElementById('port-sport-label');
+  label.textContent = sport;
+  label.style.display = 'block';
+  document.getElementById('port-nudge').style.opacity = '0';
+  document.getElementById('port-count').textContent =
+    filtered.length + ' photo' + (filtered.length !== 1 ? 's' : '') + ' · ' + sport;
+  document.querySelectorAll('.sport-tag').forEach(t =>
+    t.classList.toggle('active', t.textContent.trim().startsWith(sport))
+  );
+  const tagAll = document.getElementById('tag-all');
+  if (tagAll) tagAll.style.display = 'inline-block';
+}
+
+function renderGrid(photos) {
+  const g = document.getElementById('portfolio-grid');
+  if (!photos.length) {
+    g.innerHTML = '<div class="placeholder-cell" style="grid-column:1/-1;aspect-ratio:auto;padding:48px"><span>No photos for this sport yet</span></div>';
+    return;
+  }
+  g.innerHTML = '';
+  photos.forEach(p => {
+    const el = document.createElement('div');
+    el.className = 'grid-item';
+    el.innerHTML = `<img src="${p.url}" alt="${p.sport || ''}" loading="lazy"/>
+      <div class="grid-overlay"><span>${p.sport || ''}</span></div>`;
+    el.addEventListener('click', () => openLB(p.url));
+    g.appendChild(el);
+  });
+}
+
+// Expose filter to global scope for inline onclick
+window.filterSport = filterSport;
+
+function openLB(url) {
+  document.getElementById('lb-img').src = url;
+  document.getElementById('lb').classList.add('open');
+}
+window.openLB = openLB;
+
+function closeLB() {
+  document.getElementById('lb').classList.remove('open');
+  document.getElementById('lb-img').src = '';
+}
+window.closeLB = closeLB;
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLB(); });
+
+loadPortfolio();
+</script>
+</Layout>

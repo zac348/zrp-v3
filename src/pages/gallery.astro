@@ -1,0 +1,262 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+<Layout title="Your Gallery — ZRP">
+<style is:global>
+.page { max-width: 980px; margin: 0 auto; padding: 44px 24px 80px }
+@media (max-width: 600px) { .page { padding: 28px 16px 56px } }
+
+.gallery-header { margin-bottom: 36px }
+.gallery-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 10px;
+}
+.gallery-title { font-size: 22px; font-weight: 300; letter-spacing: -.02em; margin-bottom: 6px }
+.gallery-meta { font-size: 12px; color: var(--text-3) }
+.gallery-meta strong { color: var(--text); font-weight: 500 }
+
+.watermark-notice {
+  display: none;
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: var(--amber-bg);
+  border: 1px solid var(--amber-border);
+  border-radius: var(--radius);
+  font-size: 12px;
+  color: var(--amber);
+}
+
+.dl-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--bg);
+  background: var(--ink);
+  padding: 9px 18px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  border: none;
+  transition: background .15s;
+  font-family: 'DM Sans', sans-serif;
+}
+.dl-all:hover { background: var(--ink-hover) }
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 3px;
+}
+@media (max-width: 500px) { .gallery-grid { grid-template-columns: repeat(2, 1fr) } }
+
+.gal-item {
+  aspect-ratio: 3/2;
+  background: var(--surface-dim);
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+}
+.gal-item img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s }
+.gal-item:hover img { transform: scale(1.04) }
+.gal-item-overlay {
+  position: absolute; inset: 0;
+  background: rgba(26,25,24,.4);
+  opacity: 0;
+  transition: opacity .2s;
+  display: flex; align-items: flex-end; padding: 10px;
+}
+.gal-item:hover .gal-item-overlay { opacity: 1 }
+.dl-btn {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.9);
+  background: rgba(0,0,0,.4);
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 3px;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: background .15s;
+}
+.dl-btn:hover { background: rgba(0,0,0,.7) }
+
+.not-found {
+  text-align: center;
+  padding: 80px 24px;
+}
+.not-found h2 { font-size: 20px; font-weight: 300; margin-bottom: 8px }
+.not-found p { font-size: 13px; color: var(--text-3) }
+
+/* LIGHTBOX */
+.lightbox { display: none; position: fixed; inset: 0; background: rgba(26,25,24,.95); z-index: 999; align-items: center; justify-content: center; flex-direction: column; gap: 14px }
+.lightbox.open { display: flex }
+.lightbox img { max-width: 90vw; max-height: 80vh; object-fit: contain; border-radius: var(--radius) }
+.lb-close { position: absolute; top: 20px; right: 24px; font-size: 22px; color: rgba(255,255,255,.5); cursor: pointer; background: none; border: none; transition: color .15s }
+.lb-close:hover { color: #fff }
+.lb-dl {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.6);
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 3px;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: all .15s;
+  text-decoration: none;
+}
+.lb-dl:hover { background: rgba(255,255,255,.15); color: #fff }
+</style>
+
+<div class="page" id="gallery-page">
+  <div id="not-found" class="not-found" style="display:none">
+    <h2>Gallery not found</h2>
+    <p>This link may have expired or the gallery doesn't exist.</p>
+  </div>
+
+  <div id="gallery-content" style="display:none">
+    <div class="gallery-header">
+      <p class="gallery-tag">Private gallery</p>
+      <h1 class="gallery-title" id="gallery-title">Loading…</h1>
+      <p class="gallery-meta" id="gallery-meta"></p>
+      <div class="watermark-notice" id="watermark-notice">
+        These are preview photos. Final edited versions will be delivered shortly.
+      </div>
+      <button class="dl-all" id="dl-all-btn" onclick="downloadAll()" style="display:none">
+        <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><polyline points="8 17 12 21 16 17"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
+        Download all
+      </button>
+    </div>
+
+    <div class="gallery-grid" id="gallery-grid"></div>
+  </div>
+</div>
+
+<div class="lightbox" id="lb" onclick="closeLB(event)">
+  <button class="lb-close" onclick="closeLB()">×</button>
+  <img id="lb-img" src="" alt=""/>
+  <a class="lb-dl" id="lb-dl" href="#" download>Download photo</a>
+</div>
+
+<script>
+import { createClient } from '@supabase/supabase-js';
+const sb = createClient(
+  import.meta.env.PUBLIC_SUPABASE_URL,
+  import.meta.env.PUBLIC_SUPABASE_ANON_KEY
+);
+
+let galleryPhotos = [];
+
+async function loadGallery() {
+  const slug = new URLSearchParams(window.location.search).get('g');
+  if (!slug) { showNotFound(); return; }
+
+  const { data: gallery, error: galErr } = await sb
+    .from('client_galleries')
+    .select('*')
+    .eq('slug', slug)
+    .single();
+
+  if (galErr || !gallery) { showNotFound(); return; }
+
+  document.getElementById('gallery-title').textContent = gallery.name;
+  document.title = gallery.name + ' — ZRP';
+
+  const { data: photos } = await sb
+    .from('portfolio_photos')
+    .select('*')
+    .eq('gallery_id', gallery.id)
+    .order('created_at', { ascending: true });
+
+  galleryPhotos = photos || [];
+
+  document.getElementById('gallery-meta').innerHTML =
+    `<strong>${galleryPhotos.length}</strong> photo${galleryPhotos.length !== 1 ? 's' : ''}`;
+
+  if (gallery.watermarked) {
+    document.getElementById('watermark-notice').style.display = 'block';
+  }
+
+  if (galleryPhotos.length > 0) {
+    document.getElementById('dl-all-btn').style.display = 'inline-flex';
+  }
+
+  renderGallery();
+  document.getElementById('gallery-content').style.display = 'block';
+}
+
+function showNotFound() { document.getElementById('not-found').style.display = 'block'; }
+
+function renderGallery() {
+  const grid = document.getElementById('gallery-grid');
+  if (!galleryPhotos.length) {
+    grid.innerHTML = '<p class="no-data" style="grid-column:1/-1;padding:40px;text-align:center">No photos in this gallery yet.</p>';
+    return;
+  }
+  grid.innerHTML = '';
+  galleryPhotos.forEach((p, i) => {
+    const el = document.createElement('div');
+    el.className = 'gal-item';
+    el.innerHTML = `
+      <img src="${p.url}" alt="Photo ${i+1}" loading="lazy"/>
+      <div class="gal-item-overlay">
+        <button class="dl-btn" onclick="event.stopPropagation();downloadPhoto('${p.url}','${p.file_name}')">Download</button>
+      </div>`;
+    el.addEventListener('click', () => openLB(p.url, p.file_name));
+    grid.appendChild(el);
+  });
+}
+
+function openLB(url, filename) {
+  document.getElementById('lb-img').src = url;
+  document.getElementById('lb-dl').href = url;
+  document.getElementById('lb-dl').download = filename || 'photo.jpg';
+  document.getElementById('lb').classList.add('open');
+}
+window.openLB = openLB;
+
+function closeLB(e) {
+  if (e && e.target !== document.getElementById('lb') && e.target !== document.querySelector('.lb-close')) return;
+  document.getElementById('lb').classList.remove('open');
+  document.getElementById('lb-img').src = '';
+}
+window.closeLB = closeLB;
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLB(); });
+
+async function downloadPhoto(url, filename) {
+  try {
+    const resp = await fetch(url);
+    const blob = await resp.blob();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename || 'photo.jpg';
+    a.click();
+  } catch(err) { window.open(url, '_blank'); }
+}
+window.downloadPhoto = downloadPhoto;
+
+async function downloadAll() {
+  const btn = document.getElementById('dl-all-btn');
+  btn.disabled = true; btn.textContent = 'Preparing…';
+  for (const p of galleryPhotos) {
+    await downloadPhoto(p.url, p.file_name);
+    await new Promise(r => setTimeout(r, 400));
+  }
+  btn.disabled = false;
+  btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><polyline points="8 17 12 21 16 17"/><line x1="12" y1="3" x2="12" y2="21"/></svg> Download all';
+}
+window.downloadAll = downloadAll;
+
+loadGallery();
+</script>
+</Layout>

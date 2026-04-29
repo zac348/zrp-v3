@@ -1,0 +1,110 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+<Layout title="Booking Received — ZRP">
+<style is:global>
+.main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+  min-height: calc(100vh - 112px);
+}
+.card { max-width: 480px; width: 100%; text-align: center }
+.icon { font-size: 36px; margin-bottom: 24px; line-height: 1 }
+.eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--green);
+  margin-bottom: 12px;
+}
+h1 { font-size: 26px; font-weight: 300; letter-spacing: -.02em; margin-bottom: 12px }
+.sub { font-size: 13px; color: var(--text-2); line-height: 1.8; margin-bottom: 28px }
+
+.booking-num-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+  margin-bottom: 28px;
+}
+.booking-num-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 8px;
+}
+.booking-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--text);
+  letter-spacing: .08em;
+}
+.booking-num-note { font-size: 11px; color: var(--text-3); margin-top: 6px }
+
+.divider { width: 40px; height: 1px; background: var(--border); margin: 0 auto 28px }
+
+.details { display: flex; flex-direction: column; gap: 8px; margin-bottom: 28px }
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  padding: 9px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.detail-row span:first-child {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.detail-row span:last-child { color: var(--text); font-weight: 500 }
+
+.actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap }
+</style>
+
+<div class="main">
+  <div class="card">
+    <div class="icon">✓</div>
+    <p class="eyebrow">Booking received</p>
+    <h1>You're all set!</h1>
+    <p class="sub">
+      Zachary will review your request and get back to you within 24 hours to confirm your session.
+    </p>
+
+    <div class="booking-num-card">
+      <div class="booking-num-label">Your booking reference</div>
+      <div class="booking-num" id="booking-num">—</div>
+      <div class="booking-num-note">Save this number for your records</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="details">
+      <div class="detail-row"><span>Next step</span><span>Check your email for confirmation</span></div>
+      <div class="detail-row"><span>Questions?</span><span>229-300-1006</span></div>
+      <div class="detail-row"><span>Turnaround</span><span>5–7 days after your event</span></div>
+    </div>
+
+    <div class="actions">
+      <a href="/" class="btn" style="background:var(--surface);color:var(--text);border:1px solid var(--border)">Back to home</a>
+      <a href="https://instagram.com/zacharyroutsongphotos" target="_blank" rel="noopener" class="btn">Follow on Instagram</a>
+    </div>
+  </div>
+</div>
+
+<script>
+const num = sessionStorage.getItem('zrp_booking_num');
+if (num) document.getElementById('booking-num').textContent = num;
+</script>
+</Layout>

@@ -31,6 +31,33 @@
   --radius-lg: 8px;
 }
 
+/* ── DARK MODE ── */
+html.dark {
+  --bg:          #111110;
+  --surface:     #1C1B1A;
+  --surface-dim: #242322;
+  --border:      #302F2E;
+  --border-2:    #403F3D;
+  --text:        #EEEDE9;
+  --text-2:      #9A9895;
+  --text-3:      #605E5C;
+  --ink:         #EEEDE9;
+  --ink-hover:   #FFFFFF;
+
+  /* Status colors — slightly brighter in dark mode */
+  --red:          #F04438;
+  --red-bg:       rgba(240,68,56,.1);
+  --red-border:   rgba(240,68,56,.25);
+  --green:        #3CCB7F;
+  --green-bg:     rgba(60,203,127,.1);
+  --green-border: rgba(60,203,127,.25);
+  --amber:        #F79009;
+  --amber-bg:     rgba(247,144,9,.1);
+  --amber-border: rgba(247,144,9,.25);
+  --purple:       #9E77ED;
+  --purple-bg:    rgba(158,119,237,.1);
+}
+
 html { scroll-behavior: smooth }
 
 body {

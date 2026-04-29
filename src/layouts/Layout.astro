@@ -24,6 +24,16 @@ const {
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <!-- Theme: run before paint to avoid flash -->
+  <script is:inline>
+    (function() {
+      var stored = localStorage.getItem('zrp-theme');
+      var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (stored === 'dark' || (!stored && prefersDark)) {
+        document.documentElement.classList.add('dark');
+      }
+    })();
+  </script>
 </head>
 <body>
 
@@ -36,7 +46,13 @@ const {
       <a href="tel:2293001006">229-300-1006</a>
       <a href="https://instagram.com/zacharyroutsongphotos" target="_blank" rel="noopener">Instagram</a>
     </div>
-    <a href="/book" class="btn" style="font-size:12px;padding:7px 16px;">Book a session</a>
+    <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
+      <button id="theme-toggle" aria-label="Toggle dark mode" style="background:none;border:1px solid var(--border);border-radius:var(--radius-sm);width:32px;height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-3);transition:all .15s;flex-shrink:0" onmouseover="this.style.borderColor='var(--border-2)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-3)'">
+        <svg id="icon-moon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg id="icon-sun" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      </button>
+      <a href="/book" class="btn" style="font-size:12px;padding:7px 16px;">Book a session</a>
+    </div>
   </nav>
 )}
 
@@ -54,6 +70,37 @@ const {
 )}
 
 <div class="toast" id="toast"></div>
+
+<script is:inline>
+  (function() {
+    var btn      = document.getElementById('theme-toggle');
+    var iconMoon = document.getElementById('icon-moon');
+    var iconSun  = document.getElementById('icon-sun');
+
+    function applyTheme(dark) {
+      if (dark) {
+        document.documentElement.classList.add('dark');
+        if (iconMoon) iconMoon.style.display = 'none';
+        if (iconSun)  iconSun.style.display  = 'block';
+      } else {
+        document.documentElement.classList.remove('dark');
+        if (iconMoon) iconMoon.style.display = 'block';
+        if (iconSun)  iconSun.style.display  = 'none';
+      }
+    }
+
+    // Sync icon with current state on load
+    applyTheme(document.documentElement.classList.contains('dark'));
+
+    if (btn) {
+      btn.addEventListener('click', function() {
+        var isDark = document.documentElement.classList.contains('dark');
+        applyTheme(!isDark);
+        localStorage.setItem('zrp-theme', isDark ? 'light' : 'dark');
+      });
+    }
+  })();
+</script>
 
 </body>
 </html>

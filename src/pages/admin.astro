@@ -170,8 +170,10 @@ html,body { height: 100% }
   text-transform: uppercase; padding: 2px 8px; border-radius: 3px; border: 1px solid;
   white-space: nowrap;
 }
-.badge.pending  { color: var(--amber);  border-color: var(--amber-border);  background: var(--amber-bg) }
-.badge.approved { color: var(--green);  border-color: var(--green-border);  background: var(--green-bg) }
+.badge.pending   { color: var(--amber);  border-color: var(--amber-border);  background: var(--amber-bg) }
+.badge.accepted  { color: var(--purple, #7c3aed); border-color: rgba(124,58,237,.25); background: var(--purple-bg, rgba(124,58,237,.08)) }
+.badge.approved  { color: var(--green);  border-color: var(--green-border);  background: var(--green-bg) }
+.badge.confirmed { color: var(--green);  border-color: var(--green-border);  background: var(--green-bg) }
 .badge.delivered { color: var(--text-2); border-color: var(--border); background: var(--surface-dim) }
 .badge.cancelled { color: var(--red);   border-color: var(--red-border);    background: var(--red-bg) }
 .badge.pkg { color: var(--text-2); border-color: var(--border); background: var(--surface-dim) }
@@ -496,10 +498,11 @@ html,body { height: 100% }
     <p class="main-sub">Manage incoming booking requests.</p>
     <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">
       <button class="btn-sm on-ink" onclick="filterBookings('all',this)" id="bfilt-all">All</button>
-      <button class="btn-sm" onclick="filterBookings('pending',this)"  id="bfilt-pending">Pending</button>
-      <button class="btn-sm" onclick="filterBookings('approved',this)" id="bfilt-approved">Approved</button>
-      <button class="btn-sm" onclick="filterBookings('delivered',this)" id="bfilt-delivered">Delivered</button>
-      <button class="btn-sm" onclick="filterBookings('cancelled',this)" id="bfilt-cancelled">Cancelled</button>
+      <button class="btn-sm" onclick="filterBookings('pending',this)"    id="bfilt-pending">Pending</button>
+      <button class="btn-sm" onclick="filterBookings('accepted',this)"   id="bfilt-accepted">Accepted</button>
+      <button class="btn-sm" onclick="filterBookings('confirmed',this)"  id="bfilt-confirmed">Confirmed</button>
+      <button class="btn-sm" onclick="filterBookings('delivered',this)"  id="bfilt-delivered">Delivered</button>
+      <button class="btn-sm" onclick="filterBookings('cancelled',this)"  id="bfilt-cancelled">Cancelled</button>
     </div>
     <div class="booking-list" id="all-bookings"><p class="no-data">No bookings yet.</p></div>
   </div>
@@ -1021,13 +1024,16 @@ function renderOvBookings() {
 }
 
 function bookingCard(b) {
-  const name = [b.first_name, b.last_name].filter(Boolean).join(' ') || 'Unknown';
+  const name   = [b.first_name, b.last_name].filter(Boolean).join(' ') || 'Unknown';
   const status = b.status || 'pending';
+  const numDisplay = b.ztn_number || b.booking_number || b.id?.slice(-8).toUpperCase() || '—';
+  const venue = b.venue_address || b.event_location || '—';
+
   return `<div class="booking-card">
     <div class="booking-head">
       <div>
         <div class="booking-name">${name}</div>
-        <div class="booking-num">${b.booking_number || b.id?.slice(-8).toUpperCase() || '—'}</div>
+        <div class="booking-num">${numDisplay}</div>
       </div>
       <div class="booking-badges">
         <span class="badge ${status}">${status}</span>
@@ -1038,22 +1044,45 @@ function bookingCard(b) {
       <div class="booking-detail"><strong>Date</strong>${b.event_date || '—'}</div>
       <div class="booking-detail"><strong>Time</strong>${b.event_time || '—'}</div>
       <div class="booking-detail"><strong>Sport</strong>${b.sport_type || '—'}</div>
-      <div class="booking-detail"><strong>Location</strong>${b.event_location || '—'}</div>
+      <div class="booking-detail"><strong>Venue</strong>${venue}</div>
       <div class="booking-detail"><strong>Total</strong>${b.total || '—'}</div>
       <div class="booking-detail"><strong>Deposit</strong>${b.deposit || '—'}</div>
       <div class="booking-detail"><strong>Email</strong>${b.email || '—'}</div>
       <div class="booking-detail"><strong>Phone</strong>${b.phone || '—'}</div>
+      ${b.addons_selected ? `<div class="booking-detail" style="grid-column:1/-1"><strong>Add-ons</strong>${b.addons_selected}</div>` : ''}
       ${b.notes ? `<div class="booking-detail" style="grid-column:1/-1"><strong>Notes</strong>${b.notes}</div>` : ''}
+      ${b.gallery_id ? `<div class="booking-detail" style="grid-column:1/-1"><strong>Gallery</strong><a href="/gallery?g=${b.ztn_number ? b.ztn_number.toLowerCase() : ''}" target="_blank" style="color:var(--text-2);text-decoration:underline">${b.ztn_number ? b.ztn_number.toLowerCase() : 'view gallery'}</a></div>` : ''}
     </div>
     <div class="booking-actions">
-      ${status !== 'approved'   ? `<button class="btn-sm green"  onclick="setStatus('${b.id}','approved')">Approve</button>` : ''}
-      ${status !== 'delivered'  ? `<button class="btn-sm on-ink" onclick="setStatus('${b.id}','delivered')">Mark delivered</button>` : ''}
-      ${status !== 'cancelled'  ? `<button class="btn-sm red"    onclick="setStatus('${b.id}','cancelled')">Cancel</button>` : ''}
-      ${status !== 'pending'    ? `<button class="btn-sm"        onclick="setStatus('${b.id}','pending')">Reset to pending</button>` : ''}
-      <button class="btn-sm" onclick="mailTo('${b.email}','${name}')">Email client</button>
+      ${status === 'pending'   ? `<button class="btn-sm green"  onclick="acceptBooking('${b.id}','${name.replace(/'/g,'\\\'')}')" title="Accept and email client with confirm link">Accept</button>` : ''}
+      ${status === 'accepted'  ? `<button class="btn-sm on-ink" onclick="setStatus('${b.id}','confirmed')">Mark confirmed</button>` : ''}
+      ${status === 'confirmed' ? `<button class="btn-sm on-ink" onclick="setStatus('${b.id}','delivered')">Mark delivered</button>` : ''}
+      ${status !== 'cancelled' && status !== 'pending' ? `<button class="btn-sm" onclick="setStatus('${b.id}','delivered')">Mark delivered</button>` : ''}
+      ${status !== 'cancelled' ? `<button class="btn-sm red"    onclick="setStatus('${b.id}','cancelled')">Cancel</button>` : ''}
+      ${status !== 'pending'   ? `<button class="btn-sm"        onclick="setStatus('${b.id}','pending')">Reset</button>` : ''}
+      ${b.ztn_number ? `<a class="btn-sm" href="/invoice?ztn=${b.ztn_number}" target="_blank">Invoice</a>` : ''}
+      <button class="btn-sm" onclick="mailTo('${b.email}','${name.replace(/'/g,'\\\'')}')" title="Open email client">Email</button>
     </div>
   </div>`;
 }
+
+async function acceptBooking(id, name) {
+  if (!confirm('Accept booking for ' + name + ' and email them a confirm link?')) return;
+  try {
+    const res = await fetch('/api/accept-booking', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ bookingId: id }),
+    });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || 'Unknown error');
+    await loadBookings();
+    toast('Accepted — confirm email sent to client');
+  } catch(e) {
+    toast('Error: ' + e.message); console.error(e);
+  }
+}
+window.acceptBooking = acceptBooking;
 
 async function setStatus(id, status) {
   await sb.from('bookings').update({ status }).eq('id', id);

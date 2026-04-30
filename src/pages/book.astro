@@ -2,106 +2,42 @@
 import Layout from '../layouts/Layout.astro';
 ---
 <Layout title="Book a Session — ZRP">
-
 <style is:global>
-.page { max-width: 780px; margin: 0 auto; padding: 44px 28px 96px }
-@media (max-width: 600px) { .page { padding: 28px 18px 64px } }
-
-.block { margin-bottom: 44px }
+.page { max-width: 560px; margin: 0 auto; padding: 48px 24px 80px }
 
 /* PACKAGES */
-.pkg-wrap { border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden }
-.pkg-header {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1px;
-  background: var(--border);
-  border-bottom: 1px solid var(--border);
-}
-.pkg-header-cell {
-  background: var(--surface-dim);
-  padding: 12px 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-.pkg-header-name {
-  font-family: 'DM Mono', monospace;
-  font-size: 9px;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: var(--text-2);
-}
-.pkg-popular {
-  font-family: 'DM Mono', monospace;
-  font-size: 8px;
-  letter-spacing: .06em;
-  text-transform: uppercase;
-  color: var(--surface);
-  background: var(--text);
-  padding: 2px 7px;
-  border-radius: 2px;
-}
 .pkg-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1px;
-  background: var(--border);
-}
-.pkg-card {
-  background: var(--surface);
-  padding: 20px 16px;
-  cursor: pointer;
-  transition: background .15s;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-}
-.pkg-card:hover { background: var(--surface-dim) }
-.pkg-card.unavailable { opacity: .4; cursor: not-allowed; pointer-events: none }
-.pkg-card.selected { background: var(--surface-dim) }
-.pkg-card.selected::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  background: var(--text);
-}
-.pkg-check {
-  display: none;
-  position: absolute;
-  top: 10px; right: 12px;
-  width: 16px; height: 16px;
-  background: var(--text);
-  border-radius: 50%;
-  align-items: center;
-  justify-content: center;
-}
-.pkg-check svg { width: 8px; height: 8px; stroke: var(--bg); stroke-width: 2.5; fill: none }
-.pkg-card.selected .pkg-check { display: flex }
-.pkg-card-name {
-  display: none;
-  font-family: 'DM Mono', monospace;
-  font-size: 9px;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: var(--text-2);
-  margin-bottom: 12px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--border);
-  align-items: center;
-  justify-content: space-between;
   gap: 8px;
+  margin-bottom: 32px;
 }
-@media (max-width: 600px) {
-  .pkg-header { display: none }
-  .pkg-grid { grid-template-columns: 1fr; gap: 1px }
-  .pkg-card-name { display: flex }
-  .pkg-card { border-bottom: 1px solid var(--border) }
-}
+@media (max-width: 500px) { .pkg-grid { grid-template-columns: 1fr } }
 
-.pkg-price-header { height: 44px; display: flex; flex-direction: column; justify-content: flex-end; margin-bottom: 4px }
+.pkg-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+  position: relative;
+}
+.pkg-card:hover { border-color: var(--border-2) }
+.pkg-card.sel { border-color: var(--text); background: var(--surface-dim) }
+.pkg-card.unavail { opacity: .4; cursor: not-allowed; pointer-events: none }
+.pkg-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  background: var(--text);
+  color: var(--bg);
+  padding: 2px 7px;
+  border-radius: 3px;
+  position: absolute;
+  top: -1px; right: 12px;
+  transform: translateY(-50%);
+}
 .pkg-sale-badge {
   font-family: 'DM Mono', monospace;
   font-size: 8px;
@@ -113,237 +49,23 @@ import Layout from '../layouts/Layout.astro';
   border-radius: 3px;
   padding: 2px 7px;
   display: inline-block;
-  width: fit-content;
-  visibility: hidden;
-  margin-bottom: 3px;
+  margin-bottom: 4px;
 }
-.pkg-sale-badge.visible { visibility: visible }
-.pkg-price-orig {
-  font-size: 13px;
-  color: var(--text-3);
-  text-decoration: line-through;
-  visibility: hidden;
-  line-height: 1.4;
-}
-.pkg-price-orig.visible { visibility: visible }
-.pkg-price {
-  font-size: 28px;
-  font-weight: 300;
-  color: var(--text);
-  letter-spacing: -.03em;
-  line-height: 1;
-  margin-bottom: 14px;
-  margin-top: 4px;
-}
-.pkg-price small { font-size: 12px; color: var(--text-3); font-weight: 400 }
-.pkg-price.sale { color: var(--green) }
-.pkg-features { list-style: none; border-top: 1px solid var(--border); padding-top: 12px; flex: 1 }
-.pkg-features li {
-  font-size: 11px;
-  color: var(--text-2);
-  padding: 2px 0;
-  display: flex;
-  gap: 6px;
-  line-height: 1.5;
-}
-.pkg-features li::before { content: '–'; color: var(--border-2); flex-shrink: 0 }
-
-/* ADD-ONS */
-.addons-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px }
-.addons-toggles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px }
-@media (max-width: 600px) {
-  .addons-grid { grid-template-columns: 1fr }
-  .addons-toggles { grid-template-columns: 1fr 1fr }
-}
-
-.qty-pill {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 12px 14px;
-  transition: border-color .15s;
-}
-.qty-pill.active { border-color: var(--border-2) }
-.qty-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 8px }
-.qty-label { font-size: 12px; color: var(--text-2) }
-.qty-rate { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-3) }
-.qty-row { display: flex; align-items: center; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; width: fit-content }
-.qty-btn {
-  background: var(--surface-dim);
-  border: none;
-  color: var(--text-2);
-  width: 30px; height: 30px;
-  font-size: 15px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background .15s, color .15s;
-  user-select: none;
-}
-.qty-btn:hover { background: var(--border); color: var(--text) }
-.qty-val {
-  font-family: 'DM Mono', monospace;
-  font-size: 13px;
-  color: var(--text);
-  width: 36px;
-  text-align: center;
-  background: var(--surface);
-  border-left: 1px solid var(--border);
-  border-right: 1px solid var(--border);
-  height: 30px;
-  line-height: 30px;
-}
-.qty-sub { font-size: 10px; color: var(--text-3); margin-top: 5px; font-family: 'DM Mono', monospace }
-
-.toggle-pill {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 11px 14px;
-  cursor: pointer;
-  transition: border-color .15s, background .15s;
-  user-select: none;
-  gap: 8px;
-}
-.toggle-pill:hover { border-color: var(--border-2) }
-.toggle-pill.active { border-color: var(--border-2); background: var(--surface-dim) }
-.toggle-pill.unavailable { opacity: .35; cursor: not-allowed; pointer-events: none }
-.toggle-left { display: flex; align-items: center; gap: 10px; flex: 1 }
-.toggle-box {
-  width: 14px; height: 14px;
-  border-radius: 3px;
-  border: 1px solid var(--border-2);
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background .15s, border-color .15s;
-}
-.toggle-pill.active .toggle-box { background: var(--text); border-color: var(--text) }
-.toggle-box svg { width: 8px; height: 8px; stroke: var(--bg); stroke-width: 2.5; fill: none; display: none }
-.toggle-pill.active .toggle-box svg { display: block }
-.toggle-name { font-size: 12px; color: var(--text-2) }
-.toggle-pill.active .toggle-name { color: var(--text) }
-.toggle-price { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-3); white-space: nowrap; flex-shrink: 0 }
-
-/* TRAVEL */
-.travel-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 20px;
-}
-.travel-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px }
-.travel-title { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: .15em; text-transform: uppercase; color: var(--text-3) }
-.gas-pill {
+.pkg-name {
   font-family: 'DM Mono', monospace;
   font-size: 9px;
-  color: var(--text-2);
-  background: var(--surface-dim);
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  padding: 3px 8px;
-}
-.travel-hint { font-size: 12px; color: var(--text-3); margin-bottom: 12px; line-height: 1.6 }
-.addr-wrap { position: relative }
-.addr-drop {
-  position: absolute; top: 100%; left: 0; right: 0;
-  background: var(--surface);
-  border: 1px solid var(--border-2);
-  border-top: none;
-  border-radius: 0 0 var(--radius) var(--radius);
-  z-index: 50;
-  max-height: 200px;
-  overflow-y: auto;
-  display: none;
-  box-shadow: 0 8px 24px rgba(0,0,0,.1);
-}
-.addr-drop.open { display: block }
-.addr-item { padding: 9px 12px; cursor: pointer; border-bottom: 1px solid var(--border); transition: background .1s }
-.addr-item:last-child { border-bottom: none }
-.addr-item:hover, .addr-item.focused { background: var(--surface-dim) }
-.addr-main { font-size: 12px; color: var(--text) }
-.addr-sub { font-size: 10px; color: var(--text-3); margin-top: 1px }
-.travel-err { font-size: 11px; color: var(--red); margin-top: 6px; display: none }
-.travel-result { border-top: 1px solid var(--border); padding-top: 12px; margin-top: 12px; display: none }
-.travel-result.show { display: block }
-.tr-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-2); padding: 2px 0 }
-.tr-row.big { font-size: 13px; font-weight: 500; color: var(--text); border-top: 1px solid var(--border); margin-top: 6px; padding-top: 8px }
-.tr-row.free { color: var(--green); justify-content: center; font-size: 12px; margin-top: 6px }
-.travel-calc-status { font-size: 11px; color: var(--text-3); margin-top: 8px; font-family: 'DM Mono', monospace; display: none }
-
-/* AVAILABILITY CALENDAR */
-.avail-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden }
-.avail-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 12px 16px; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 8px;
-}
-.avail-hint { font-size: 12px; color: var(--text-3) }
-.avail-nav { display: flex; align-items: center; gap: 10px }
-.avail-month {
-  font-family: 'DM Mono', monospace;
-  font-size: 10px;
-  letter-spacing: .08em;
-  color: var(--text-2);
-  min-width: 120px;
-  text-align: center;
-}
-.avail-nav-btn {
-  background: var(--surface-dim);
-  border: 1px solid var(--border);
-  color: var(--text-3);
-  border-radius: var(--radius-sm);
-  width: 26px; height: 26px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all .15s;
-}
-.avail-nav-btn:hover { color: var(--text); border-color: var(--border-2) }
-.avail-grid { display: grid; grid-template-columns: repeat(7, 1fr) }
-.avail-dow {
-  font-family: 'DM Mono', monospace;
-  font-size: 8px;
-  letter-spacing: .08em;
+  letter-spacing: .12em;
   text-transform: uppercase;
   color: var(--text-3);
-  text-align: center;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--border);
+  margin-bottom: 6px;
 }
-.avail-day {
-  aspect-ratio: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  color: var(--text-3);
-  position: relative;
-  transition: background .1s;
-  flex-direction: column;
-  gap: 1px;
-}
-.avail-day.clickable { cursor: pointer }
-.avail-day.clickable:hover { background: var(--surface-dim); color: var(--text) }
-.avail-day.empty, .avail-day.past { pointer-events: none }
-.avail-day.past { color: var(--border) }
-.avail-day.today { color: var(--text); font-weight: 500 }
-.avail-day.picked { background: var(--surface-dim); color: var(--text); outline: 1px solid var(--border-2) }
-.avail-day.unavailable { color: var(--red); background: var(--red-bg) }
-.avail-day.partial { color: var(--amber); background: var(--amber-bg); cursor: pointer }
-.avail-day.available { color: var(--green); background: var(--green-bg); cursor: pointer }
-.avail-dot-sm { width: 3px; height: 3px; border-radius: 50%; flex-shrink: 0 }
-.avail-legend {
-  display: flex; gap: 14px; padding: 10px 16px;
-  border-top: 1px solid var(--border); flex-wrap: wrap;
-}
-.avail-legend-item { display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--text-3) }
-.avail-dot { width: 6px; height: 6px; border-radius: 50% }
+.pkg-orig { font-size: 11px; color: var(--text-3); text-decoration: line-through; line-height: 1; margin-bottom: 1px }
+.pkg-price { font-size: 26px; font-weight: 300; letter-spacing: -.02em; margin-bottom: 10px }
+.pkg-price small { font-size: 12px; color: var(--text-3); font-weight: 400 }
+.pkg-price.sale { color: var(--green) }
+.pkg-features { list-style: none; display: flex; flex-direction: column; gap: 5px }
+.pkg-features li { font-size: 11px; color: var(--text-2); display: flex; align-items: center; gap: 6px }
+.pkg-features li::before { content: '—'; color: var(--text-3); font-size: 9px; flex-shrink: 0 }
 
 /* FORM */
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px }
@@ -366,755 +88,208 @@ import Layout from '../layouts/Layout.astro';
   color: var(--text-3);
   margin-bottom: 10px;
 }
-.cost-empty { font-size: 12px; color: var(--text-3); font-style: italic }
 .cost-line { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-2); padding: 2px 0 }
-.cost-line.hide { display: none }
-.cost-line.total {
-  border-top: 1px solid var(--border);
-  margin-top: 8px; padding-top: 9px;
-  font-size: 13px; font-weight: 500; color: var(--text);
-}
-.cost-line.deposit { font-size: 12px; font-weight: 500; color: var(--text) }
-.cost-line.balance { font-size: 11px; color: var(--text-3) }
-
-/* COUPON */
-.coupon-input-wrap { display: flex; gap: 8px }
-.coupon-input-wrap input { flex: 1 }
-.coupon-apply-btn {
-  background: var(--surface-dim);
-  border: 1px solid var(--border);
-  color: var(--text-2);
-  border-radius: var(--radius);
-  padding: 0 16px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 12px;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all .15s;
-  flex-shrink: 0;
-}
-.coupon-apply-btn:hover { border-color: var(--border-2); color: var(--text) }
-.coupon-status { font-size: 11px; margin-top: 6px; min-height: 16px }
-.coupon-status.ok { color: var(--green) }
-.coupon-status.err { color: var(--red) }
+.cost-line.total { border-top: 1px solid var(--border); margin-top: 8px; padding-top: 9px; font-size: 13px; font-weight: 500; color: var(--text) }
+.cost-line.note { font-size: 11px; color: var(--text-3); padding-top: 6px; font-style: italic }
+.cost-empty { font-size: 12px; color: var(--text-3); font-style: italic }
 
 /* SUBMIT */
-.submit-wrap { grid-column: 1/-1; margin-top: 6px }
 .submit-btn {
-  width: 100%;
-  background: var(--ink);
-  color: var(--bg);
-  border: none;
-  border-radius: var(--radius);
-  padding: 14px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background .15s;
+  width: 100%; background: var(--ink); color: var(--bg);
+  border: none; border-radius: var(--radius); padding: 14px;
+  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+  cursor: pointer; transition: background .15s; grid-column: 1/-1; margin-top: 4px;
 }
 .submit-btn:hover:not(:disabled) { background: var(--ink-hover) }
 .submit-btn:disabled { opacity: .5; cursor: not-allowed }
 
-@media (max-width: 600px) {
-  .field.full, .submit-wrap, .cost-box { grid-column: 1 }
-  .block { margin-bottom: 30px }
+/* SUCCESS */
+.success-state {
+  display: none;
+  text-align: center;
+  padding: 48px 24px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  margin-top: 32px;
 }
+.success-icon {
+  width: 48px; height: 48px;
+  background: var(--green-bg);
+  border: 1px solid var(--green-border);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px;
+}
+.success-icon svg { width: 20px; height: 20px; stroke: var(--green); fill: none; stroke-width: 2 }
 </style>
 
-<div class="page" id="book">
+<div class="page">
+  <div class="sec-label" style="margin-bottom:6px">book a session</div>
+  <h1 style="font-size:24px;font-weight:300;letter-spacing:-.02em;margin-bottom:4px">Request a session</h1>
+  <p style="font-size:13px;color:var(--text-3);margin-bottom:32px">Pick a package and fill in the basics. You'll finalize venue and add-ons after confirmation.</p>
 
   <!-- PACKAGES -->
-  <div class="block">
-    <div class="sec-label">choose a package</div>
-    <div class="pkg-wrap">
-      <div class="pkg-header" id="pkg-header">
-        <div class="pkg-header-cell"><span class="pkg-header-name">Basic</span></div>
-        <div class="pkg-header-cell"><span class="pkg-header-name">Standard</span><span class="pkg-popular">Popular</span></div>
-        <div class="pkg-header-cell"><span class="pkg-header-name">Premium</span></div>
-      </div>
-      <div class="pkg-grid" id="pkg-grid">
-        <div class="pkg-card" style="opacity:.35;pointer-events:none"></div>
-        <div class="pkg-card" style="opacity:.35;pointer-events:none"></div>
-        <div class="pkg-card" style="opacity:.35;pointer-events:none"></div>
-      </div>
-    </div>
+  <div class="sec-label">choose a package</div>
+  <div class="pkg-grid" id="pkg-grid">
+    <div class="pkg-card unavail" style="height:120px"></div>
+    <div class="pkg-card unavail" style="height:120px"></div>
+    <div class="pkg-card unavail" style="height:120px"></div>
   </div>
 
-  <!-- ADD-ONS -->
-  <div class="block">
-    <div class="sec-label">add-ons</div>
-    <div class="addons-grid">
-      <div class="qty-pill" id="qp-photos">
-        <div class="qty-top"><span class="qty-label">Extra edited photos (+25)</span><span class="qty-rate">$15/set</span></div>
-        <div class="qty-row">
-          <button class="qty-btn" onclick="chQty('photos',-1)">−</button>
-          <div class="qty-val" id="qv-photos">0</div>
-          <button class="qty-btn" onclick="chQty('photos',1)">+</button>
-        </div>
-        <div class="qty-sub" id="qs-photos">0 sets · $0.00</div>
-      </div>
-      <div class="qty-pill" id="qp-prints">
-        <div class="qty-top"><span class="qty-label">Printed 4×6 photos</span><span class="qty-rate">$3 each</span></div>
-        <div class="qty-row">
-          <button class="qty-btn" onclick="chQty('prints',-1)">−</button>
-          <div class="qty-val" id="qv-prints">0</div>
-          <button class="qty-btn" onclick="chQty('prints',1)">+</button>
-        </div>
-        <div class="qty-sub" id="qs-prints">0 prints · $0.00</div>
-      </div>
-    </div>
-    <div class="addons-toggles">
-      <div class="toggle-pill" data-addon="Rush delivery (24 hrs)" data-price="40" onclick="togAddon(this)">
-        <div class="toggle-left"><div class="toggle-box"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"/></svg></div><span class="toggle-name">Rush delivery</span></div>
-        <span class="toggle-price">+$40</span>
-      </div>
-      <div class="toggle-pill" data-addon="Video highlight reel" data-price="50" onclick="togAddon(this)">
-        <div class="toggle-left"><div class="toggle-box"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"/></svg></div><span class="toggle-name">Video reel</span></div>
-        <span class="toggle-price">+$50</span>
-      </div>
-      <div class="toggle-pill" data-addon="Social media crop pack" data-price="10" onclick="togAddon(this)">
-        <div class="toggle-left"><div class="toggle-box"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"/></svg></div><span class="toggle-name">Social media crops</span></div>
-        <span class="toggle-price">+$10</span>
-      </div>
-    </div>
-  </div>
+  <!-- FORM -->
+  <div class="sec-label">your details</div>
+  <form id="book-form">
+    <div class="form-grid">
+      <div class="field"><label>First name</label><input type="text" id="f-first" placeholder="Jordan" required/></div>
+      <div class="field"><label>Last name</label><input type="text"  id="f-last"  placeholder="Smith"  required/></div>
+      <div class="field"><label>Email</label><input type="email" id="f-email" placeholder="you@email.com" required/></div>
+      <div class="field"><label>Phone</label><input type="tel" id="f-phone" placeholder="(229) 555-0100"/></div>
 
-  <!-- TRAVEL -->
-  <div class="block">
-    <div class="sec-label">travel estimate</div>
-    <div class="travel-card">
-      <div class="travel-top">
-        <span class="travel-title">Fuel cost calculator</span>
-        <span class="gas-pill">Valdosta avg: $3.69/gal</span>
-      </div>
-      <p class="travel-hint">Type an address or venue — driving distance from Valdosta at 22.5 MPG, rounded to nearest $0.10. Under 15 miles = no charge.</p>
-      <div class="addr-wrap">
-        <div class="field" style="margin:0">
-          <label>Shoot location</label>
-          <input type="text" id="addr-input" placeholder="e.g. Lowndes High School, Valdosta GA"
-            autocomplete="off" oninput="onAddrInput(this.value)" onkeydown="onAddrKey(event)"/>
-        </div>
-        <div class="addr-drop" id="addr-drop"></div>
-      </div>
-      <p class="travel-err" id="travel-err">No results — try adding a city or state.</p>
-      <p class="travel-calc-status" id="travel-calc-status">Calculating distance…</p>
-      <div class="travel-result" id="travel-result">
-        <div class="tr-row"><span>One-way distance</span><span id="tr-mi">—</span></div>
-        <div class="tr-row"><span>Gas price</span><span id="tr-gas">$3.69/gal</span></div>
-        <div class="tr-row"><span>Fuel used (round trip)</span><span id="tr-gal">—</span></div>
-        <div class="tr-row big" id="tr-fee-row"><span>Travel fee</span><span id="tr-fee">—</span></div>
-        <div class="tr-row free" id="tr-free" style="display:none">No travel fee — within 15 miles!</div>
-      </div>
-    </div>
-  </div>
+      <hr class="divider" style="grid-column:1/-1"/>
 
-  <!-- AVAILABILITY -->
-  <div class="block">
-    <div class="sec-label">availability</div>
-    <div class="avail-card">
-      <div class="avail-header">
-        <span class="avail-hint">Click an available date to pre-fill your event date.</span>
-        <div class="avail-nav">
-          <button class="avail-nav-btn" onclick="shiftCalMonth(-1)">
-            <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="none" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
-          </button>
-          <span class="avail-month" id="avail-month"></span>
-          <button class="avail-nav-btn" onclick="shiftCalMonth(1)">
-            <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="none" stroke-width="2"><polyline points="9 6 15 12 9 18"/></svg>
-          </button>
+      <div class="field">
+        <label>Event date</label>
+        <input type="date" id="f-date" required onclick="this.showPicker()" onkeydown="return false" style="cursor:pointer"/>
+      </div>
+      <div class="field">
+        <label>Start time</label>
+        <input type="time" id="f-time" onclick="this.showPicker()" onkeydown="return false" style="cursor:pointer"/>
+      </div>
+      <div class="field full">
+        <label>Sport / event type</label>
+        <select id="f-sport" required>
+          <option value="" disabled selected>Select…</option>
+          <option>Football</option><option>Basketball</option><option>Baseball / Softball</option>
+          <option>Soccer</option><option>Track &amp; Field</option><option>Volleyball</option>
+          <option>Wrestling</option><option>Swimming</option><option>Other</option>
+        </select>
+      </div>
+
+      <hr class="divider" style="grid-column:1/-1"/>
+
+      <!-- COST BOX -->
+      <div class="cost-box">
+        <div class="cost-label">Package estimate</div>
+        <div id="cost-empty" class="cost-empty">Select a package above to see pricing.</div>
+        <div id="cost-lines" style="display:none">
+          <div class="cost-line"><span id="cl-pkg-n"></span><span id="cl-pkg-p"></span></div>
+          <div class="cost-line total"><span>Base total</span><span id="cl-total"></span></div>
+          <div class="cost-line note"><span>Add-ons and venue finalized after acceptance.</span></div>
         </div>
       </div>
-      <div class="avail-grid">
-        <div class="avail-dow">Sun</div><div class="avail-dow">Mon</div><div class="avail-dow">Tue</div>
-        <div class="avail-dow">Wed</div><div class="avail-dow">Thu</div><div class="avail-dow">Fri</div><div class="avail-dow">Sat</div>
+
+      <hr class="divider" style="grid-column:1/-1"/>
+
+      <div class="field full">
+        <label>Anything else? (optional)</label>
+        <textarea id="f-notes" placeholder="Players to focus on, questions, etc."></textarea>
       </div>
-      <div class="avail-grid" id="avail-grid"></div>
-      <div class="avail-legend">
-        <div class="avail-legend-item"><div class="avail-dot" style="background:var(--red)"></div>Unavailable</div>
-        <div class="avail-legend-item"><div class="avail-dot" style="background:var(--amber)"></div>Partial</div>
-        <div class="avail-legend-item"><div class="avail-dot" style="background:var(--green)"></div>Available</div>
-        <div class="avail-legend-item"><div class="avail-dot" style="background:var(--border-2)"></div>Not set</div>
-      </div>
+
+      <button type="submit" class="submit-btn" id="submit-btn" disabled>Select a package to continue</button>
     </div>
-  </div>
+  </form>
 
-  <!-- DETAILS FORM -->
-  <div class="block">
-    <div class="sec-label">your details</div>
-    <div id="form-wrap">
-      <form id="booking-form" action="https://formspree.io/f/xzdyygdl" method="POST">
-        <input type="hidden" name="Package"        id="h-pkg"/>
-        <input type="hidden" name="Add-Ons"        id="h-addons"/>
-        <input type="hidden" name="Total"          id="h-total"/>
-        <input type="hidden" name="Deposit Due"    id="h-deposit"/>
-        <input type="hidden" name="Travel Fee"     id="h-travel"/>
-        <input type="hidden" name="_next"          value="/thanks"/>
-        <input type="hidden" name="_subject"       value="New booking request — ZRP"/>
-        <input type="hidden" name="Booking Number" id="h-booking-num"/>
-
-        <div class="form-grid">
-          <div class="field"><label>First name</label><input type="text" name="First Name" id="fname" placeholder="Jordan" required/></div>
-          <div class="field"><label>Last name</label><input type="text" name="Last Name" id="lname" placeholder="Smith" required/></div>
-          <div class="field"><label>Email</label><input type="email" name="Email" id="email" placeholder="you@email.com" required/></div>
-          <div class="field"><label>Phone</label><input type="tel" name="Phone" id="phone" placeholder="(229) 555-0100"/></div>
-          <hr class="divider" style="grid-column:1/-1"/>
-          <div class="field">
-            <label>Event date</label>
-            <input type="date" name="Event Date" id="edate" required
-              onclick="this.showPicker()" onkeydown="return false" style="cursor:pointer"/>
-          </div>
-          <div class="field">
-            <label>Start time</label>
-            <input type="time" name="Start Time" id="etime" required
-              onclick="this.showPicker()" onkeydown="return false" style="cursor:pointer"/>
-          </div>
-          <div class="field">
-            <label>Sport / event type</label>
-            <select name="Sport" id="sport" required>
-              <option value="" disabled selected>Select…</option>
-              <option>Football</option><option>Basketball</option><option>Baseball / Softball</option>
-              <option>Soccer</option><option>Track &amp; Field</option><option>Volleyball</option>
-              <option>Wrestling</option><option>Swimming</option><option>Other</option>
-            </select>
-          </div>
-          <div class="field"><label>Venue / location</label><input type="text" name="Venue" id="venue" placeholder="Valdosta High School Stadium" required/></div>
-          <hr class="divider" style="grid-column:1/-1"/>
-          <div class="field"><label>Player last name</label><input type="text" name="Player Last Name" id="player-name" placeholder="e.g. Smith"/></div>
-          <div class="field"><label>Player number</label><input type="text" name="Player Number" id="player-num" placeholder="e.g. 24"/></div>
-          <hr class="divider" style="grid-column:1/-1"/>
-          <div class="field full">
-            <label>Selected package</label>
-            <input type="text" id="pkg-display" placeholder="Select a package above first"
-              readonly style="cursor:default;color:var(--text-3)"/>
-          </div>
-          <hr class="divider" style="grid-column:1/-1"/>
-
-          <!-- COST BOX -->
-          <div class="cost-box">
-            <div class="cost-label">Estimate</div>
-            <div id="cost-empty" class="cost-empty">Select a package to see your total.</div>
-            <div id="cost-lines" style="display:none">
-              <div class="cost-line" id="cl-pkg"><span id="cl-pkg-n"></span><span id="cl-pkg-p"></span></div>
-              <div class="cost-line hide" id="cl-photos"><span>Extra photos</span><span id="cl-photos-v"></span></div>
-              <div class="cost-line hide" id="cl-prints"><span>Printed 4×6</span><span id="cl-prints-v"></span></div>
-              <div class="cost-line hide" id="cl-travel"><span>Travel (fuel)</span><span id="cl-travel-v"></span></div>
-              <div class="cost-line hide" id="cl-a0"><span></span><span></span></div>
-              <div class="cost-line hide" id="cl-a1"><span></span><span></span></div>
-              <div class="cost-line hide" id="cl-a2"><span></span><span></span></div>
-              <div class="cost-line total"><span>Total</span><span id="cl-total"></span></div>
-              <div class="cost-line hide" id="cl-coupon" style="color:var(--purple)">
-                <span id="cl-coupon-label">Coupon</span><span id="cl-coupon-val"></span>
-              </div>
-              <div class="cost-line deposit"><span>Deposit due at booking (50%)</span><span id="cl-deposit"></span></div>
-              <div class="cost-line balance"><span>Balance due day of event</span><span id="cl-balance"></span></div>
-            </div>
-          </div>
-          <hr class="divider" style="grid-column:1/-1"/>
-
-          <!-- COUPON -->
-          <div class="field full" style="margin:0">
-            <label>Coupon code (optional)</label>
-            <div class="coupon-input-wrap">
-              <input type="text" id="coupon-input" placeholder="e.g. SUMMER25"
-                autocomplete="off" style="text-transform:uppercase"
-                oninput="this.value=this.value.toUpperCase()"
-                onkeydown="if(event.key==='Enter'){event.preventDefault();applyCoupon();}"/>
-              <button type="button" class="coupon-apply-btn" onclick="applyCoupon()">Apply</button>
-            </div>
-            <div class="coupon-status" id="coupon-status"></div>
-          </div>
-          <hr class="divider" style="grid-column:1/-1"/>
-
-          <div class="field full">
-            <label>How'd you find Zachary?</label>
-            <select name="Referral" id="referral" required>
-              <option value="" disabled selected>Select…</option>
-              <option>Instagram (@zacharyroutsongphotos)</option>
-              <option>Word of mouth / friend</option>
-              <option>Saw photos at an event</option>
-              <option>Google search</option>
-              <option>School / team recommendation</option>
-              <option>Other</option>
-            </select>
-          </div>
-          <div class="field full">
-            <label>Anything else? (optional)</label>
-            <textarea name="Notes" id="notes" placeholder="Players to focus on, questions, etc."></textarea>
-          </div>
-          <div class="submit-wrap">
-            <button type="submit" class="submit-btn" id="submit-btn">Send booking request</button>
-          </div>
-        </div>
-      </form>
-    </div>
+  <div class="success-state" id="success-state">
+    <div class="success-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+    <h2 style="font-size:18px;font-weight:400;margin-bottom:8px">Request sent!</h2>
+    <p style="font-size:13px;color:var(--text-3);line-height:1.7;max-width:340px;margin:0 auto">Zachary will review your request and email you within 24 hours with a link to finalize your booking.</p>
   </div>
 </div>
 
 <script>
 import { createClient } from '@supabase/supabase-js';
-
 const sb = createClient(
   import.meta.env.PUBLIC_SUPABASE_URL,
   import.meta.env.PUBLIC_SUPABASE_ANON_KEY
 );
 
-// ── CONFIG ──
-const ORIGIN  = { lat: 30.8876, lng: -83.3089 };
-const GAS     = 3.69;
-const MPG     = 22.5;
-const FREE_MI = 15;
+const DEFAULT_PKGS = [
+  { name:'Basic',    price:40,  popular:false, on_sale:false, features:['1–2 hrs coverage','25 edited photos','Private gallery link'] },
+  { name:'Standard', price:75,  popular:true,  on_sale:false, features:['Full game / 3 hrs','60 edited photos','Private gallery link','1 free 5×7 print'] },
+  { name:'Premium',  price:120, popular:false, on_sale:false, features:['Full day coverage','100+ edited photos','Private gallery link','3 free 5×7 prints'] },
+];
 
-// ── STATE ──
-let selPkg = null, qPhotos = 0, qPrints = 0, addons = [];
-let travelCost = 0, travelReady = true;
-let acTimer = null, acResults = [], acIdx = -1;
-let activeCoupon = null;
+let selPkg = null;
 
-// ── FORM SUBMIT ──
-document.getElementById('booking-form').addEventListener('submit', async function(e) {
-  e.preventDefault();
-  if (!selPkg) { alert('Please select a package first.'); document.querySelector('.pkg-grid').scrollIntoView({ behavior: 'smooth' }); return; }
-  if (!travelReady) { alert('Travel fee is still calculating — please wait.'); return; }
-
-  const btn = document.getElementById('submit-btn');
-  btn.disabled = true; btn.textContent = 'Submitting…';
-
-  syncHiddenFields();
-
-  let bookingNum = 'ZRP-' + new Date().getFullYear() + '-' + String(Math.floor(Math.random()*900)+100).padStart(3,'0');
-
-  try {
-    const pc = qPhotos*15, pr = qPrints*3, at = addons.reduce((s,a)=>s+a.p,0);
-    const total = (selPkg ? selPkg.price : 0) + pc + pr + travelCost + at;
-    const deposit = Math.round(total*50)/100;
-    const insertData = {
-      first_name: document.getElementById('fname').value,
-      last_name:  document.getElementById('lname').value,
-      email:      document.getElementById('email').value,
-      phone:      document.getElementById('phone').value,
-      event_date: document.getElementById('edate').value,
-      event_time: document.getElementById('etime').value,
-      sport_type: document.getElementById('sport').value,
-      event_location: document.getElementById('venue').value,
-      package_selected: selPkg.name + ' — $' + selPkg.price,
-      addons:   document.getElementById('h-addons').value,
-      total:    '$' + total.toFixed(2),
-      deposit:  '$' + deposit.toFixed(2),
-      travel_fee: travelCost > 0 ? '$' + travelCost.toFixed(2) : 'None',
-      referral: document.getElementById('referral').value || null,
-      notes:    document.getElementById('notes').value || null,
-      status: 'pending',
-    };
-    const result = await sb.from('bookings').insert(insertData).select('id').single();
-    if (!result.error && result.data?.id) {
-      const shortId = result.data.id.slice(-5).toUpperCase();
-      bookingNum = 'ZRP-' + new Date().getFullYear() + '-' + shortId;
-      await sb.from('bookings').update({ booking_number: bookingNum }).eq('id', result.data.id);
-    }
-  } catch(err) { console.warn('Supabase insert failed, continuing with Formspree only', err); }
-
-  sessionStorage.setItem('zrp_booking_num', bookingNum);
-  document.getElementById('h-booking-num').value = bookingNum;
-
-  try {
-    const form = document.getElementById('booking-form');
-    await fetch(form.action, { method: 'POST', body: new FormData(form), headers: { 'Accept': 'application/json' } });
-  } catch(err) { console.warn('Formspree error', err); }
-
-  window.location.href = '/thanks';
-});
-
-function syncHiddenFields() {
-  const pc = qPhotos*15, pr = qPrints*3, at = addons.reduce((s,a)=>s+a.p,0);
-  const effectiveTravel = (activeCoupon && activeCoupon.type==='travel') ? 0 : travelCost;
-  const subtotal = (selPkg ? selPkg.price : 0) + pc + pr + effectiveTravel + at;
-  let discount = 0;
-  if (activeCoupon) {
-    if (activeCoupon.type==='percent') discount = Math.floor(subtotal*(activeCoupon.value/100)*100)/100;
-    else if (activeCoupon.type==='fixed') discount = Math.min(parseFloat(activeCoupon.value), subtotal);
-    else if (activeCoupon.type==='travel') discount = travelCost;
-  }
-  const total = Math.max(0, subtotal - discount);
-  const deposit = Math.round(total*50)/100;
-  const an = [];
-  if (qPhotos > 0) an.push('Extra photos x' + qPhotos);
-  if (qPrints > 0) an.push('Prints x' + qPrints);
-  if (travelCost > 0) an.push('Travel $' + travelCost.toFixed(2));
-  addons.forEach(a => an.push(a.n));
-  document.getElementById('h-pkg').value     = selPkg ? selPkg.name + ' — $' + selPkg.price : '';
-  document.getElementById('h-addons').value  = an.join(', ') || 'None';
-  document.getElementById('h-total').value   = '$' + total.toFixed(2);
-  document.getElementById('h-deposit').value = '$' + deposit.toFixed(2);
-  document.getElementById('h-travel').value  = travelCost > 0 ? '$' + travelCost.toFixed(2) : 'None';
-  if (activeCoupon) sb.rpc('increment_coupon_uses', { coupon_id: activeCoupon.id });
+async function loadPackages() {
+  const { data } = await sb.from('package_pricing').select('*').eq('available', true).order('base_price');
+  const pkgs = (data && data.length)
+    ? data.map((p, i) => ({
+        name:     p.package_name,
+        price:    (p.on_sale && p.sale_price) ? p.sale_price : p.base_price,
+        origPrice: (p.on_sale && p.sale_price) ? p.base_price : null,
+        popular:  p.package_name === 'Standard',
+        on_sale:  !!(p.on_sale && p.sale_price),
+        features: DEFAULT_PKGS[i]?.features || ['Photos included', 'Private gallery link'],
+      }))
+    : DEFAULT_PKGS;
+  renderPackages(pkgs);
 }
 
-// ── URL COUPON AUTO-APPLY ──
-(function() {
-  const code = new URLSearchParams(window.location.search).get('coupon');
-  if (code) {
-    document.addEventListener('DOMContentLoaded', function() {
-      const input = document.getElementById('coupon-input');
-      if (input) { input.value = code.toUpperCase(); setTimeout(applyCoupon, 800); }
-    });
-  }
-})();
-
-// ── ADDRESS AUTOCOMPLETE ──
-function onAddrInput(v) {
-  clearTimeout(acTimer);
-  document.getElementById('travel-err').style.display = 'none';
-  document.getElementById('travel-result').classList.remove('show');
-  document.getElementById('travel-calc-status').style.display = 'none';
-  travelCost = 0; travelReady = true;
-  updateCost();
-  if (v.length < 3) { closeDD(); return; }
-  acTimer = setTimeout(() => fetchAddr(v), 400);
-}
-window.onAddrInput = onAddrInput;
-
-async function fetchAddr(q) {
-  try {
-    const r = await fetch(
-      'https://nominatim.openstreetmap.org/search?format=json&limit=6&countrycodes=us&q=' + encodeURIComponent(q),
-      { headers: { 'Accept-Language': 'en-US', 'User-Agent': 'ZRPBooking/1.0' } }
-    );
-    const d = await r.json();
-    acResults = d; acIdx = -1;
-    if (!d.length) { document.getElementById('travel-err').style.display = 'block'; closeDD(); return; }
-    const dd = document.getElementById('addr-drop');
-    dd.innerHTML = d.map((item, i) => {
-      const p = item.display_name.split(', ');
-      return `<div class="addr-item" onmousedown="pickAddr(${i})">
-        <div class="addr-main">${p.slice(0,2).join(', ')}</div>
-        <div class="addr-sub">${p.slice(2,5).join(', ')}</div>
-      </div>`;
-    }).join('');
-    dd.classList.add('open');
-  } catch(e) { closeDD(); }
-}
-
-function pickAddr(i) {
-  const r = acResults[i]; if (!r) return;
-  const label = r.display_name.split(', ').slice(0,3).join(', ');
-  document.getElementById('addr-input').value = label;
-  const vf = document.getElementById('venue');
-  if (vf && !vf.value) vf.value = label;
-  closeDD();
-  calcTravel(parseFloat(r.lat), parseFloat(r.lon));
-}
-window.pickAddr = pickAddr;
-
-function onAddrKey(e) {
-  const items = document.querySelectorAll('.addr-item');
-  if (e.key === 'ArrowDown') { e.preventDefault(); acIdx = Math.min(acIdx+1, items.length-1); items.forEach((el,i) => el.classList.toggle('focused', i===acIdx)); }
-  else if (e.key === 'ArrowUp') { e.preventDefault(); acIdx = Math.max(acIdx-1,0); items.forEach((el,i) => el.classList.toggle('focused', i===acIdx)); }
-  else if (e.key === 'Enter') { e.preventDefault(); if (acIdx>=0 && items[acIdx]) items[acIdx].dispatchEvent(new MouseEvent('mousedown')); }
-  else if (e.key === 'Escape') closeDD();
-}
-window.onAddrKey = onAddrKey;
-
-function closeDD() { const dd = document.getElementById('addr-drop'); dd.classList.remove('open'); dd.innerHTML = ''; }
-document.addEventListener('click', e => { if (!e.target.closest('.addr-wrap')) closeDD(); });
-
-// ── CALENDAR ──
-let calYear, calMonth, calBlocks = [], pickedDate = null;
-
-async function initCalendar() {
-  const now = new Date();
-  calYear = now.getFullYear(); calMonth = now.getMonth();
-  const { data } = await fetchBlocks();
-  calBlocks = data || [];
-  renderPublicCal();
-}
-
-async function fetchBlocks() {
-  const from = `${calYear}-${String(calMonth+1).padStart(2,'0')}-01`;
-  const nextM = calMonth===11 ? 1 : calMonth+2;
-  const nextY = calMonth===11 ? calYear+1 : calYear;
-  const to = `${nextY}-${String(nextM).padStart(2,'0')}-01`;
-  return await sb.from('availability').select('*').gte('date',from).lt('date',to);
-}
-
-async function shiftCalMonth(dir) {
-  calMonth += dir;
-  if (calMonth>11) { calMonth=0; calYear++; }
-  if (calMonth<0)  { calMonth=11; calYear--; }
-  const { data } = await fetchBlocks();
-  calBlocks = data || [];
-  renderPublicCal();
-}
-window.shiftCalMonth = shiftCalMonth;
-
-function getPublicStatus(dateStr) {
-  const blocks = calBlocks.filter(b => b.date === dateStr);
-  if (!blocks.length) return null;
-  if (blocks.some(b => b.status==='unavailable' && !b.start_time)) return 'unavailable';
-  if (blocks.some(b => b.status==='partial')) return 'partial';
-  if (blocks.some(b => b.status==='available')) return 'available';
-  return null;
-}
-
-function renderPublicCal() {
-  const now = new Date(); const today = now.toISOString().slice(0,10);
-  document.getElementById('avail-month').textContent =
-    new Date(calYear, calMonth, 1).toLocaleString('default', { month: 'long', year: 'numeric' });
-  const grid = document.getElementById('avail-grid');
-  grid.innerHTML = '';
-  const firstDay = new Date(calYear,calMonth,1).getDay();
-  const daysInMonth = new Date(calYear,calMonth+1,0).getDate();
-  for (let i=0; i<firstDay; i++) { const el=document.createElement('div'); el.className='avail-day empty'; grid.appendChild(el); }
-  for (let d=1; d<=daysInMonth; d++) {
-    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const status = getPublicStatus(dateStr);
-    const isPast = dateStr < today;
-    const el = document.createElement('div');
-    let cls = 'avail-day';
-    if (isPast) cls += ' past'; else cls += ' clickable';
-    if (dateStr===today) cls += ' today';
-    if (dateStr===pickedDate) cls += ' picked';
-    if (status) cls += ' ' + status;
-    el.className = cls;
-    el.innerHTML = `<span>${d}</span>`;
-    if (status) {
-      const dot = document.createElement('div');
-      dot.className = 'avail-dot-sm';
-      dot.style.background = status==='unavailable' ? 'var(--red)' : status==='partial' ? 'var(--amber)' : 'var(--green)';
-      el.appendChild(dot);
-    }
-    if (!isPast && status !== 'unavailable') {
-      el.addEventListener('click', () => {
-        pickedDate = dateStr;
-        const edateInput = document.getElementById('edate');
-        if (edateInput) edateInput.value = dateStr;
-        renderPublicCal();
-        document.getElementById('book').scrollIntoView({ behavior: 'smooth' });
-      });
-    }
-    grid.appendChild(el);
-  }
-}
-
-// ── TRAVEL CALC ──
-async function calcTravel(lat, lng) {
-  travelReady = false; travelCost = 0;
-  const statusEl = document.getElementById('travel-calc-status');
-  const resultEl = document.getElementById('travel-result');
-  statusEl.style.display = 'block'; resultEl.classList.remove('show');
-  document.getElementById('tr-fee-row').style.display = 'none';
-  document.getElementById('tr-free').style.display = 'none';
-
-  let onewayMi = null;
-  try {
-    const controller = new AbortController();
-    const t = setTimeout(() => controller.abort(), 5000);
-    const url = 'https://router.project-osrm.org/route/v1/driving/'
-      + ORIGIN.lng + ',' + ORIGIN.lat + ';' + lng + ',' + lat + '?overview=false';
-    const resp = await fetch(url, { signal: controller.signal });
-    clearTimeout(t);
-    const data = await resp.json();
-    if (data.code==='Ok' && data.routes?.length) onewayMi = data.routes[0].distance * 0.000621371;
-  } catch(e) { console.warn('OSRM fallback'); }
-
-  if (!onewayMi) onewayMi = haversine(ORIGIN.lat, ORIGIN.lng, lat, lng) * 1.3;
-
-  const roundTrip = onewayMi * 2;
-  const gallons   = roundTrip / MPG;
-  document.getElementById('tr-mi').textContent  = onewayMi.toFixed(1) + ' mi (driving)';
-  document.getElementById('tr-gal').textContent = gallons.toFixed(2) + ' gal';
-  statusEl.style.display = 'none';
-
-  if (onewayMi <= FREE_MI) {
-    travelCost = 0;
-    document.getElementById('tr-free').style.display = 'flex';
-  } else {
-    travelCost = Math.floor(gallons * GAS * 10) / 10;
-    document.getElementById('tr-fee-row').style.display = 'flex';
-    document.getElementById('tr-fee').textContent = '$' + travelCost.toFixed(2);
-  }
-  resultEl.classList.add('show'); travelReady = true; updateCost();
-}
-
-function haversine(a,b,c,d) {
-  const R=3958.8,dL=(c-a)*Math.PI/180,dN=(d-b)*Math.PI/180;
-  const x=Math.sin(dL/2)*Math.sin(dL/2)+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dN/2)*Math.sin(dN/2);
-  return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
-}
-
-// ── PACKAGES ──
-const pkgFeatures = {
-  'Basic':    ['1–2 hours coverage','25 edited photos','Online gallery delivery','Personal use license'],
-  'Standard': ['Full game or 3 hrs','60 edited photos','Online gallery delivery','1 free 5×7 print','Personal use license'],
-  'Premium':  ['Full day or double-header','100+ edited photos','Online gallery delivery','3 free 5×7 prints','Action highlight reel','Personal use license']
-};
-
-async function loadPackagePricing() {
-  const pkgRes   = await sb.from('package_pricing').select('*').order('base_price');
-  const addonRes = await sb.from('addon_pricing').select('*').order('price');
-
-  let data = pkgRes.data;
-  if (pkgRes.error || !data?.length) {
-    data = [
-      { package_name:'Basic',    base_price:40,  sale_price:null, on_sale:false, available:true },
-      { package_name:'Standard', base_price:75,  sale_price:null, on_sale:false, available:true },
-      { package_name:'Premium',  base_price:120, sale_price:null, on_sale:false, available:true },
-    ];
-  }
-
-  const header = document.getElementById('pkg-header');
-  header.innerHTML = data.map(pkg => {
-    const isPopular = pkg.package_name === 'Standard';
-    const unavail = pkg.available === false;
-    return `<div class="pkg-header-cell${unavail?' unavailable':''}">
-      <span class="pkg-header-name">${pkg.package_name}</span>
-      ${isPopular && !unavail ? '<span class="pkg-popular" style="margin-left:6px">Popular</span>' : ''}
-      ${unavail ? '<span style="font-family:\'DM Mono\',monospace;font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--red);margin-left:6px">Unavailable</span>' : ''}
-    </div>`;
-  }).join('');
-
+function renderPackages(pkgs) {
   const grid = document.getElementById('pkg-grid');
-  grid.innerHTML = data.map(pkg => {
-    const onSale = pkg.on_sale && pkg.sale_price;
-    const unavail = pkg.available === false;
-    const activePrice = onSale ? pkg.sale_price : pkg.base_price;
-    const features = pkgFeatures[pkg.package_name] || [];
-    return `<div class="pkg-card${unavail?' unavailable':''}" data-package="${pkg.package_name}" data-price="${activePrice}" onclick="selectPkg(this)">
-      <div class="pkg-check"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"/></svg></div>
-      <div class="pkg-card-name">${pkg.package_name}${pkg.package_name==='Standard'?' <span class="pkg-popular">Popular</span>':''}</div>
-      <div class="pkg-price-header">
-        <span class="pkg-sale-badge${onSale?' visible':''}">Sale</span>
-        <span class="pkg-price-orig${onSale?' visible':''}">$${pkg.base_price} <small>/ event</small></span>
-      </div>
-      <p class="pkg-price${onSale?' sale':''}">$${activePrice} <small>/ event</small></p>
-      <ul class="pkg-features">${features.map(f=>`<li>${f}</li>`).join('')}</ul>
-    </div>`;
-  }).join('');
-
-  if (addonRes.data) {
-    addonRes.data.forEach(a => {
-      if (a.available === false) {
-        document.querySelectorAll('.toggle-pill').forEach(pill => {
-          if (pill.dataset.addon === a.addon_name) pill.classList.add('unavailable');
-        });
-      }
-    });
-  }
+  grid.innerHTML = pkgs.map((p, i) => `
+    <div class="pkg-card" id="pkg-${i}" onclick="selectPkg(${i},${JSON.stringify(p).replace(/"/g,'&quot;')})">
+      ${p.popular ? '<span class="pkg-badge">Popular</span>' : ''}
+      <div class="pkg-name">${p.name}</div>
+      ${p.on_sale ? `<span class="pkg-sale-badge">Sale</span>` : ''}
+      ${p.origPrice ? `<div class="pkg-orig">$${p.origPrice}</div>` : ''}
+      <div class="pkg-price${p.on_sale ? ' sale' : ''}">$${p.price}<small>/session</small></div>
+      <ul class="pkg-features">${p.features.map(f => `<li>${f}</li>`).join('')}</ul>
+    </div>`).join('');
 }
 
-function selectPkg(card) {
-  document.querySelectorAll('.pkg-card').forEach(c => c.classList.remove('selected'));
-  card.classList.add('selected');
-  selPkg = { name: card.dataset.package, price: parseFloat(card.dataset.price) };
-  const d = document.getElementById('pkg-display');
-  d.value = selPkg.name + ' — $' + selPkg.price; d.style.color = 'var(--text)';
-  updateCost();
+function selectPkg(i, pkg) {
+  selPkg = pkg;
+  document.querySelectorAll('.pkg-card').forEach((c, j) => c.classList.toggle('sel', j === i));
+  document.getElementById('cl-pkg-n').textContent = pkg.name + ' package';
+  document.getElementById('cl-pkg-p').textContent = '$' + pkg.price;
+  document.getElementById('cl-total').textContent  = '$' + pkg.price.toFixed(2);
+  document.getElementById('cost-empty').style.display = 'none';
+  document.getElementById('cost-lines').style.display = 'block';
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = false;
+  btn.textContent = 'Send booking request';
 }
 window.selectPkg = selectPkg;
 
-// ── QTY ──
-function chQty(t, d) {
-  if (t==='photos') {
-    qPhotos = Math.max(0, qPhotos+d);
-    document.getElementById('qv-photos').textContent = qPhotos;
-    document.getElementById('qs-photos').textContent = qPhotos + ' set' + (qPhotos!==1?'s':'') + ' · $' + (qPhotos*15).toFixed(2);
-    document.getElementById('qp-photos').classList.toggle('active', qPhotos>0);
-  } else {
-    qPrints = Math.max(0, qPrints+d);
-    document.getElementById('qv-prints').textContent = qPrints;
-    document.getElementById('qs-prints').textContent = qPrints + ' print' + (qPrints!==1?'s':'') + ' · $' + (qPrints*3).toFixed(2);
-    document.getElementById('qp-prints').classList.toggle('active', qPrints>0);
+document.getElementById('book-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  if (!selPkg) { alert('Please select a package first.'); return; }
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true; btn.textContent = 'Sending…';
+
+  try {
+    await sb.from('bookings').insert({
+      first_name:       document.getElementById('f-first').value.trim(),
+      last_name:        document.getElementById('f-last').value.trim(),
+      email:            document.getElementById('f-email').value.trim(),
+      phone:            document.getElementById('f-phone').value.trim() || null,
+      event_date:       document.getElementById('f-date').value || null,
+      event_time:       document.getElementById('f-time').value || null,
+      sport_type:       document.getElementById('f-sport').value,
+      package_selected: selPkg.name + ' — $' + selPkg.price,
+      total:            '$' + selPkg.price.toFixed(2),
+      deposit:          '$' + (selPkg.price / 2).toFixed(2),
+      notes:            document.getElementById('f-notes').value.trim() || null,
+      status:           'pending',
+    });
+  } catch(err) {
+    btn.disabled = false; btn.textContent = 'Send booking request';
+    alert('Something went wrong — please try again.');
+    return;
   }
-  updateCost();
-}
-window.chQty = chQty;
 
-// ── TOGGLES ──
-function togAddon(pill) {
-  pill.classList.toggle('active');
-  const n = pill.dataset.addon, p = parseFloat(pill.dataset.price);
-  if (pill.classList.contains('active')) addons.push({ n, p });
-  else addons = addons.filter(a => a.n !== n);
-  updateCost();
-}
-window.togAddon = togAddon;
+  document.getElementById('book-form').style.display = 'none';
+  document.querySelector('.pkg-grid').style.display = 'none';
+  document.querySelector('[style*="choose a package"]')?.style && null;
+  document.querySelectorAll('.sec-label').forEach(el => el.style.display = 'none');
+  document.querySelector('h1').style.display = 'none';
+  document.querySelector('p[style*="text-3"]').style.display = 'none';
+  document.getElementById('success-state').style.display = 'block';
+});
 
-// ── COUPON ──
-async function applyCoupon() {
-  const code = document.getElementById('coupon-input').value.trim().toUpperCase();
-  const statusEl = document.getElementById('coupon-status');
-  statusEl.className = 'coupon-status'; statusEl.textContent = '';
-  if (!code) { statusEl.className='coupon-status err'; statusEl.textContent='Enter a code first.'; return; }
-  const result = await sb.from('coupons').select('*').eq('code',code).eq('active',true).single();
-  if (result.error || !result.data) {
-    activeCoupon = null; statusEl.className='coupon-status err'; statusEl.textContent='Invalid or expired code.'; updateCost(); return;
-  }
-  const c = result.data;
-  if (c.expires_at && new Date(c.expires_at) < new Date()) {
-    activeCoupon=null; statusEl.className='coupon-status err'; statusEl.textContent='This code has expired.'; updateCost(); return;
-  }
-  if (c.max_uses !== null && c.uses >= c.max_uses) {
-    activeCoupon=null; statusEl.className='coupon-status err'; statusEl.textContent='This code has reached its usage limit.'; updateCost(); return;
-  }
-  activeCoupon = c;
-  statusEl.className='coupon-status ok';
-  statusEl.textContent = c.type==='percent' ? `✓ ${c.value}% off applied!`
-    : c.type==='fixed' ? `✓ $${c.value} off applied!` : '✓ Travel fee waived!';
-  updateCost();
-}
-window.applyCoupon = applyCoupon;
-
-function showLine(id, show, vid, val) {
-  const r = document.getElementById(id);
-  if (show) { r.classList.remove('hide'); if (vid) document.getElementById(vid).textContent = val; }
-  else r.classList.add('hide');
-}
-
-function updateCost() {
-  if (!selPkg) { document.getElementById('cost-empty').style.display='block'; document.getElementById('cost-lines').style.display='none'; return; }
-  document.getElementById('cost-empty').style.display='none'; document.getElementById('cost-lines').style.display='block';
-  const pc=qPhotos*15, pr=qPrints*3;
-  document.getElementById('cl-pkg-n').textContent = selPkg.name + ' package';
-  document.getElementById('cl-pkg-p').textContent = '$' + selPkg.price.toFixed(2);
-  showLine('cl-photos', qPhotos>0, 'cl-photos-v', qPhotos+' set'+(qPhotos!==1?'s':'')+' · +$'+pc.toFixed(2));
-  showLine('cl-prints', qPrints>0, 'cl-prints-v', qPrints+' print'+(qPrints!==1?'s':'')+' · +$'+pr.toFixed(2));
-  const effectiveTravel = (activeCoupon && activeCoupon.type==='travel') ? 0 : travelCost;
-  showLine('cl-travel', effectiveTravel>0, 'cl-travel-v', '+$'+effectiveTravel.toFixed(2));
-  let at=0;
-  ['cl-a0','cl-a1','cl-a2'].forEach((id,i) => {
-    const row=document.getElementById(id), a=addons[i];
-    if (a) { row.classList.remove('hide'); row.children[0].textContent=a.n; row.children[1].textContent='+$'+a.p.toFixed(2); at+=a.p; }
-    else row.classList.add('hide');
-  });
-  const subtotal = selPkg.price+pc+pr+effectiveTravel+at;
-  let discount=0;
-  const couponRow=document.getElementById('cl-coupon');
-  if (activeCoupon) {
-    if (activeCoupon.type==='percent') {
-      discount=Math.floor(subtotal*(activeCoupon.value/100)*100)/100;
-      couponRow.classList.remove('hide');
-      document.getElementById('cl-coupon-label').textContent=activeCoupon.code+' ('+activeCoupon.value+'% off)';
-      document.getElementById('cl-coupon-val').textContent='−$'+discount.toFixed(2);
-    } else if (activeCoupon.type==='fixed') {
-      discount=Math.min(parseFloat(activeCoupon.value),subtotal);
-      couponRow.classList.remove('hide');
-      document.getElementById('cl-coupon-label').textContent=activeCoupon.code+' ($'+activeCoupon.value+' off)';
-      document.getElementById('cl-coupon-val').textContent='−$'+discount.toFixed(2);
-    } else if (activeCoupon.type==='travel' && travelCost>0) {
-      discount=travelCost;
-      couponRow.classList.remove('hide');
-      document.getElementById('cl-coupon-label').textContent=activeCoupon.code+' (travel waived)';
-      document.getElementById('cl-coupon-val').textContent='−$'+discount.toFixed(2);
-    } else couponRow.classList.add('hide');
-  } else couponRow.classList.add('hide');
-
-  const total=Math.max(0,subtotal-discount), deposit=Math.round(total*50)/100, balance=total-deposit;
-  document.getElementById('cl-total').textContent   = '$'+subtotal.toFixed(2)+(discount>0?' → $'+total.toFixed(2):'');
-  document.getElementById('cl-deposit').textContent = '$'+deposit.toFixed(2);
-  document.getElementById('cl-balance').textContent = '$'+balance.toFixed(2);
-}
-
-initCalendar();
-loadPackagePricing();
+loadPackages();
 </script>
 </Layout>

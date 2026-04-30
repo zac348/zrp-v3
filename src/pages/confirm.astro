@@ -1,0 +1,404 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+<Layout title="Complete Your Booking — ZRP">
+<style is:global>
+.page { max-width: 560px; margin: 0 auto; padding: 48px 24px 80px }
+
+/* BOOKING SUMMARY */
+.summary-card {
+  background: var(--surface-dim);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  margin-bottom: 32px;
+}
+.summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px }
+.summary-item strong {
+  display: block;
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 2px;
+}
+.summary-item span { font-size: 12px; color: var(--text-2) }
+
+/* ADD-ONS */
+.addons-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px }
+.addons-toggles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px }
+@media (max-width: 500px) {
+  .addons-grid { grid-template-columns: 1fr }
+  .addons-toggles { grid-template-columns: 1fr 1fr }
+}
+
+.qty-pill {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 12px 14px;
+  transition: border-color .15s;
+}
+.qty-pill.active { border-color: var(--border-2) }
+.qty-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 8px }
+.qty-label { font-size: 12px; color: var(--text-2) }
+.qty-rate { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-3) }
+.qty-row { display: flex; align-items: center; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; width: fit-content }
+.qty-btn {
+  background: var(--surface-dim); border: none; color: var(--text-2);
+  width: 30px; height: 30px; font-size: 15px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .15s, color .15s; user-select: none;
+}
+.qty-btn:hover { background: var(--border); color: var(--text) }
+.qty-val {
+  font-family: 'DM Mono', monospace; font-size: 13px; color: var(--text);
+  width: 36px; text-align: center; background: var(--surface);
+  border-left: 1px solid var(--border); border-right: 1px solid var(--border);
+  height: 30px; line-height: 30px;
+}
+.qty-sub { font-size: 10px; color: var(--text-3); margin-top: 5px; font-family: 'DM Mono', monospace }
+
+.toggle-pill {
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 11px 14px;
+  cursor: pointer; transition: border-color .15s, background .15s;
+  user-select: none; gap: 8px;
+}
+.toggle-pill:hover { border-color: var(--border-2) }
+.toggle-pill.active { border-color: var(--border-2); background: var(--surface-dim) }
+.toggle-left { display: flex; align-items: center; gap: 10px; flex: 1 }
+.toggle-box {
+  width: 14px; height: 14px; border-radius: 3px; border: 1px solid var(--border-2);
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  transition: background .15s, border-color .15s;
+}
+.toggle-pill.active .toggle-box { background: var(--text); border-color: var(--text) }
+.toggle-box svg { width: 8px; height: 8px; stroke: var(--bg); stroke-width: 2.5; fill: none; display: none }
+.toggle-pill.active .toggle-box svg { display: block }
+.toggle-name { font-size: 12px; color: var(--text-2) }
+.toggle-pill.active .toggle-name { color: var(--text) }
+.toggle-price { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-3); white-space: nowrap; flex-shrink: 0 }
+
+/* FORM */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px }
+@media (max-width: 480px) { .form-grid { grid-template-columns: 1fr } }
+.field.full { grid-column: 1/-1 }
+
+/* COST BOX */
+.cost-box {
+  grid-column: 1/-1;
+  background: var(--surface-dim);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+}
+.cost-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--text-3); margin-bottom: 10px }
+.cost-line { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-2); padding: 2px 0 }
+.cost-line.hide { display: none }
+.cost-line.total { border-top: 1px solid var(--border); margin-top: 8px; padding-top: 9px; font-size: 13px; font-weight: 500; color: var(--text) }
+.cost-line.deposit { font-size: 12px; font-weight: 500; color: var(--text) }
+.cost-line.balance { font-size: 11px; color: var(--text-3) }
+
+/* SUBMIT */
+.submit-btn {
+  width: 100%; background: var(--ink); color: var(--bg);
+  border: none; border-radius: var(--radius); padding: 14px;
+  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+  cursor: pointer; transition: background .15s; grid-column: 1/-1; margin-top: 4px;
+}
+.submit-btn:hover:not(:disabled) { background: var(--ink-hover) }
+.submit-btn:disabled { opacity: .5; cursor: not-allowed }
+
+/* STATES */
+.error-state, .confirmed-state, .pending-state { display: none; text-align: center; padding: 64px 24px }
+.state-icon {
+  width: 52px; height: 52px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 18px;
+}
+.state-icon svg { width: 22px; height: 22px; fill: none; stroke-width: 2 }
+.state-icon.ok { background: var(--green-bg); border: 1px solid var(--green-border) }
+.state-icon.ok svg { stroke: var(--green) }
+.state-icon.err { background: var(--red-bg); border: 1px solid var(--red-border) }
+.state-icon.err svg { stroke: var(--red) }
+.state-icon.warn { background: var(--amber-bg); border: 1px solid var(--amber-border) }
+.state-icon.warn svg { stroke: var(--amber) }
+.ztn-tag {
+  font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500;
+  letter-spacing: .06em; color: var(--text); margin: 12px 0 8px;
+}
+</style>
+
+<div class="page" id="confirm-page">
+
+  <!-- Loading -->
+  <div id="loading-state" style="text-align:center;padding:80px 24px">
+    <p style="font-size:13px;color:var(--text-3)">Loading your booking…</p>
+  </div>
+
+  <!-- Already confirmed -->
+  <div class="confirmed-state" id="confirmed-state">
+    <div class="state-icon ok"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+    <h2 style="font-size:18px;font-weight:400;margin-bottom:6px">Already confirmed</h2>
+    <p class="ztn-tag" id="cs-ztn"></p>
+    <p style="font-size:13px;color:var(--text-3);line-height:1.7">Your booking is confirmed. Check your email for full details and your invoice link.</p>
+  </div>
+
+  <!-- Pending / not accepted yet -->
+  <div class="pending-state" id="pending-state">
+    <div class="state-icon warn"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+    <h2 style="font-size:18px;font-weight:400;margin-bottom:8px">Not ready yet</h2>
+    <p style="font-size:13px;color:var(--text-3);line-height:1.7">Your booking request is still being reviewed. Once Zachary accepts it, you'll receive an email with this link to complete your booking.</p>
+  </div>
+
+  <!-- Error -->
+  <div class="error-state" id="error-state">
+    <div class="state-icon err"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>
+    <h2 style="font-size:18px;font-weight:400;margin-bottom:8px">Link not found</h2>
+    <p style="font-size:13px;color:var(--text-3);line-height:1.7">This link may have expired or been used already. Contact Zachary directly if you have questions.</p>
+  </div>
+
+  <!-- Main confirm form -->
+  <div id="form-state" style="display:none">
+    <div class="sec-label" style="margin-bottom:6px">complete booking</div>
+    <h1 style="font-size:24px;font-weight:300;letter-spacing:-.02em;margin-bottom:4px">Finalize your session</h1>
+    <p style="font-size:13px;color:var(--text-3);margin-bottom:28px">Add your venue, any extras, and we're set.</p>
+
+    <!-- Booking summary -->
+    <div class="summary-card">
+      <div class="summary-grid">
+        <div class="summary-item"><strong>Client</strong><span id="sum-name"></span></div>
+        <div class="summary-item"><strong>Package</strong><span id="sum-pkg"></span></div>
+        <div class="summary-item"><strong>Date</strong><span id="sum-date"></span></div>
+        <div class="summary-item"><strong>Sport</strong><span id="sum-sport"></span></div>
+      </div>
+    </div>
+
+    <!-- Add-ons -->
+    <div class="sec-label">add-ons (optional)</div>
+    <div style="margin-bottom:32px">
+      <div class="addons-grid">
+        <div class="qty-pill" id="qp-photos">
+          <div class="qty-top"><span class="qty-label">Extra edited photos (+25)</span><span class="qty-rate">$15/set</span></div>
+          <div class="qty-row">
+            <button class="qty-btn" type="button" onclick="chQty('photos',-1)">−</button>
+            <div class="qty-val" id="qv-photos">0</div>
+            <button class="qty-btn" type="button" onclick="chQty('photos',1)">+</button>
+          </div>
+          <div class="qty-sub" id="qs-photos">0 sets · $0.00</div>
+        </div>
+        <div class="qty-pill" id="qp-prints">
+          <div class="qty-top"><span class="qty-label">Printed 4×6 photos</span><span class="qty-rate">$3 each</span></div>
+          <div class="qty-row">
+            <button class="qty-btn" type="button" onclick="chQty('prints',-1)">−</button>
+            <div class="qty-val" id="qv-prints">0</div>
+            <button class="qty-btn" type="button" onclick="chQty('prints',1)">+</button>
+          </div>
+          <div class="qty-sub" id="qs-prints">0 prints · $0.00</div>
+        </div>
+      </div>
+      <div class="addons-toggles">
+        <div class="toggle-pill" data-name="Rush delivery (24 hrs)" data-price="40" onclick="togAddon(this)">
+          <div class="toggle-left"><div class="toggle-box"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"/></svg></div><span class="toggle-name">Rush delivery</span></div>
+          <span class="toggle-price">+$40</span>
+        </div>
+        <div class="toggle-pill" data-name="Video highlight reel" data-price="50" onclick="togAddon(this)">
+          <div class="toggle-left"><div class="toggle-box"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"/></svg></div><span class="toggle-name">Video reel</span></div>
+          <span class="toggle-price">+$50</span>
+        </div>
+        <div class="toggle-pill" data-name="Social media crop pack" data-price="10" onclick="togAddon(this)">
+          <div class="toggle-left"><div class="toggle-box"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"/></svg></div><span class="toggle-name">Social crops</span></div>
+          <span class="toggle-price">+$10</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Details form -->
+    <div class="sec-label">event details</div>
+    <form id="confirm-form">
+      <div class="form-grid">
+        <div class="field full">
+          <label>Venue / event location</label>
+          <input type="text" id="f-venue" placeholder="e.g. Valdosta High School Stadium" required/>
+        </div>
+
+        <hr class="divider" style="grid-column:1/-1"/>
+
+        <!-- COST BOX -->
+        <div class="cost-box">
+          <div class="cost-label">Your total</div>
+          <div class="cost-line" id="cl-pkg"><span id="cl-pkg-n"></span><span id="cl-pkg-p"></span></div>
+          <div class="cost-line hide" id="cl-photos"><span>Extra photos</span><span id="cl-photos-v"></span></div>
+          <div class="cost-line hide" id="cl-prints"><span>Printed 4×6</span><span id="cl-prints-v"></span></div>
+          <div class="cost-line hide" id="cl-a0"><span></span><span></span></div>
+          <div class="cost-line hide" id="cl-a1"><span></span><span></span></div>
+          <div class="cost-line hide" id="cl-a2"><span></span><span></span></div>
+          <div class="cost-line total"><span>Total</span><span id="cl-total"></span></div>
+          <div class="cost-line deposit"><span>Deposit due at booking (50%)</span><span id="cl-deposit"></span></div>
+          <div class="cost-line balance"><span>Balance due day of event</span><span id="cl-balance"></span></div>
+        </div>
+
+        <hr class="divider" style="grid-column:1/-1"/>
+
+        <div class="field full">
+          <label>Additional notes (optional)</label>
+          <textarea id="f-notes" placeholder="Players to focus on, questions, anything else…"></textarea>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submit-btn">Confirm my booking</button>
+      </div>
+    </form>
+
+    <!-- Submitted -->
+    <div id="submit-success" style="display:none;text-align:center;padding:48px 24px;border:1px solid var(--border);border-radius:var(--radius-lg);margin-top:16px">
+      <div class="state-icon ok" style="display:flex"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <h2 style="font-size:18px;font-weight:400;margin-bottom:6px">Booking confirmed!</h2>
+      <p class="ztn-tag" id="success-ztn"></p>
+      <p style="font-size:13px;color:var(--text-3);line-height:1.7;max-width:360px;margin:0 auto">Check your email for the full invoice. Your gallery will be ready within 5–7 days after the event.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+import { createClient } from '@supabase/supabase-js';
+const sb = createClient(
+  import.meta.env.PUBLIC_SUPABASE_URL,
+  import.meta.env.PUBLIC_SUPABASE_ANON_KEY
+);
+
+let booking = null;
+let qPhotos = 0, qPrints = 0, addons = [];
+
+// ── LOAD BOOKING ──
+async function init() {
+  const token = new URLSearchParams(window.location.search).get('token');
+  if (!token) { show('error-state'); return; }
+
+  const { data, error } = await sb
+    .from('bookings')
+    .select('*')
+    .eq('token', token)
+    .single();
+
+  hide('loading-state');
+
+  if (error || !data) { show('error-state'); return; }
+  booking = data;
+
+  if (data.status === 'confirmed' || data.status === 'delivered') {
+    document.getElementById('cs-ztn').textContent = data.ztn_number || '';
+    show('confirmed-state'); return;
+  }
+  if (data.status !== 'accepted') {
+    show('pending-state'); return;
+  }
+
+  // Populate summary
+  const name = [data.first_name, data.last_name].filter(Boolean).join(' ');
+  document.getElementById('sum-name').textContent  = name || '—';
+  document.getElementById('sum-pkg').textContent   = data.package_selected?.split('—')[0]?.trim() || '—';
+  document.getElementById('sum-date').textContent  = data.event_date || '—';
+  document.getElementById('sum-sport').textContent = data.sport_type || '—';
+
+  // Set up cost box baseline
+  updateCost();
+  show('form-state');
+}
+
+function show(id) { document.getElementById(id).style.display = 'block'; }
+function hide(id) { document.getElementById(id).style.display = 'none'; }
+
+// ── QUANTITIES ──
+function chQty(t, d) {
+  if (t === 'photos') {
+    qPhotos = Math.max(0, qPhotos + d);
+    document.getElementById('qv-photos').textContent = qPhotos;
+    document.getElementById('qs-photos').textContent = qPhotos + ' set' + (qPhotos !== 1 ? 's' : '') + ' · $' + (qPhotos * 15).toFixed(2);
+    document.getElementById('qp-photos').classList.toggle('active', qPhotos > 0);
+  } else {
+    qPrints = Math.max(0, qPrints + d);
+    document.getElementById('qv-prints').textContent = qPrints;
+    document.getElementById('qs-prints').textContent = qPrints + ' print' + (qPrints !== 1 ? 's' : '') + ' · $' + (qPrints * 3).toFixed(2);
+    document.getElementById('qp-prints').classList.toggle('active', qPrints > 0);
+  }
+  updateCost();
+}
+window.chQty = chQty;
+
+function togAddon(pill) {
+  pill.classList.toggle('active');
+  const n = pill.dataset.name, p = parseFloat(pill.dataset.price);
+  if (pill.classList.contains('active')) addons.push({ name: n, price: p });
+  else addons = addons.filter(a => a.name !== n);
+  updateCost();
+}
+window.togAddon = togAddon;
+
+function showLine(id, show, vid, val) {
+  const r = document.getElementById(id);
+  if (show) { r.classList.remove('hide'); if (vid) document.getElementById(vid).textContent = val; }
+  else r.classList.add('hide');
+}
+
+function updateCost() {
+  if (!booking) return;
+  const basePkg = parseFloat((booking.total || '$0').replace('$', '')) || 0;
+  const pc = qPhotos * 15, pr = qPrints * 3;
+  const at = addons.reduce((s, a) => s + a.price, 0);
+  const total = basePkg + pc + pr + at;
+  const deposit = Math.round(total * 50) / 100;
+  const balance = total - deposit;
+
+  document.getElementById('cl-pkg-n').textContent = (booking.package_selected?.split('—')[0]?.trim() || 'Package') + ' package';
+  document.getElementById('cl-pkg-p').textContent = '$' + basePkg.toFixed(2);
+  showLine('cl-photos', qPhotos > 0, 'cl-photos-v', qPhotos + ' set' + (qPhotos !== 1 ? 's' : '') + ' · +$' + pc.toFixed(2));
+  showLine('cl-prints', qPrints > 0, 'cl-prints-v', qPrints + ' print' + (qPrints !== 1 ? 's' : '') + ' · +$' + pr.toFixed(2));
+  ['cl-a0','cl-a1','cl-a2'].forEach((cid, i) => {
+    const row = document.getElementById(cid), a = addons[i];
+    if (a) { row.classList.remove('hide'); row.children[0].textContent = a.name; row.children[1].textContent = '+$' + a.price.toFixed(2); }
+    else row.classList.add('hide');
+  });
+  document.getElementById('cl-total').textContent   = '$' + total.toFixed(2);
+  document.getElementById('cl-deposit').textContent = '$' + deposit.toFixed(2);
+  document.getElementById('cl-balance').textContent = '$' + balance.toFixed(2);
+}
+
+// ── SUBMIT ──
+document.getElementById('confirm-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true; btn.textContent = 'Confirming…';
+
+  const token = new URLSearchParams(window.location.search).get('token');
+  const venue = document.getElementById('f-venue').value.trim();
+  const notes = document.getElementById('f-notes').value.trim();
+
+  const allAddons = [];
+  if (qPhotos > 0) allAddons.push({ name: 'Extra photos x' + qPhotos, price: qPhotos * 15 });
+  if (qPrints > 0) allAddons.push({ name: 'Prints x' + qPrints,       price: qPrints * 3 });
+  addons.forEach(a => allAddons.push(a));
+
+  try {
+    const res = await fetch('/api/confirm-booking', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, venueAddress: venue, addons: allAddons, notes: notes || null }),
+    });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || 'Server error');
+
+    document.getElementById('confirm-form').style.display = 'none';
+    document.getElementById('success-ztn').textContent = data.ztn;
+    document.getElementById('submit-success').style.display = 'block';
+  } catch(err) {
+    btn.disabled = false; btn.textContent = 'Confirm my booking';
+    alert('Something went wrong: ' + err.message);
+  }
+});
+
+init();
+</script>
+</Layout>

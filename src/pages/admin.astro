@@ -638,21 +638,11 @@ function updateStats() {
 }
 
 async function loadStorageUsage() {
-  try {
-    const { data } = await sb.storage.from('photos').list('public', { limit: 10000 });
-    if (!data) return;
-    const totalBytes = data.reduce((s, f) => s + (f.metadata?.size || 0), 0);
-    const totalMB = totalBytes / (1024*1024);
-    const totalGB = totalMB / 1024;
-    const pct = Math.min((totalGB / 1) * 100, 100);
-    const label = totalMB < 1 ? (totalBytes/1024).toFixed(1)+' KB'
-      : totalMB < 1000 ? totalMB.toFixed(1)+' MB' : totalGB.toFixed(2)+' GB';
-    document.getElementById('st-storage').textContent = label;
-    document.getElementById('storage-detail').textContent = label + ' of 1 GB free';
-    document.getElementById('storage-fill').style.width = pct.toFixed(1) + '%';
-    document.getElementById('storage-bar-card').style.display = 'block';
-    document.getElementById('storage-warn').style.display = pct > 70 ? 'block' : 'none';
-  } catch(e) { document.getElementById('st-storage').textContent = '—'; }
+  // Storage is now Cloudflare R2 — size stats not available from the browser.
+  // We show photo count as a proxy instead.
+  const el = document.getElementById('st-storage');
+  if (el) el.textContent = 'R2';
+  document.getElementById('storage-bar-card').style.display = 'none';
 }
 
 // ── PHOTOS ──
@@ -757,7 +747,13 @@ window.togHP = togHP;
 
 async function delPhoto(id, storagePath) {
   if (!confirm('Delete this photo? This cannot be undone.')) return;
-  await sb.storage.from('photos').remove([storagePath]);
+  if (storagePath) {
+    await fetch('/api/delete-photo', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key: storagePath }),
+    });
+  }
   await sb.from('portfolio_photos').delete().eq('id', id);
   selectedPhotoIds.delete(id);
   await loadPhotos();
@@ -787,7 +783,13 @@ async function bulkDelete() {
   const ids = [...selectedPhotoIds];
   const photos = allPhotos.filter(p => ids.includes(p.id));
   const paths = photos.map(p => p.storage_path).filter(Boolean);
-  if (paths.length) await sb.storage.from('photos').remove(paths);
+  if (paths.length) {
+    await fetch('/api/delete-photo', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ keys: paths }),
+    });
+  }
   await sb.from('portfolio_photos').delete().in('id', ids);
   selectedPhotoIds.clear();
   await loadPhotos(); toast('Deleted ' + ids.length + ' photo(s)');
@@ -814,14 +816,21 @@ async function handleFiles(files) {
   progWrap.style.display = 'block'; let done = 0;
   for (const file of files) {
     status.textContent = `Uploading ${file.name}…`;
-    const ext  = file.name.split('.').pop();
-    const path = `public/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-    const { error: upErr } = await sb.storage.from('photos').upload(path, file, { cacheControl:'3600', upsert:false });
-    if (upErr) { status.textContent = `Error: ${upErr.message}`; continue; }
-    const { data: urlData } = sb.storage.from('photos').getPublicUrl(path);
+    const fd = new FormData();
+    fd.append('file', file);
+    let key, url;
+    try {
+      const res  = await fetch('/api/upload', { method: 'POST', body: fd });
+      const json = await res.json();
+      if (json.error) { status.textContent = `Error: ${json.error}`; continue; }
+      key = json.key; url = json.url;
+    } catch (e) {
+      status.textContent = `Upload error: ${e.message}`;
+      continue;
+    }
     await sb.from('portfolio_photos').insert({
-      file_name: file.name, storage_path: path,
-      url: urlData.publicUrl, sport: sport || null,
+      file_name: file.name, storage_path: key,
+      url, sport: sport || null,
       gallery_id: galId, show_on_homepage: onHP,
     });
     done++;

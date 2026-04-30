@@ -213,6 +213,21 @@ html,body { height: 100% }
 .cal-day.unavailable { background: var(--red-bg); color: var(--red) }
 .cal-day.partial     { background: var(--amber-bg); color: var(--amber) }
 .cal-day.available   { background: var(--green-bg); color: var(--green) }
+.cal-day.bulk-sel    { outline: 2px solid var(--text); outline-offset: -2px; background: var(--surface-dim) }
+
+.bulk-bar {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 12px 16px;
+  margin-bottom: 16px;
+}
+.bulk-bar.visible { display: flex }
+.bulk-bar-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--text-3); margin-right: 4px }
 .cal-dot { width: 4px; height: 4px; border-radius: 50% }
 .cal-legend { display: flex; gap: 14px; padding: 12px 18px; border-top: 1px solid var(--border); flex-wrap: wrap }
 .cal-legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-3) }
@@ -492,7 +507,21 @@ html,body { height: 100% }
   <!-- AVAILABILITY -->
   <div class="tab" id="tab-calendar">
     <h1 class="main-title">Availability</h1>
-    <p class="main-sub">Click any date to mark it available, partial, or unavailable.</p>
+    <p class="main-sub" id="avail-sub">Click any date to mark it available, partial, or unavailable.</p>
+
+    <!-- Bulk bar -->
+    <div class="bulk-bar" id="bulk-bar">
+      <span class="bulk-bar-label" id="bulk-count-label">0 days selected</span>
+      <button class="btype-btn" onclick="applyBulk('unavailable')">Full day — unavailable</button>
+      <button class="btype-btn" onclick="applyBulk('available')">Mark available</button>
+      <button class="btype-btn" onclick="applyBulk('clear')">Clear</button>
+      <button class="btn-sm" onclick="toggleBulkMode()" style="margin-left:auto">Cancel bulk</button>
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+      <button class="btn-sm" id="bulk-mode-btn" onclick="toggleBulkMode()">Bulk select</button>
+    </div>
+
     <div class="cal-wrap">
       <div class="cal-header">
         <span class="cal-month" id="cal-month-label"></span>
@@ -1027,6 +1056,48 @@ window.mailTo = mailTo;
 
 // ── AVAILABILITY CALENDAR ──
 let calYear, calMonth, calBlocks = [], selectedDate = null, blockType = null;
+let bulkMode = false, selectedDates = new Set();
+
+function toggleBulkMode() {
+  bulkMode = !bulkMode;
+  selectedDates.clear();
+  selectedDate = null;
+  document.getElementById('day-editor').classList.remove('open');
+  document.getElementById('bulk-mode-btn').textContent = bulkMode ? 'Exit bulk' : 'Bulk select';
+  document.getElementById('bulk-mode-btn').style.borderColor = bulkMode ? 'var(--text)' : '';
+  document.getElementById('bulk-mode-btn').style.color = bulkMode ? 'var(--text)' : '';
+  document.getElementById('avail-sub').textContent = bulkMode
+    ? 'Click multiple days to select them, then apply a status to all at once.'
+    : 'Click any date to mark it available, partial, or unavailable.';
+  updateBulkBar();
+  renderCalendar();
+}
+window.toggleBulkMode = toggleBulkMode;
+
+function updateBulkBar() {
+  const bar = document.getElementById('bulk-bar');
+  const count = selectedDates.size;
+  bar.classList.toggle('visible', bulkMode);
+  document.getElementById('bulk-count-label').textContent = count + ' day' + (count !== 1 ? 's' : '') + ' selected';
+}
+
+async function applyBulk(type) {
+  if (!selectedDates.size) { toast('No days selected'); return; }
+  const dates = [...selectedDates];
+  for (const date of dates) {
+    await sb.from('availability').delete().eq('date', date);
+    if (type !== 'clear') {
+      await sb.from('availability').insert({ date, status: type });
+    }
+  }
+  const { data } = await sb.from('availability').select('*').order('date');
+  allBlocks = data || [];
+  selectedDates.clear();
+  updateBulkBar();
+  renderCalendar();
+  toast(type === 'clear' ? `Cleared ${dates.length} day(s)` : `Marked ${dates.length} day(s) as ${type}`);
+}
+window.applyBulk = applyBulk;
 
 async function loadBlocks() {
   const { data } = await sb.from('availability').select('*').order('date');
@@ -1061,6 +1132,7 @@ function renderCalendar() {
     if (isPast) cls += ' past'; else cls += ' clickable';
     if (dateStr === today) cls += ' today';
     if (dateStr === selectedDate) cls += ' selected';
+    if (bulkMode && selectedDates.has(dateStr)) cls += ' bulk-sel';
     if (status) cls += ' ' + status;
     el.className = cls;
     el.innerHTML = `<span>${d}</span>`;
@@ -1070,7 +1142,16 @@ function renderCalendar() {
       dot.style.background = status==='unavailable' ? 'var(--red)' : status==='partial' ? 'var(--amber)' : 'var(--green)';
       el.appendChild(dot);
     }
-    if (!isPast) el.addEventListener('click', () => openEditor(dateStr));
+    if (!isPast) el.addEventListener('click', () => {
+      if (bulkMode) {
+        if (selectedDates.has(dateStr)) selectedDates.delete(dateStr);
+        else selectedDates.add(dateStr);
+        updateBulkBar();
+        renderCalendar();
+      } else {
+        openEditor(dateStr);
+      }
+    });
     grid.appendChild(el);
   }
 

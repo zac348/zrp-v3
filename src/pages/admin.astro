@@ -1079,12 +1079,12 @@ function toggleBulkMode() {
   document.getElementById('avail-sub').textContent = bulkMode
     ? 'Click multiple days to select them, then apply a status to all at once.'
     : 'Click any date to mark it available, partial, or unavailable.';
-  updateBulkBar();
+  updateCalBulkBar();
   renderCalendar();
 }
 window.toggleBulkMode = toggleBulkMode;
 
-function updateBulkBar() {
+function updateCalBulkBar() {
   const bar = document.getElementById('bulk-bar');
   const count = selectedDates.size;
   bar.classList.toggle('visible', bulkMode);
@@ -1103,7 +1103,7 @@ async function applyBulk(type) {
   const { data } = await sb.from('availability').select('*').order('date');
   allBlocks = data || [];
   selectedDates.clear();
-  updateBulkBar();
+  updateCalBulkBar();
   renderCalendar();
   toast(type === 'clear' ? `Cleared ${dates.length} day(s)` : `Marked ${dates.length} day(s) as ${type}`);
 }
@@ -1156,7 +1156,7 @@ function renderCalendar() {
       if (bulkMode) {
         if (selectedDates.has(dateStr)) selectedDates.delete(dateStr);
         else selectedDates.add(dateStr);
-        updateBulkBar();
+        updateCalBulkBar();
         renderCalendar();
       } else {
         openEditor(dateStr);

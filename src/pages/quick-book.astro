@@ -1,0 +1,297 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+<Layout title="Quick Book — ZRP">
+<style is:global>
+.page { max-width: 560px; margin: 0 auto; padding: 48px 24px 80px }
+
+/* PACKAGES */
+.pkg-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 32px;
+}
+@media (max-width: 500px) { .pkg-grid { grid-template-columns: 1fr } }
+
+.pkg-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+  position: relative;
+}
+.pkg-card:hover { border-color: var(--border-2) }
+.pkg-card.sel { border-color: var(--text); background: var(--surface-dim) }
+.pkg-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  background: var(--text);
+  color: var(--bg);
+  padding: 2px 7px;
+  border-radius: 3px;
+  position: absolute;
+  top: -1px; right: 12px;
+  transform: translateY(-50%);
+}
+.pkg-name {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 8px;
+}
+.pkg-price { font-size: 26px; font-weight: 300; letter-spacing: -.02em; margin-bottom: 10px }
+.pkg-price small { font-size: 12px; color: var(--text-3); font-weight: 400 }
+.pkg-features { list-style: none; display: flex; flex-direction: column; gap: 5px }
+.pkg-features li { font-size: 11px; color: var(--text-2); display: flex; align-items: center; gap: 6px }
+.pkg-features li::before { content: '—'; color: var(--text-3); font-size: 9px; flex-shrink: 0 }
+
+/* FORM */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px }
+@media (max-width: 480px) { .form-grid { grid-template-columns: 1fr } }
+.field.full { grid-column: 1/-1 }
+
+/* COST BOX */
+.cost-box {
+  grid-column: 1/-1;
+  background: var(--surface-dim);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+}
+.cost-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 10px;
+}
+.cost-line { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-2); padding: 2px 0 }
+.cost-line.total { border-top: 1px solid var(--border); margin-top: 8px; padding-top: 9px; font-size: 13px; font-weight: 500; color: var(--text) }
+.cost-line.deposit { font-size: 12px; font-weight: 500; color: var(--text) }
+.cost-line.balance { font-size: 11px; color: var(--text-3) }
+.cost-empty { font-size: 12px; color: var(--text-3); font-style: italic }
+
+/* SUBMIT */
+.submit-btn {
+  width: 100%; background: var(--ink); color: var(--bg);
+  border: none; border-radius: var(--radius); padding: 14px;
+  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+  cursor: pointer; transition: background .15s; grid-column: 1/-1; margin-top: 4px;
+}
+.submit-btn:hover:not(:disabled) { background: var(--ink-hover) }
+.submit-btn:disabled { opacity: .5; cursor: not-allowed }
+</style>
+
+<div class="page">
+  <div class="sec-label" style="margin-bottom:6px">quick book</div>
+  <h1 style="font-size:24px;font-weight:300;letter-spacing:-.02em;margin-bottom:4px">Book a session</h1>
+  <p style="font-size:13px;color:var(--text-3);margin-bottom:32px">Simple booking for individual player or action shots.</p>
+
+  <!-- PACKAGES -->
+  <div class="sec-label">choose a package</div>
+  <div class="pkg-grid" id="pkg-grid">
+    <!-- populated by JS -->
+  </div>
+
+  <!-- FORM -->
+  <div class="sec-label">your details</div>
+  <form id="qbook-form" action={`https://formspree.io/f/${import.meta.env.PUBLIC_FORMSPREE_ID}`} method="POST">
+    <input type="hidden" name="_subject" value="New quick booking — ZRP"/>
+    <input type="hidden" name="_next"    value="/thanks"/>
+    <input type="hidden" name="Package"  id="h-pkg"/>
+    <input type="hidden" name="Total"    id="h-total"/>
+    <input type="hidden" name="Deposit"  id="h-deposit"/>
+    <input type="hidden" name="Booking Number" id="h-booking-num"/>
+
+    <div class="form-grid">
+      <div class="field"><label>First name</label><input type="text" name="First Name" placeholder="Jordan" required/></div>
+      <div class="field"><label>Last name</label><input type="text"  name="Last Name"  placeholder="Smith"  required/></div>
+      <div class="field"><label>Email</label><input type="email" name="Email" placeholder="you@email.com" required/></div>
+      <div class="field"><label>Phone</label><input type="tel"   name="Phone" placeholder="(229) 555-0100"/></div>
+
+      <hr class="divider" style="grid-column:1/-1"/>
+
+      <div class="field"><label>Event date</label>
+        <input type="date" name="Event Date" id="edate" required onclick="this.showPicker()" onkeydown="return false" style="cursor:pointer"/>
+      </div>
+      <div class="field"><label>Start time</label>
+        <input type="time" name="Start Time" id="etime" required onclick="this.showPicker()" onkeydown="return false" style="cursor:pointer"/>
+      </div>
+
+      <div class="field"><label>Sport / event type</label>
+        <select name="Sport" required>
+          <option value="" disabled selected>Select…</option>
+          <option>Football</option><option>Basketball</option><option>Baseball / Softball</option>
+          <option>Soccer</option><option>Track &amp; Field</option><option>Volleyball</option>
+          <option>Wrestling</option><option>Swimming</option><option>Other</option>
+        </select>
+      </div>
+      <div class="field"><label>General location</label>
+        <input type="text" name="Location" placeholder="e.g. Valdosta High School" required/>
+      </div>
+
+      <hr class="divider" style="grid-column:1/-1"/>
+
+      <div class="field"><label>Player number</label>
+        <input type="text" name="Player Number" placeholder="e.g. 24"/>
+      </div>
+      <div class="field"><label>Player last name</label>
+        <input type="text" name="Player Last Name" placeholder="e.g. Smith"/>
+      </div>
+      <div class="field full"><label>Shot type</label>
+        <select name="Shot Type" required>
+          <option value="" disabled selected>Select…</option>
+          <option>Action shots — in-game</option>
+          <option>Portrait / posed</option>
+          <option>Both action &amp; portrait</option>
+          <option>Team photos</option>
+          <option>Sideline / candid</option>
+        </select>
+      </div>
+
+      <hr class="divider" style="grid-column:1/-1"/>
+
+      <!-- COST BOX -->
+      <div class="cost-box">
+        <div class="cost-label">Estimate</div>
+        <div id="cost-empty" class="cost-empty">Select a package above to see your total.</div>
+        <div id="cost-lines" style="display:none">
+          <div class="cost-line"><span id="cl-pkg-n"></span><span id="cl-pkg-p"></span></div>
+          <div class="cost-line total"><span>Total</span><span id="cl-total"></span></div>
+          <div class="cost-line deposit"><span>Deposit due now (50%)</span><span id="cl-deposit"></span></div>
+          <div class="cost-line balance"><span>Balance due day of event</span><span id="cl-balance"></span></div>
+        </div>
+      </div>
+
+      <hr class="divider" style="grid-column:1/-1"/>
+
+      <div class="field full">
+        <label>Anything else? (optional)</label>
+        <textarea name="Notes" placeholder="Specific plays, players, questions…"></textarea>
+      </div>
+
+      <button type="submit" class="submit-btn" id="submit-btn" disabled>Select a package to continue</button>
+    </div>
+  </form>
+</div>
+
+<script>
+import { createClient } from '@supabase/supabase-js';
+const sb = createClient(
+  import.meta.env.PUBLIC_SUPABASE_URL,
+  import.meta.env.PUBLIC_SUPABASE_ANON_KEY
+);
+
+// ── PACKAGES ──
+// Falls back to these defaults if table is empty
+const DEFAULT_PKGS = [
+  { name: 'Basic',    price: 40,  popular: false, features: ['1–2 hrs coverage', '25 edited photos', 'Private gallery link'] },
+  { name: 'Standard', price: 75,  popular: true,  features: ['Full game / 3 hrs', '60 edited photos', 'Private gallery link', '1 free 5×7 print'] },
+  { name: 'Premium',  price: 120, popular: false,  features: ['Full day coverage', '100+ edited photos', 'Private gallery link', '3 free 5×7 prints'] },
+];
+
+let selPkg = null;
+
+async function loadPackages() {
+  const { data } = await sb.from('package_pricing').select('*').eq('available', true).order('base_price');
+  const pkgs = (data && data.length)
+    ? data.map((p, i) => ({
+        name: p.package_name,
+        price: (p.on_sale && p.sale_price) ? p.sale_price : p.base_price,
+        popular: i === 1,
+        features: DEFAULT_PKGS[i]?.features || ['Photos included', 'Private gallery link'],
+      }))
+    : DEFAULT_PKGS;
+  renderPackages(pkgs);
+}
+
+function renderPackages(pkgs) {
+  const grid = document.getElementById('pkg-grid');
+  grid.innerHTML = pkgs.map((p, i) => `
+    <div class="pkg-card" id="pkg-${i}" onclick="selectPkg(${i},${JSON.stringify(p).replace(/"/g, '&quot;')})">
+      ${p.popular ? '<span class="pkg-badge">Popular</span>' : ''}
+      <div class="pkg-name">${p.name}</div>
+      <div class="pkg-price">$${p.price}<small>/session</small></div>
+      <ul class="pkg-features">${p.features.map(f => `<li>${f}</li>`).join('')}</ul>
+    </div>`).join('');
+}
+
+function selectPkg(i, pkg) {
+  selPkg = pkg;
+  document.querySelectorAll('.pkg-card').forEach((c, j) => c.classList.toggle('sel', j === i));
+  document.getElementById('h-pkg').value   = pkg.name + ' — $' + pkg.price;
+  document.getElementById('cl-pkg-n').textContent = pkg.name;
+  document.getElementById('cl-pkg-p').textContent = '$' + pkg.price;
+  document.getElementById('cl-total').textContent   = '$' + pkg.price.toFixed(2);
+  document.getElementById('cl-deposit').textContent = '$' + (pkg.price / 2).toFixed(2);
+  document.getElementById('cl-balance').textContent = '$' + (pkg.price / 2).toFixed(2);
+  document.getElementById('h-total').value   = '$' + pkg.price.toFixed(2);
+  document.getElementById('h-deposit').value = '$' + (pkg.price / 2).toFixed(2);
+  document.getElementById('cost-empty').style.display  = 'none';
+  document.getElementById('cost-lines').style.display  = 'block';
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = false;
+  btn.textContent = 'Send booking request';
+}
+window.selectPkg = selectPkg;
+
+// ── SUBMIT ──
+document.getElementById('qbook-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  if (!selPkg) { alert('Please select a package first.'); return; }
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true; btn.textContent = 'Sending…';
+
+  const bookingNum = 'ZRP-' + Date.now().toString(36).toUpperCase();
+  document.getElementById('h-booking-num').value = bookingNum;
+
+  // Save to Supabase
+  const fd = new FormData(this);
+  try {
+    await sb.from('bookings').insert({
+      booking_number:   bookingNum,
+      first_name:       fd.get('First Name'),
+      last_name:        fd.get('Last Name'),
+      email:            fd.get('Email'),
+      phone:            fd.get('Phone') || null,
+      event_date:       fd.get('Event Date'),
+      start_time:       fd.get('Start Time'),
+      sport_type:       fd.get('Sport'),
+      event_location:   fd.get('Location'),
+      package_selected: selPkg.name + ' — $' + selPkg.price,
+      total:            '$' + selPkg.price.toFixed(2),
+      deposit:          '$' + (selPkg.price / 2).toFixed(2),
+      notes: [
+        fd.get('Player Number') ? 'Player #' + fd.get('Player Number') : '',
+        fd.get('Player Last Name') ? 'Player: ' + fd.get('Player Last Name') : '',
+        fd.get('Shot Type') ? 'Shot type: ' + fd.get('Shot Type') : '',
+        fd.get('Notes') || '',
+      ].filter(Boolean).join(' | ') || null,
+      status: 'pending',
+    });
+  } catch(_) {}
+
+  // Send via Formspree
+  sessionStorage.setItem('zrp_booking_num', bookingNum);
+  try {
+    const res = await fetch(this.action, {
+      method: 'POST', body: fd, headers: { Accept: 'application/json' },
+    });
+    if (res.ok) { window.location.href = '/thanks'; return; }
+  } catch(_) {}
+
+  // Formspree fallback — submit normally
+  this.submit();
+});
+
+loadPackages();
+</script>
+</Layout>

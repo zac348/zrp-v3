@@ -252,55 +252,58 @@ window.closeLB = closeLB;
 
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLB(); });
 
-async function downloadPhoto(url, filename) {
-  try {
-    const resp = await fetch(url);
-    const blob = await resp.blob();
-
-    if (!isWatermarked) {
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = filename || 'photo.jpg';
-      a.click();
-      return;
-    }
-
-    // Burn watermark into the image via canvas
+function burnWatermark(blob) {
+  return new Promise((resolve, reject) => {
     const blobUrl = URL.createObjectURL(blob);
     const img = new Image();
     img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width  = img.naturalWidth;
-      canvas.height = img.naturalHeight;
-      const ctx = canvas.getContext('2d');
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width  = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        URL.revokeObjectURL(blobUrl);
 
-      // Draw original photo
-      ctx.drawImage(img, 0, 0);
+        // Scale text to ~2% of shortest side
+        const size = Math.max(20, Math.round(Math.min(canvas.width, canvas.height) * 0.022));
+        const pad  = Math.round(size * 1.2);
 
-      // Watermark text sizing — scales with image
-      const size = Math.round(Math.min(img.naturalWidth, img.naturalHeight) * 0.022);
-      const pad  = Math.round(size * 1.1);
+        ctx.save();
+        ctx.font         = `${size}px monospace`;
+        ctx.textAlign    = 'right';
+        ctx.textBaseline = 'bottom';
+        ctx.shadowColor  = 'rgba(0,0,0,0.7)';
+        ctx.shadowBlur   = size * 0.8;
+        ctx.fillStyle    = 'rgba(255,255,255,0.78)';
+        ctx.fillText('© zacharyroutsongphotography.com', canvas.width - pad, canvas.height - pad);
+        ctx.restore();
 
-      ctx.font         = `500 ${size}px "DM Mono", monospace`;
-      ctx.textAlign    = 'right';
-      ctx.textBaseline = 'bottom';
-
-      // Subtle shadow for legibility on any background
-      ctx.shadowColor  = 'rgba(0,0,0,0.55)';
-      ctx.shadowBlur   = size * 0.6;
-      ctx.fillStyle    = 'rgba(255,255,255,0.72)';
-      ctx.fillText('© zacharyroutsongphotography.com', canvas.width - pad, canvas.height - pad);
-
-      URL.revokeObjectURL(blobUrl);
-      canvas.toBlob(out => {
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(out);
-        a.download = filename || 'photo.jpg';
-        a.click();
-      }, 'image/jpeg', 0.94);
+        canvas.toBlob(out => out ? resolve(out) : reject(new Error('toBlob failed')), 'image/jpeg', 0.94);
+      } catch(e) { URL.revokeObjectURL(blobUrl); reject(e); }
     };
+    img.onerror = () => { URL.revokeObjectURL(blobUrl); reject(new Error('Image load failed')); };
     img.src = blobUrl;
-  } catch(err) { window.open(url, '_blank'); }
+  });
+}
+
+async function downloadPhoto(url, filename) {
+  try {
+    const resp = await fetch(url);
+    let blob = await resp.blob();
+    if (isWatermarked) blob = await burnWatermark(blob);
+    const objectUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href     = objectUrl;
+    a.download = filename || 'photo.jpg';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(objectUrl), 3000);
+  } catch(err) {
+    console.error('Download error:', err);
+    window.open(url, '_blank');
+  }
 }
 window.downloadPhoto = downloadPhoto;
 

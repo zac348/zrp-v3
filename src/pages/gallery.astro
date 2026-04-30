@@ -89,18 +89,19 @@ import Layout from '../layouts/Layout.astro';
 
 .wm-badge {
   position: absolute;
-  bottom: 8px;
-  right: 8px;
-  font-family: 'DM Mono', monospace;
-  font-size: 9px;
-  letter-spacing: .06em;
-  color: rgba(255,255,255,.75);
-  background: rgba(0,0,0,.45);
-  padding: 3px 8px;
-  border-radius: 3px;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+  font-weight: bold;
+  color: rgba(255,255,255,.5);
+  text-shadow: 0 1px 3px rgba(0,0,0,.7);
   pointer-events: none;
   user-select: none;
-  backdrop-filter: blur(2px);
+  transform: rotate(-25deg);
+  letter-spacing: .03em;
 }
 
 .not-found {
@@ -265,19 +266,35 @@ function watermarkCanvas(img) {
   const ctx = canvas.getContext('2d');
   ctx.drawImage(img, 0, 0, W, H);
 
-  const sz  = Math.max(18, Math.floor(Math.min(W, H) * 0.024));
-  const pad = Math.floor(sz * 1.1);
+  const sz      = Math.max(16, Math.floor(Math.min(W, H) * 0.022));
+  const gapX    = Math.floor(W * 0.32);   // horizontal repeat spacing
+  const gapY    = Math.floor(H * 0.22);   // vertical repeat spacing
+  const angle   = -25 * Math.PI / 180;    // diagonal tilt
 
-  ctx.font         = 'bold ' + sz + 'px Arial, sans-serif';
-  ctx.textAlign    = 'right';
-  ctx.textBaseline = 'bottom';
-  ctx.lineWidth    = Math.max(3, sz * 0.18);
-  ctx.lineJoin     = 'round';
-  ctx.strokeStyle  = 'rgba(0,0,0,0.85)';
-  ctx.strokeText(WM_TEXT, W - pad, H - pad);
-  ctx.fillStyle    = 'rgba(255,255,255,0.92)';
-  ctx.fillText(WM_TEXT, W - pad, H - pad);
+  ctx.save();
+  ctx.font        = 'bold ' + sz + 'px Arial, sans-serif';
+  ctx.lineWidth   = Math.max(2, sz * 0.16);
+  ctx.lineJoin    = 'round';
+  ctx.strokeStyle = 'rgba(0,0,0,0.55)';
+  ctx.fillStyle   = 'rgba(255,255,255,0.45)';
 
+  // Tile across the whole image at an angle
+  for (let row = -1; row * gapY < H + gapY; row++) {
+    for (let col = -1; col * gapX < W + gapX; col++) {
+      const x = col * gapX + (row % 2 === 0 ? 0 : gapX / 2);
+      const y = row * gapY;
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(angle);
+      ctx.textAlign    = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.strokeText(WM_TEXT, 0, 0);
+      ctx.fillText(WM_TEXT, 0, 0);
+      ctx.restore();
+    }
+  }
+
+  ctx.restore();
   return canvas;
 }
 

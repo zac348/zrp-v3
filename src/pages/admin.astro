@@ -706,6 +706,7 @@ async function loadPhotos() {
   allPhotos = data || [];
   renderPhotos();
   populateGalDropdowns();
+  renderGalleries(); // keep gallery photo counts in sync
 }
 
 function renderPhotos() {

@@ -1069,39 +1069,37 @@ function bookingCard(b) {
 async function acceptBooking(id, name) {
   if (!confirm('Accept booking for ' + name + '?\n\nThis will update their status and email them a link to complete their booking.')) return;
 
-  // Step 1: update DB via Supabase (browser already has creds — reliable)
-  const { data: updated, error } = await sb
-    .from('bookings')
-    .update({ status: 'accepted' })
-    .eq('id', id)
-    .select('*')
-    .single();
+  // Step 1: update status
+  const { error: upErr } = await sb.from('bookings').update({ status: 'accepted' }).eq('id', id);
+  if (upErr) { toast('DB error: ' + upErr.message); return; }
 
-  if (error) { toast('DB error: ' + error.message); return; }
+  // Step 2: fresh read to get the actual token stored in DB
+  const { data: booking, error: getErr } = await sb.from('bookings').select('*').eq('id', id).single();
+  if (getErr || !booking) { toast('Could not read booking after update'); return; }
 
   await loadBookings();
   toast('Accepted ✓');
 
-  // Step 2: send email via function (only needs RESEND_API_KEY)
+  // Step 3: send email
   try {
     const res = await fetch('/api/accept-booking', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        email:   updated.email,
-        name:    [updated.first_name, updated.last_name].filter(Boolean).join(' '),
-        token:   updated.token,
+        email:   booking.email,
+        name:    [booking.first_name, booking.last_name].filter(Boolean).join(' '),
+        token:   booking.token,
         booking: {
-          event_date:       updated.event_date,
-          sport_type:       updated.sport_type,
-          package_selected: updated.package_selected,
-          total:            updated.total,
+          event_date:       booking.event_date,
+          sport_type:       booking.sport_type,
+          package_selected: booking.package_selected,
+          total:            booking.total,
         },
       }),
     });
     const d = await res.json();
-    if (d.emailSent) toast('Email sent to ' + updated.email);
-    else toast('Email not sent: ' + (d.debug || d.resendError || 'unknown — check Cloudflare env vars'));
+    if (d.emailSent) toast('Email sent to ' + booking.email);
+    else toast('Email not sent: ' + (d.debug || d.resendError || 'unknown'));
   } catch(e) {
     toast('Accepted — email failed: ' + e.message);
     console.error('Email error:', e);

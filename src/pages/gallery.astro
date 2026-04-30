@@ -159,8 +159,11 @@ import Layout from '../layouts/Layout.astro';
 
 <div class="lightbox" id="lb" onclick="closeLB(event)">
   <button class="lb-close" onclick="closeLB()">×</button>
-  <img id="lb-img" src="" alt=""/>
-  <a class="lb-dl" id="lb-dl" href="#" download>Download photo</a>
+  <div style="position:relative;display:inline-block;max-width:90vw;max-height:80vh">
+    <img id="lb-img" src="" alt="" style="max-width:90vw;max-height:80vh;object-fit:contain;border-radius:var(--radius);display:block"/>
+    <div id="lb-wm" style="display:none;position:absolute;bottom:10px;right:10px;font-family:Arial,sans-serif;font-size:13px;font-weight:bold;color:rgba(255,255,255,0.88);text-shadow:0 0 4px rgba(0,0,0,0.9),0 1px 3px rgba(0,0,0,0.8);pointer-events:none;user-select:none">Copyright – Zachary R.</div>
+  </div>
+  <button class="lb-dl" id="lb-dl">Download photo</button>
 </div>
 
 <script>
@@ -228,7 +231,7 @@ function renderGallery() {
       <div class="gal-item-overlay">
         <button class="dl-btn" onclick="event.stopPropagation();downloadPhoto('${p.url}','${p.file_name}')">Download</button>
       </div>
-      ${isWatermarked ? '<div class="wm-badge">© zacharyroutsongphotography.com</div>' : ''}`;
+      ${isWatermarked ? '<div class="wm-badge">Copyright – Zachary R.</div>' : ''}`;
     el.addEventListener('click', () => openLB(p.url, p.file_name));
     grid.appendChild(el);
   });
@@ -236,9 +239,8 @@ function renderGallery() {
 
 function openLB(url, filename) {
   document.getElementById('lb-img').src = url;
-  // Route download through watermark function
-  const dlBtn = document.getElementById('lb-dl');
-  dlBtn.onclick = (e) => { e.preventDefault(); downloadPhoto(url, filename); };
+  document.getElementById('lb-wm').style.display = isWatermarked ? 'block' : 'none';
+  document.getElementById('lb-dl').onclick = function() { downloadPhoto(url, filename); };
   document.getElementById('lb').classList.add('open');
 }
 window.openLB = openLB;
@@ -250,103 +252,74 @@ function closeLB(e) {
 }
 window.closeLB = closeLB;
 
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLB(); });
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeLB(); });
 
-// Fetch image as blob — tries normal fetch first, falls back to no-cors
-// (no-cors gives an opaque blob but it still contains the image bytes,
-//  and loading it via blob URL keeps the canvas un-tainted so toBlob works)
-async function fetchImageBlob(url) {
-  try {
-    const r = await fetch(url);
-    if (!r.ok) throw new Error('status ' + r.status);
-    return await r.blob();
-  } catch(_) {
-    const r = await fetch(url, { mode: 'no-cors' });
-    return await r.blob();
-  }
-}
+const WM_TEXT = 'Copyright – Zachary R.';
 
-// Draw image blob onto a canvas, stamp watermark, return new JPEG blob
-function stampWatermark(blob) {
-  return new Promise((resolve, reject) => {
-    const src = URL.createObjectURL(blob);
-    const img = new Image();
+function watermarkCanvas(img) {
+  const W = img.naturalWidth;
+  const H = img.naturalHeight;
+  const canvas = document.createElement('canvas');
+  canvas.width  = W;
+  canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(img, 0, 0, W, H);
 
-    img.onload = function() {
-      const W = img.naturalWidth;
-      const H = img.naturalHeight;
+  const sz  = Math.max(18, Math.floor(Math.min(W, H) * 0.024));
+  const pad = Math.floor(sz * 1.1);
 
-      if (!W || !H) {
-        URL.revokeObjectURL(src);
-        return reject(new Error('zero-size image'));
-      }
+  ctx.font         = 'bold ' + sz + 'px Arial, sans-serif';
+  ctx.textAlign    = 'right';
+  ctx.textBaseline = 'bottom';
+  ctx.lineWidth    = Math.max(3, sz * 0.18);
+  ctx.lineJoin     = 'round';
+  ctx.strokeStyle  = 'rgba(0,0,0,0.85)';
+  ctx.strokeText(WM_TEXT, W - pad, H - pad);
+  ctx.fillStyle    = 'rgba(255,255,255,0.92)';
+  ctx.fillText(WM_TEXT, W - pad, H - pad);
 
-      const canvas = document.createElement('canvas');
-      canvas.width  = W;
-      canvas.height = H;
-      const ctx = canvas.getContext('2d');
-
-      // Draw original photo
-      ctx.drawImage(img, 0, 0, W, H);
-      URL.revokeObjectURL(src);
-
-      // Watermark — size scales with image, min 16px
-      const sz  = Math.max(16, Math.floor(Math.min(W, H) * 0.022));
-      const pad = sz;
-      const txt = '© zacharyroutsongphotography.com';
-
-      ctx.font         = 'bold ' + sz + 'px Arial, sans-serif';
-      ctx.textAlign    = 'right';
-      ctx.textBaseline = 'bottom';
-
-      // Dark stroke for legibility on any background
-      ctx.lineWidth   = Math.max(2, sz * 0.15);
-      ctx.lineJoin    = 'round';
-      ctx.strokeStyle = 'rgba(0,0,0,0.75)';
-      ctx.strokeText(txt, W - pad, H - pad);
-
-      // White fill
-      ctx.fillStyle = 'rgba(255,255,255,0.88)';
-      ctx.fillText(txt, W - pad, H - pad);
-
-      canvas.toBlob(function(out) {
-        if (out) resolve(out);
-        else reject(new Error('canvas.toBlob returned null'));
-      }, 'image/jpeg', 0.93);
-    };
-
-    img.onerror = function() {
-      URL.revokeObjectURL(src);
-      reject(new Error('img.onerror fired'));
-    };
-
-    img.src = src;
-  });
-}
-
-// Trigger a file download from a Blob
-function saveBlob(blob, filename) {
-  const url = URL.createObjectURL(blob);
-  const a   = document.createElement('a');
-  a.href     = url;
-  a.download = filename || 'photo.jpg';
-  a.style.display = 'none';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  setTimeout(function() { URL.revokeObjectURL(url); }, 15000);
+  return canvas;
 }
 
 async function downloadPhoto(url, filename) {
-  try {
-    let blob = await fetchImageBlob(url);
-    if (isWatermarked) blob = await stampWatermark(blob);
-    saveBlob(blob, filename);
-  } catch(err) {
-    console.error('downloadPhoto failed:', err);
-    // Last resort: open in new tab
-    window.open(url, '_blank');
+  if (!isWatermarked) {
+    // Clean download — no canvas needed
+    const a = document.createElement('a');
+    a.href = url; a.download = filename || 'photo.jpg';
+    a.style.display = 'none';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    return;
   }
+
+  // Watermarked download via canvas
+  // crossOrigin='anonymous' works because R2 public buckets send Access-Control-Allow-Origin: *
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+
+  img.onload = function() {
+    try {
+      const canvas = watermarkCanvas(img);
+      canvas.toBlob(function(blob) {
+        if (!blob) { window.open(url, '_blank'); return; }
+        const objUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = objUrl; a.download = filename || 'photo.jpg';
+        a.style.display = 'none';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        setTimeout(function() { URL.revokeObjectURL(objUrl); }, 10000);
+      }, 'image/jpeg', 0.93);
+    } catch(e) {
+      console.error('canvas error:', e);
+      window.open(url, '_blank');
+    }
+  };
+
+  img.onerror = function() {
+    console.error('img load failed for watermark');
+    window.open(url, '_blank');
+  };
+
+  img.src = url;
 }
 window.downloadPhoto = downloadPhoto;
 

@@ -386,13 +386,26 @@ html,body { height: 100% }
       <div class="stat"><div class="stat-n" id="st-pending">—</div><div class="stat-l">Pending</div></div>
       <div class="stat"><div class="stat-n" id="st-storage">—</div><div class="stat-l">Storage</div></div>
     </div>
-    <div class="storage-bar-card" id="storage-bar-card">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <span style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-3)">Supabase storage</span>
-        <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-3)" id="storage-detail">— of 1 GB free</span>
+    <div class="storage-bar-card" id="storage-bar-card" style="display:none">
+      <!-- R2 bar -->
+      <div style="margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-3)">Cloudflare R2</span>
+          <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-3)" id="r2-detail">—</span>
+        </div>
+        <div class="storage-track"><div class="storage-fill" id="r2-fill"></div></div>
+        <p style="font-size:10px;color:var(--text-3);margin-top:4px">of 5 TB</p>
       </div>
-      <div class="storage-track"><div class="storage-fill" id="storage-fill"></div></div>
-      <p id="storage-warn" style="display:none;font-size:11px;color:var(--amber);margin-top:6px">⚠ Getting full — consider removing unused photos.</p>
+      <!-- Supabase bar -->
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-3)">Supabase storage</span>
+          <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-3)" id="sb-detail">—</span>
+        </div>
+        <div class="storage-track"><div class="storage-fill" id="sb-fill"></div></div>
+        <p style="font-size:10px;color:var(--text-3);margin-top:4px">of 1 GB free</p>
+        <p id="storage-warn" style="display:none;font-size:11px;color:var(--amber);margin-top:6px">⚠ Supabase almost full — new uploads are going to R2.</p>
+      </div>
     </div>
     <div class="sec-label">recent bookings</div>
     <div class="booking-list" id="ov-bookings"><p class="no-data">No bookings yet.</p></div>
@@ -637,12 +650,50 @@ function updateStats() {
   loadStorageUsage();
 }
 
+function fmtBytes(bytes) {
+  if (bytes < 1024)           return bytes + ' B';
+  if (bytes < 1024*1024)      return (bytes/1024).toFixed(1) + ' KB';
+  if (bytes < 1024*1024*1024) return (bytes/(1024*1024)).toFixed(1) + ' MB';
+  return (bytes/(1024*1024*1024)).toFixed(2) + ' GB';
+}
+
 async function loadStorageUsage() {
-  // Storage is now Cloudflare R2 — size stats not available from the browser.
-  // We show photo count as a proxy instead.
-  const el = document.getElementById('st-storage');
-  if (el) el.textContent = 'R2';
-  document.getElementById('storage-bar-card').style.display = 'none';
+  try {
+    // Pull file_size for all photos from the database
+    const { data: photos } = await sb.from('portfolio_photos').select('url, file_size');
+    if (!photos) return;
+
+    const sbUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+
+    let r2Bytes = 0, sbBytes = 0;
+    for (const p of photos) {
+      const size = p.file_size || 0;
+      if (p.url && p.url.startsWith(sbUrl)) {
+        sbBytes += size;
+      } else {
+        r2Bytes += size;
+      }
+    }
+
+    // R2 bar (5 TB cap)
+    const r2Cap = 5 * 1024 * 1024 * 1024 * 1024;
+    const r2Pct = Math.min((r2Bytes / r2Cap) * 100, 100);
+    document.getElementById('r2-detail').textContent = fmtBytes(r2Bytes);
+    document.getElementById('r2-fill').style.width = r2Pct.toFixed(2) + '%';
+
+    // Supabase bar (1 GB cap)
+    const sbCap = 1024 * 1024 * 1024;
+    const sbPct = Math.min((sbBytes / sbCap) * 100, 100);
+    document.getElementById('sb-detail').textContent = fmtBytes(sbBytes);
+    document.getElementById('sb-fill').style.width = sbPct.toFixed(1) + '%';
+    document.getElementById('storage-warn').style.display = sbPct > 70 ? 'block' : 'none';
+
+    // Total for the stat tile
+    document.getElementById('st-storage').textContent = fmtBytes(r2Bytes + sbBytes);
+    document.getElementById('storage-bar-card').style.display = 'block';
+  } catch(e) {
+    document.getElementById('st-storage').textContent = '—';
+  }
 }
 
 // ── PHOTOS ──
@@ -832,6 +883,7 @@ async function handleFiles(files) {
       file_name: file.name, storage_path: key,
       url, sport: sport || null,
       gallery_id: galId, show_on_homepage: onHP,
+      file_size: file.size,
     });
     done++;
     progBar.style.width = Math.round((done / files.length) * 100) + '%';

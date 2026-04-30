@@ -134,11 +134,21 @@ import Layout from '../layouts/Layout.astro';
 /* ABOUT */
 .about-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 420px 1fr;
   gap: 56px;
   align-items: start;
 }
+@media (max-width: 860px) { .about-grid { grid-template-columns: 1fr 1fr; gap: 36px } }
 @media (max-width: 620px) { .about-grid { grid-template-columns: 1fr; gap: 32px } }
+
+.about-photo {
+  width: 100%;
+  aspect-ratio: 3/4;
+  object-fit: cover;
+  object-position: center top;
+  border-radius: var(--radius-lg);
+  display: block;
+}
 
 .about-text h2 {
   font-size: 22px;
@@ -184,7 +194,7 @@ import Layout from '../layouts/Layout.astro';
 <div class="hero">
   <p class="hero-eyebrow">Sports Photography · Valdosta, Georgia</p>
   <h1 class="hero-title">Zachary Routsong<br/>Photography</h1>
-  <p class="hero-sub">Capturing action, celebrations, and the moments in between. Affordable packages, fast turnaround, delivered via private gallery.</p>
+  <p class="hero-sub">Sharp edits. Private galleries. Straightforward pricing. Built for athletes and families who want real photos, not just highlights.</p>
   <a href="/book" class="btn">Book a session</a>
 </div>
 
@@ -215,20 +225,22 @@ import Layout from '../layouts/Layout.astro';
 <div class="section" id="about" style="padding-top: 64px">
   <div class="sec-label">about</div>
   <div class="about-grid">
-    <div class="about-text">
-      <h2>About Zachary</h2>
-      <p>Based in Valdosta, Georgia, Zachary has spent the last year building a reputation for capturing the moments that matter most — the big plays, the celebrations, and everything in between.</p>
-      <p>What started as a passion quickly turned into a craft. Over the past year Zachary has sharpened his eye for action photography and developed a strong hand for post-processing — delivering clean, polished edits that look great on your wall or your feed.</p>
-      <p>Fast turnaround, affordable pricing, and photos delivered via private gallery link.</p>
-      <div style="margin-top: 22px">
-        <a href="/book" class="btn">Book your event</a>
+    <img src="/zachary.jpg" alt="Zachary Routsong" class="about-photo"/>
+    <div>
+      <div class="about-text">
+        <h2>Zachary Routsong</h2>
+        <p>Based in Valdosta, Georgia. I shoot sports — football, basketball, baseball, track, and everything in between. My focus is on delivering sharp, well-edited images that actually look like the moment felt.</p>
+        <p>Every shoot comes with a private online gallery, fast turnaround, and straightforward pricing. No fluff.</p>
+        <div style="margin-top: 22px; margin-bottom: 28px">
+          <a href="/book" class="btn">Book a session</a>
+        </div>
       </div>
-    </div>
-    <div class="stats">
-      <div class="stat"><div class="stat-n">$40</div><div class="stat-l">Starting price</div></div>
-      <div class="stat"><div class="stat-n">5–7</div><div class="stat-l">Day turnaround</div></div>
-      <div class="stat"><div class="stat-n">25+</div><div class="stat-l">Edited photos</div></div>
-      <div class="stat"><div class="stat-n">All</div><div class="stat-l">Sports covered</div></div>
+      <div class="stats">
+        <div class="stat"><div class="stat-n">$40</div><div class="stat-l">Starting price</div></div>
+        <div class="stat"><div class="stat-n">5–7</div><div class="stat-l">Day turnaround</div></div>
+        <div class="stat"><div class="stat-n">25+</div><div class="stat-l">Edited photos</div></div>
+        <div class="stat"><div class="stat-n">All</div><div class="stat-l">Sports covered</div></div>
+      </div>
     </div>
   </div>
 </div>

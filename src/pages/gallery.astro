@@ -236,8 +236,9 @@ function renderGallery() {
 
 function openLB(url, filename) {
   document.getElementById('lb-img').src = url;
-  document.getElementById('lb-dl').href = url;
-  document.getElementById('lb-dl').download = filename || 'photo.jpg';
+  // Route download through watermark function
+  const dlBtn = document.getElementById('lb-dl');
+  dlBtn.onclick = (e) => { e.preventDefault(); downloadPhoto(url, filename); };
   document.getElementById('lb').classList.add('open');
 }
 window.openLB = openLB;
@@ -255,10 +256,50 @@ async function downloadPhoto(url, filename) {
   try {
     const resp = await fetch(url);
     const blob = await resp.blob();
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = filename || 'photo.jpg';
-    a.click();
+
+    if (!isWatermarked) {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = filename || 'photo.jpg';
+      a.click();
+      return;
+    }
+
+    // Burn watermark into the image via canvas
+    const blobUrl = URL.createObjectURL(blob);
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width  = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext('2d');
+
+      // Draw original photo
+      ctx.drawImage(img, 0, 0);
+
+      // Watermark text sizing — scales with image
+      const size = Math.round(Math.min(img.naturalWidth, img.naturalHeight) * 0.022);
+      const pad  = Math.round(size * 1.1);
+
+      ctx.font         = `500 ${size}px "DM Mono", monospace`;
+      ctx.textAlign    = 'right';
+      ctx.textBaseline = 'bottom';
+
+      // Subtle shadow for legibility on any background
+      ctx.shadowColor  = 'rgba(0,0,0,0.55)';
+      ctx.shadowBlur   = size * 0.6;
+      ctx.fillStyle    = 'rgba(255,255,255,0.72)';
+      ctx.fillText('© zacharyroutsongphotography.com', canvas.width - pad, canvas.height - pad);
+
+      URL.revokeObjectURL(blobUrl);
+      canvas.toBlob(out => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(out);
+        a.download = filename || 'photo.jpg';
+        a.click();
+      }, 'image/jpeg', 0.94);
+    };
+    img.src = blobUrl;
   } catch(err) { window.open(url, '_blank'); }
 }
 window.downloadPhoto = downloadPhoto;

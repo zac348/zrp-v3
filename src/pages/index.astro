@@ -236,7 +236,7 @@ import Layout from '../layouts/Layout.astro';
         </div>
       </div>
       <div class="stats">
-        <div class="stat"><div class="stat-n">$40</div><div class="stat-l">Starting price</div></div>
+        <div class="stat"><div class="stat-n" id="stat-starting-price">$40</div><div class="stat-l">Starting price</div></div>
         <div class="stat"><div class="stat-n">5–7</div><div class="stat-l">Day turnaround</div></div>
         <div class="stat"><div class="stat-n">25+</div><div class="stat-l">Edited photos</div></div>
         <div class="stat"><div class="stat-n">All</div><div class="stat-l">Sports covered</div></div>
@@ -364,6 +364,18 @@ window.closeLB = closeLB;
 
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLB(); });
 
+async function loadStartingPrice() {
+  try {
+    const { data } = await sb.from('package_pricing').select('base_price, sale_price, on_sale').eq('available', true);
+    if (!data?.length) return;
+    const lowest = Math.min(...data.map(p => (p.on_sale && p.sale_price) ? p.sale_price : p.base_price));
+    if (isFinite(lowest)) {
+      document.getElementById('stat-starting-price').textContent = '$' + lowest;
+    }
+  } catch(e) {}
+}
+
 loadPortfolio();
+loadStartingPrice();
 </script>
 </Layout>

@@ -213,7 +213,7 @@ html,body { height: 100% }
 .cal-day.unavailable { background: var(--red-bg); color: var(--red) }
 .cal-day.partial     { background: var(--amber-bg); color: var(--amber) }
 .cal-day.available   { background: var(--green-bg); color: var(--green) }
-.cal-day.bulk-sel    { outline: 2px solid var(--text); outline-offset: -2px; background: var(--surface-dim) }
+.cal-day.bulk-sel    { outline: 2px solid var(--text) !important; outline-offset: -2px; background: var(--surface-dim) !important; color: var(--text) !important }
 
 .bulk-bar {
   display: none;
@@ -944,6 +944,9 @@ function renderGalleries() {
         <p>${photoCount} photo${photoCount!==1?'s':''} · ${g.slug}</p>
       </div>
       <div class="gal-actions">
+        <button class="btn-sm ${g.watermarked ? 'on-amber' : ''}" onclick="toggleWatermark('${g.id}',${!!g.watermarked})" title="Toggle watermark">
+          ${g.watermarked ? '◆ Watermark on' : '◇ Watermark off'}
+        </button>
         <button class="btn-sm" onclick="copyLink('${link}')">Copy link</button>
         <a class="btn-sm" href="/gallery?g=${g.slug}" target="_blank">Preview</a>
         <button class="btn-sm red" onclick="deleteGallery('${g.id}','${g.name}')">Delete</button>
@@ -951,6 +954,13 @@ function renderGalleries() {
     </div>`;
   }).join('');
 }
+
+async function toggleWatermark(id, current) {
+  await sb.from('client_galleries').update({ watermarked: !current }).eq('id', id);
+  await loadGalleries();
+  toast('Watermark ' + (!current ? 'enabled' : 'disabled'));
+}
+window.toggleWatermark = toggleWatermark;
 
 async function createGallery() {
   const name = document.getElementById('new-gal-name').value.trim();

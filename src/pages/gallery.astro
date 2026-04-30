@@ -87,6 +87,22 @@ import Layout from '../layouts/Layout.astro';
 }
 .dl-btn:hover { background: rgba(0,0,0,.7) }
 
+.wm-badge {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .06em;
+  color: rgba(255,255,255,.75);
+  background: rgba(0,0,0,.45);
+  padding: 3px 8px;
+  border-radius: 3px;
+  pointer-events: none;
+  user-select: none;
+  backdrop-filter: blur(2px);
+}
+
 .not-found {
   text-align: center;
   padding: 80px 24px;
@@ -154,7 +170,7 @@ const sb = createClient(
   import.meta.env.PUBLIC_SUPABASE_ANON_KEY
 );
 
-let galleryPhotos = [];
+let galleryPhotos = [], isWatermarked = false;
 
 async function loadGallery() {
   const slug = new URLSearchParams(window.location.search).get('g');
@@ -182,7 +198,8 @@ async function loadGallery() {
   document.getElementById('gallery-meta').innerHTML =
     `<strong>${galleryPhotos.length}</strong> photo${galleryPhotos.length !== 1 ? 's' : ''}`;
 
-  if (gallery.watermarked) {
+  isWatermarked = !!gallery.watermarked;
+  if (isWatermarked) {
     document.getElementById('watermark-notice').style.display = 'block';
   }
 
@@ -210,7 +227,8 @@ function renderGallery() {
       <img src="${p.url}" alt="Photo ${i+1}" loading="lazy"/>
       <div class="gal-item-overlay">
         <button class="dl-btn" onclick="event.stopPropagation();downloadPhoto('${p.url}','${p.file_name}')">Download</button>
-      </div>`;
+      </div>
+      ${isWatermarked ? '<div class="wm-badge">© zacharyroutsongphotography.com</div>' : ''}`;
     el.addEventListener('click', () => openLB(p.url, p.file_name));
     grid.appendChild(el);
   });

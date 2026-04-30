@@ -162,7 +162,7 @@ import Layout from '../layouts/Layout.astro';
   <button class="lb-close" onclick="closeLB()">×</button>
   <div style="position:relative;display:inline-block;max-width:90vw;max-height:80vh">
     <img id="lb-img" src="" alt="" style="max-width:90vw;max-height:80vh;object-fit:contain;border-radius:var(--radius);display:block"/>
-    <div id="lb-wm" style="display:none;position:absolute;bottom:10px;right:10px;font-family:Arial,sans-serif;font-size:13px;font-weight:bold;color:rgba(255,255,255,0.88);text-shadow:0 0 4px rgba(0,0,0,0.9),0 1px 3px rgba(0,0,0,0.8);pointer-events:none;user-select:none">Copyright – Zachary R.</div>
+    <div id="lb-wm" style="display:none;position:absolute;inset:0;pointer-events:none;user-select:none;overflow:hidden"></div>
   </div>
   <button class="lb-dl" id="lb-dl">Download photo</button>
 </div>
@@ -240,8 +240,39 @@ function renderGallery() {
 
 function openLB(url, filename) {
   document.getElementById('lb-img').src = url;
-  document.getElementById('lb-wm').style.display = isWatermarked ? 'block' : 'none';
   document.getElementById('lb-dl').onclick = function() { downloadPhoto(url, filename); };
+
+  const wmDiv = document.getElementById('lb-wm');
+  if (isWatermarked) {
+    // Build tiled watermark grid matching the canvas pattern
+    wmDiv.innerHTML = '';
+    // 4 cols × 5 rows of staggered labels covers any crop
+    const rows = 5, cols = 4;
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const span = document.createElement('span');
+        const offsetX = (r % 2 === 0 ? 0 : 12);
+        span.textContent = 'Copyright – Zachary R.';
+        span.style.cssText = [
+          'position:absolute',
+          'font-family:Arial,sans-serif',
+          'font-size:clamp(10px,1.2vw,14px)',
+          'font-weight:bold',
+          'color:rgba(255,255,255,0.42)',
+          'text-shadow:0 1px 3px rgba(0,0,0,0.75)',
+          'white-space:nowrap',
+          'transform:rotate(-25deg)',
+          'left:' + (c * 26 + offsetX) + '%',
+          'top:'  + (r * 22 - 5)       + '%',
+        ].join(';');
+        wmDiv.appendChild(span);
+      }
+    }
+    wmDiv.style.display = 'block';
+  } else {
+    wmDiv.style.display = 'none';
+  }
+
   document.getElementById('lb').classList.add('open');
 }
 window.openLB = openLB;

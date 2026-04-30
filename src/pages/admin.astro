@@ -1067,19 +1067,44 @@ function bookingCard(b) {
 }
 
 async function acceptBooking(id, name) {
-  if (!confirm('Accept booking for ' + name + ' and email them a confirm link?')) return;
+  if (!confirm('Accept booking for ' + name + '?\n\nThis will update their status and email them a link to complete their booking.')) return;
+
+  // Step 1: update DB via Supabase (browser already has creds — reliable)
+  const { data: updated, error } = await sb
+    .from('bookings')
+    .update({ status: 'accepted' })
+    .eq('id', id)
+    .select('*')
+    .single();
+
+  if (error) { toast('DB error: ' + error.message); return; }
+
+  await loadBookings();
+  toast('Accepted ✓');
+
+  // Step 2: send email via function (only needs RESEND_API_KEY)
   try {
     const res = await fetch('/api/accept-booking', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ bookingId: id }),
+      body: JSON.stringify({
+        email:   updated.email,
+        name:    [updated.first_name, updated.last_name].filter(Boolean).join(' '),
+        token:   updated.token,
+        booking: {
+          event_date:       updated.event_date,
+          sport_type:       updated.sport_type,
+          package_selected: updated.package_selected,
+          total:            updated.total,
+        },
+      }),
     });
-    const data = await res.json();
-    if (!data.ok) throw new Error(data.error || 'Unknown error');
-    await loadBookings();
-    toast('Accepted — confirm email sent to client');
+    const d = await res.json();
+    if (d.emailSent) toast('Email sent to ' + updated.email);
+    else toast('Accepted — email not sent (check RESEND_API_KEY)');
   } catch(e) {
-    toast('Error: ' + e.message); console.error(e);
+    toast('Accepted — email failed: ' + e.message);
+    console.error('Email error:', e);
   }
 }
 window.acceptBooking = acceptBooking;

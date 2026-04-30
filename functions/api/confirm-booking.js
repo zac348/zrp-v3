@@ -1,8 +1,15 @@
 /**
  * POST /api/confirm-booking
- * Body: { token, venueAddress, addons: [{name, price}], notes }
+ * Body: { email, name, ztn, booking, venueAddress, addons, finalTotal, deposit, balance }
  *
- * Creates the ZTN number, auto-creates client gallery, sends confirmation emails.
+ * DB updates happen in the browser (confirm.astro) via Supabase JS client.
+ * This function ONLY sends Resend emails.
+ *
+ * Cloudflare Pages env vars required:
+ *   RESEND_API_KEY
+ *   SITE_URL        — https://zrphotos.net
+ *   FROM_EMAIL      — optional
+ *   ZACHARY_EMAIL   — optional, for admin notification
  */
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -11,126 +18,46 @@ export async function onRequestPost(context) {
   try { body = await request.json(); }
   catch { return Response.json({ error: 'Invalid JSON' }, { status: 400 }); }
 
-  const { token, venueAddress, addons, notes } = body;
-  if (!token) return Response.json({ error: 'token required' }, { status: 400 });
+  const { email, name, ztn, booking, venueAddress, addons, finalTotal, deposit, balance } = body;
 
-  const SB_URL = env.PUBLIC_SUPABASE_URL;
-  const SB_KEY = env.PUBLIC_SUPABASE_ANON_KEY;
-  const hdrs = {
-    'apikey': SB_KEY,
-    'Authorization': 'Bearer ' + SB_KEY,
-    'Content-Type': 'application/json',
-  };
-
-  // Get booking by token
-  const getRes = await fetch(
-    `${SB_URL}/rest/v1/bookings?token=eq.${encodeURIComponent(token)}&select=*`,
-    { headers: hdrs }
-  );
-  const rows = await getRes.json();
-  if (!rows?.length) return Response.json({ error: 'Invalid or expired link' }, { status: 404 });
-  const booking = rows[0];
-
-  if (booking.status === 'confirmed' || booking.status === 'delivered') {
-    return Response.json({ ok: true, ztn: booking.ztn_number, alreadyConfirmed: true });
-  }
-  if (booking.status !== 'accepted') {
-    return Response.json({ error: 'This booking has not been accepted yet' }, { status: 400 });
+  if (!env.RESEND_API_KEY) {
+    return Response.json({ ok: true, emailSent: false });
   }
 
-  // Get next sequential booking number
-  const rpcRes = await fetch(`${SB_URL}/rest/v1/rpc/next_booking_number`, {
-    method: 'POST',
-    headers: { ...hdrs, 'Prefer': 'return=representation' },
-    body: '{}',
-  });
-  const num = await rpcRes.json();
-  const ztn = 'ZTN-' + String(num).padStart(3, '0');
-
-  // Compute totals
+  const siteUrl = (env.SITE_URL || 'https://zrphotos.net').replace(/\/$/, '');
+  const invoiceUrl = `${siteUrl}/invoice?ztn=${ztn}`;
+  const from = env.FROM_EMAIL || 'ZRP <onboarding@resend.dev>';
   const parsedAddons = Array.isArray(addons) ? addons : [];
-  const addonTotal = parsedAddons.reduce((s, a) => s + (parseFloat(a.price) || 0), 0);
-  const baseTotal = parseFloat((booking.total || '$0').replace('$', '')) || 0;
-  const finalTotal = baseTotal + addonTotal;
-  const deposit = Math.round(finalTotal * 50) / 100;
-  const balance = finalTotal - deposit;
 
-  // Auto-create gallery
-  const clientName = [booking.first_name, booking.last_name].filter(Boolean).join(' ');
-  const galleryName = [clientName, booking.sport_type, booking.event_date].filter(Boolean).join(' — ');
-  const gallerySlug = ztn.toLowerCase(); // "ztn-001"
-
-  let galleryId = null;
-  try {
-    const galRes = await fetch(`${SB_URL}/rest/v1/client_galleries`, {
+  // Client confirmation email
+  if (email) {
+    await fetch('https://api.resend.com/emails', {
       method: 'POST',
-      headers: { ...hdrs, 'Prefer': 'return=representation' },
-      body: JSON.stringify({ name: galleryName, slug: gallerySlug, watermarked: false }),
-    });
-    const gals = await galRes.json();
-    galleryId = gals?.[0]?.id || null;
-  } catch (_) {}
-
-  // Build combined notes
-  const combinedNotes = [booking.notes, notes].filter(Boolean).join(' | ') || null;
-  const addonsText = parsedAddons.length
-    ? parsedAddons.map(a => a.name + ' +$' + parseFloat(a.price).toFixed(2)).join(', ')
-    : null;
-
-  // Update booking to confirmed
-  await fetch(`${SB_URL}/rest/v1/bookings?id=eq.${encodeURIComponent(booking.id)}`, {
-    method: 'PATCH',
-    headers: { ...hdrs, 'Prefer': 'return=minimal' },
-    body: JSON.stringify({
-      status: 'confirmed',
-      ztn_number: ztn,
-      venue_address: venueAddress || booking.event_location || null,
-      addons_selected: addonsText,
-      total: '$' + finalTotal.toFixed(2),
-      deposit: '$' + deposit.toFixed(2),
-      notes: combinedNotes,
-      confirmed_at: new Date().toISOString(),
-      gallery_id: galleryId,
-    }),
-  });
-
-  // Emails
-  if (env.RESEND_API_KEY) {
-    const siteUrl = (env.SITE_URL || 'https://zrphotos.net').replace(/\/$/, '');
-    const invoiceUrl = `${siteUrl}/invoice?ztn=${ztn}`;
-    const from = env.FROM_EMAIL || 'ZRP <onboarding@resend.dev>';
-    const name = clientName || 'there';
-
-    // Client confirmation
-    if (booking.email) {
-      await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: { 'Authorization': 'Bearer ' + env.RESEND_API_KEY, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          from,
-          to: booking.email,
-          subject: `Booking confirmed — ${ztn}`,
-          html: confirmEmail(name, booking, ztn, venueAddress, parsedAddons, finalTotal, deposit, balance, invoiceUrl),
-        }),
-      }).catch(() => {});
-    }
-
-    // Zachary notification
-    if (env.ZACHARY_EMAIL) {
-      await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: { 'Authorization': 'Bearer ' + env.RESEND_API_KEY, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          from,
-          to: env.ZACHARY_EMAIL,
-          subject: `New confirmed booking — ${ztn} — ${clientName}`,
-          html: zachEmail(clientName, booking, ztn, venueAddress, parsedAddons, finalTotal),
-        }),
-      }).catch(() => {});
-    }
+      headers: { 'Authorization': 'Bearer ' + env.RESEND_API_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from,
+        to: email,
+        subject: `Booking confirmed — ${ztn}`,
+        html: confirmEmail(name || 'there', booking || {}, ztn, venueAddress, parsedAddons, finalTotal, deposit, balance, invoiceUrl),
+      }),
+    }).catch(e => console.error('client email error:', e));
   }
 
-  return Response.json({ ok: true, ztn, gallerySlug });
+  // Zachary notification
+  if (env.ZACHARY_EMAIL) {
+    await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + env.RESEND_API_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from,
+        to: env.ZACHARY_EMAIL,
+        subject: `New confirmed booking — ${ztn} — ${name}`,
+        html: zachEmail(name, email, booking || {}, ztn, venueAddress, parsedAddons, finalTotal),
+      }),
+    }).catch(e => console.error('zach email error:', e));
+  }
+
+  return Response.json({ ok: true, emailSent: true });
 }
 
 function confirmEmail(name, b, ztn, venue, addons, total, deposit, balance, invoiceUrl) {
@@ -141,9 +68,9 @@ function confirmEmail(name, b, ztn, venue, addons, total, deposit, balance, invo
     venue        && ['Venue', venue],
     b.package_selected && ['Package', b.package_selected],
     addons.length && ['Add-ons', addons.map(a => a.name).join(', ')],
-    ['Total', '$' + total.toFixed(2)],
-    ['Deposit due', '$' + deposit.toFixed(2)],
-    ['Balance due day of event', '$' + balance.toFixed(2)],
+    total  != null && ['Total', '$' + Number(total).toFixed(2)],
+    deposit != null && ['Deposit due', '$' + Number(deposit).toFixed(2)],
+    balance != null && ['Balance due day of event', '$' + Number(balance).toFixed(2)],
   ].filter(Boolean);
 
   return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
@@ -157,23 +84,23 @@ function confirmEmail(name, b, ztn, venue, addons, total, deposit, balance, invo
     ${rows.map(([k,v]) => `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e8e7e6;font-size:12px"><span style="color:#999">${k}</span><span style="font-weight:500">${v}</span></div>`).join('')}
   </div>
   <a href="${invoiceUrl}" style="display:inline-block;background:#1a1918;color:#fff;text-decoration:none;font-size:14px;font-weight:500;padding:13px 28px;border-radius:6px;margin-bottom:28px">View invoice →</a>
-  <p style="font-size:11px;color:#bbb;line-height:1.7;margin:0">Your booking number is <strong style="color:#999">${ztn}</strong>. Your private gallery will be delivered within 5–7 days after the event.</p>
+  <p style="font-size:11px;color:#bbb;line-height:1.7;margin:0">Your booking number is <strong style="color:#999">${ztn}</strong>. Your gallery will be delivered within 5–7 days after the event.</p>
 </div>
 </body></html>`;
 }
 
-function zachEmail(clientName, b, ztn, venue, addons, total) {
+function zachEmail(name, email, b, ztn, venue, addons, total) {
   const rows = [
-    ['Client', clientName || '—'],
-    ['Email', b.email || '—'],
-    b.phone && ['Phone', b.phone],
-    b.event_date && ['Date', b.event_date],
-    b.event_time && ['Time', b.event_time],
-    b.sport_type && ['Sport', b.sport_type],
-    venue && ['Venue', venue],
+    ['Client', name || '—'],
+    ['Email',  email || '—'],
+    b.phone      && ['Phone',   b.phone],
+    b.event_date && ['Date',    b.event_date],
+    b.event_time && ['Time',    b.event_time],
+    b.sport_type && ['Sport',   b.sport_type],
+    venue        && ['Venue',   venue],
     b.package_selected && ['Package', b.package_selected],
-    addons.length && ['Add-ons', addons.map(a => a.name + ' +$' + parseFloat(a.price).toFixed(2)).join(', ')],
-    ['Total', '$' + total.toFixed(2)],
+    addons.length && ['Add-ons', addons.map(a => a.name + ' +$' + Number(a.price).toFixed(2)).join(', ')],
+    total != null && ['Total',  '$' + Number(total).toFixed(2)],
   ].filter(Boolean);
 
   return `<!DOCTYPE html><html><head><meta charset="utf-8"></head>

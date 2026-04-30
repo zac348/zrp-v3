@@ -1,13 +1,14 @@
 /**
  * POST /api/accept-booking
- * Body: { bookingId: string }
+ * Body: { email, name, token, booking (object with date/sport/package/total) }
+ *
+ * The DB update happens in admin JS (browser already has Supabase).
+ * This function ONLY sends the Resend email.
  *
  * Cloudflare Pages env vars required:
- *   PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY
- *   RESEND_API_KEY   — from resend.com
- *   FROM_EMAIL       — e.g. "ZRP <bookings@yourdomain.com>"
- *   SITE_URL         — e.g. "https://zacharyroutsongphotography.com"
- *   ZACHARY_EMAIL    — your email for notifications
+ *   RESEND_API_KEY  — from resend.com (free tier)
+ *   SITE_URL        — https://zrphotos.net
+ *   FROM_EMAIL      — optional, e.g. "ZRP <bookings@zrphotos.net>"
  */
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -16,61 +17,44 @@ export async function onRequestPost(context) {
   try { body = await request.json(); }
   catch { return Response.json({ error: 'Invalid JSON' }, { status: 400 }); }
 
-  const { bookingId } = body;
-  if (!bookingId) return Response.json({ error: 'bookingId required' }, { status: 400 });
+  const { email, name, token, booking } = body;
+  if (!email || !token) return Response.json({ error: 'email and token required' }, { status: 400 });
 
-  const SB_URL = env.PUBLIC_SUPABASE_URL;
-  const SB_KEY = env.PUBLIC_SUPABASE_ANON_KEY;
-  const hdrs = {
-    'apikey': SB_KEY,
-    'Authorization': 'Bearer ' + SB_KEY,
-    'Content-Type': 'application/json',
-  };
-
-  // Fetch booking
-  const getRes = await fetch(
-    `${SB_URL}/rest/v1/bookings?id=eq.${encodeURIComponent(bookingId)}&select=*`,
-    { headers: hdrs }
-  );
-  const rows = await getRes.json();
-  if (!rows?.length) return Response.json({ error: 'Booking not found' }, { status: 404 });
-  const booking = rows[0];
-
-  // Update status to accepted
-  await fetch(`${SB_URL}/rest/v1/bookings?id=eq.${encodeURIComponent(bookingId)}`, {
-    method: 'PATCH',
-    headers: { ...hdrs, 'Prefer': 'return=minimal' },
-    body: JSON.stringify({ status: 'accepted' }),
-  });
-
-  // Send email if Resend configured
-  if (env.RESEND_API_KEY && booking.email) {
-    const siteUrl = (env.SITE_URL || 'https://zrphotos.net').replace(/\/$/, '');
-    const confirmUrl = `${siteUrl}/confirm?token=${booking.token}`;
-    const name = [booking.first_name, booking.last_name].filter(Boolean).join(' ') || 'there';
-    const from = env.FROM_EMAIL || 'ZRP <onboarding@resend.dev>';
-
-    await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + env.RESEND_API_KEY, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        from,
-        to: booking.email,
-        subject: 'Your booking was accepted — finish setting it up',
-        html: acceptEmail(name, booking, confirmUrl),
-      }),
-    }).catch(() => {}); // don't fail the request if email fails
+  if (!env.RESEND_API_KEY) {
+    // Email not configured — still return ok so DB update in admin JS already happened
+    return Response.json({ ok: true, emailSent: false });
   }
 
-  return Response.json({ ok: true });
+  const siteUrl = (env.SITE_URL || 'https://zrphotos.net').replace(/\/$/, '');
+  const confirmUrl = `${siteUrl}/confirm?token=${token}`;
+  const from = env.FROM_EMAIL || 'ZRP <onboarding@resend.dev>';
+
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + env.RESEND_API_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      from,
+      to: email,
+      subject: 'Your booking was accepted — finish setting it up',
+      html: acceptEmail(name || 'there', booking || {}, confirmUrl),
+    }),
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    console.error('Resend error:', err);
+    return Response.json({ ok: true, emailSent: false, resendError: err });
+  }
+
+  return Response.json({ ok: true, emailSent: true });
 }
 
 function acceptEmail(name, b, confirmUrl) {
   const rows = [
-    b.event_date      && ['Date',    b.event_date],
-    b.sport_type      && ['Sport',   b.sport_type],
+    b.event_date       && ['Date',    b.event_date],
+    b.sport_type       && ['Sport',   b.sport_type],
     b.package_selected && ['Package', b.package_selected],
-    b.total           && ['Total',   b.total],
+    b.total            && ['Total',   b.total],
   ].filter(Boolean);
 
   return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
@@ -83,7 +67,7 @@ function acceptEmail(name, b, confirmUrl) {
     ${rows.map(([k,v]) => `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #e8e7e6;font-size:12px"><span style="color:#999">${k}</span><span style="font-weight:500">${v}</span></div>`).join('')}
   </div>` : ''}
   <a href="${confirmUrl}" style="display:inline-block;background:#1a1918;color:#fff;text-decoration:none;font-size:14px;font-weight:500;padding:13px 28px;border-radius:6px;margin-bottom:28px">Complete your booking →</a>
-  <p style="font-size:11px;color:#bbb;line-height:1.7;margin:0">This link is private and unique to your booking. If you have questions reply to this email or reach Zachary directly.</p>
+  <p style="font-size:11px;color:#bbb;line-height:1.7;margin:0">This link is private. If you have questions reach Zachary directly at <a href="https://zrphotos.net" style="color:#999">zrphotos.net</a>.</p>
 </div>
 </body></html>`;
 }

@@ -382,16 +382,67 @@ document.getElementById('confirm-form').addEventListener('submit', async functio
   addons.forEach(a => allAddons.push(a));
 
   try {
-    const res = await fetch('/api/confirm-booking', {
+    // ── Step 1: get next ZTN number ──
+    const { data: numData, error: numErr } = await sb.rpc('next_booking_number');
+    if (numErr) throw new Error('Could not generate booking number: ' + numErr.message);
+    const ztn = 'ZTN-' + String(numData).padStart(3, '0');
+
+    // ── Step 2: compute totals ──
+    const basePkg  = parseFloat((booking.total || '$0').replace('$', '')) || 0;
+    const addonSum = allAddons.reduce((s, a) => s + parseFloat(a.price), 0);
+    const finalTotal = basePkg + addonSum;
+    const deposit    = Math.round(finalTotal * 50) / 100;
+    const balance    = finalTotal - deposit;
+
+    // ── Step 3: auto-create gallery ──
+    const clientName  = [booking.first_name, booking.last_name].filter(Boolean).join(' ');
+    const galleryName = [clientName, booking.sport_type, booking.event_date].filter(Boolean).join(' — ');
+    let galleryId = null;
+    const { data: gal } = await sb
+      .from('client_galleries')
+      .insert({ name: galleryName, slug: ztn.toLowerCase(), watermarked: false })
+      .select('id')
+      .single();
+    if (gal) galleryId = gal.id;
+
+    // ── Step 4: update booking in Supabase ──
+    const combinedNotes = [booking.notes, notes].filter(Boolean).join(' | ') || null;
+    const { error: upErr } = await sb
+      .from('bookings')
+      .update({
+        status:          'confirmed',
+        ztn_number:      ztn,
+        venue_address:   venue || null,
+        addons_selected: allAddons.length ? allAddons.map(a => a.name + ' +$' + parseFloat(a.price).toFixed(2)).join(', ') : null,
+        total:           '$' + finalTotal.toFixed(2),
+        deposit:         '$' + deposit.toFixed(2),
+        notes:           combinedNotes,
+        confirmed_at:    new Date().toISOString(),
+        gallery_id:      galleryId,
+      })
+      .eq('token', token);
+
+    if (upErr) throw new Error('Could not save booking: ' + upErr.message);
+
+    // ── Step 5: send emails via function ──
+    fetch('/api/confirm-booking', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token, venueAddress: venue, addons: allAddons, notes: notes || null }),
-    });
-    const data = await res.json();
-    if (!data.ok) throw new Error(data.error || 'Server error');
+      body: JSON.stringify({
+        email:        booking.email,
+        name:         clientName,
+        ztn,
+        booking,
+        venueAddress: venue || null,
+        addons:       allAddons,
+        finalTotal,
+        deposit,
+        balance,
+      }),
+    }).catch(() => {});
 
     document.getElementById('confirm-form').style.display = 'none';
-    document.getElementById('success-ztn').textContent = data.ztn;
+    document.getElementById('success-ztn').textContent = ztn;
     document.getElementById('submit-success').style.display = 'block';
   } catch(err) {
     btn.disabled = false; btn.textContent = 'Confirm my booking';

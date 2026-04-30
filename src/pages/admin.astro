@@ -1101,7 +1101,7 @@ async function acceptBooking(id, name) {
     });
     const d = await res.json();
     if (d.emailSent) toast('Email sent to ' + updated.email);
-    else toast('Accepted — email not sent (check RESEND_API_KEY)');
+    else toast('Email not sent: ' + (d.debug || d.resendError || 'unknown — check Cloudflare env vars'));
   } catch(e) {
     toast('Accepted — email failed: ' + e.message);
     console.error('Email error:', e);

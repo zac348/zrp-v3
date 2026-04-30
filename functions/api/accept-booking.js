@@ -21,8 +21,7 @@ export async function onRequestPost(context) {
   if (!email || !token) return Response.json({ error: 'email and token required' }, { status: 400 });
 
   if (!env.RESEND_API_KEY) {
-    // Email not configured — still return ok so DB update in admin JS already happened
-    return Response.json({ ok: true, emailSent: false });
+    return Response.json({ ok: true, emailSent: false, debug: 'RESEND_API_KEY not set in Cloudflare env vars' });
   }
 
   const siteUrl = (env.SITE_URL || 'https://zrphotos.net').replace(/\/$/, '');

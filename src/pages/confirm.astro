@@ -280,7 +280,7 @@ async function init() {
   const { data, error } = await sb
     .from('bookings')
     .select('*')
-    .eq('token', token)
+    .eq('id', token)
     .single();
 
   hide('loading-state');
@@ -420,7 +420,7 @@ document.getElementById('confirm-form').addEventListener('submit', async functio
         confirmed_at:    new Date().toISOString(),
         gallery_id:      galleryId,
       })
-      .eq('token', token);
+      .eq('id', token);
 
     if (upErr) throw new Error('Could not save booking: ' + upErr.message);
 

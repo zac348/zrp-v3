@@ -1069,13 +1069,15 @@ function bookingCard(b) {
 async function acceptBooking(id, name) {
   if (!confirm('Accept booking for ' + name + '?\n\nThis will update their status and email them a link to complete their booking.')) return;
 
-  // Step 1: update status
-  const { error: upErr } = await sb.from('bookings').update({ status: 'accepted' }).eq('id', id);
-  if (upErr) { toast('DB error: ' + upErr.message); return; }
-
-  // Step 2: fresh read to get the actual token stored in DB
+  // Step 1: read booking first
   const { data: booking, error: getErr } = await sb.from('bookings').select('*').eq('id', id).single();
-  if (getErr || !booking) { toast('Could not read booking after update'); return; }
+  if (getErr || !booking) { toast('Could not read booking'); return; }
+
+  // Step 2: generate token ourselves and write it along with status
+  const token = crypto.randomUUID();
+  const { error: upErr } = await sb.from('bookings').update({ status: 'accepted', token }).eq('id', id);
+  if (upErr) { toast('DB error: ' + upErr.message); return; }
+  booking.token = token; // use the token we just wrote
 
   await loadBookings();
   toast('Accepted ✓');

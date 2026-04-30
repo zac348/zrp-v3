@@ -252,56 +252,99 @@ window.closeLB = closeLB;
 
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLB(); });
 
-function burnWatermark(blob) {
+// Fetch image as blob — tries normal fetch first, falls back to no-cors
+// (no-cors gives an opaque blob but it still contains the image bytes,
+//  and loading it via blob URL keeps the canvas un-tainted so toBlob works)
+async function fetchImageBlob(url) {
+  try {
+    const r = await fetch(url);
+    if (!r.ok) throw new Error('status ' + r.status);
+    return await r.blob();
+  } catch(_) {
+    const r = await fetch(url, { mode: 'no-cors' });
+    return await r.blob();
+  }
+}
+
+// Draw image blob onto a canvas, stamp watermark, return new JPEG blob
+function stampWatermark(blob) {
   return new Promise((resolve, reject) => {
-    const blobUrl = URL.createObjectURL(blob);
+    const src = URL.createObjectURL(blob);
     const img = new Image();
-    img.onload = () => {
-      try {
-        const canvas = document.createElement('canvas');
-        canvas.width  = img.naturalWidth;
-        canvas.height = img.naturalHeight;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0);
-        URL.revokeObjectURL(blobUrl);
 
-        // Scale text to ~2% of shortest side
-        const size = Math.max(20, Math.round(Math.min(canvas.width, canvas.height) * 0.022));
-        const pad  = Math.round(size * 1.2);
+    img.onload = function() {
+      const W = img.naturalWidth;
+      const H = img.naturalHeight;
 
-        ctx.save();
-        ctx.font         = `${size}px monospace`;
-        ctx.textAlign    = 'right';
-        ctx.textBaseline = 'bottom';
-        ctx.shadowColor  = 'rgba(0,0,0,0.7)';
-        ctx.shadowBlur   = size * 0.8;
-        ctx.fillStyle    = 'rgba(255,255,255,0.78)';
-        ctx.fillText('© zacharyroutsongphotography.com', canvas.width - pad, canvas.height - pad);
-        ctx.restore();
+      if (!W || !H) {
+        URL.revokeObjectURL(src);
+        return reject(new Error('zero-size image'));
+      }
 
-        canvas.toBlob(out => out ? resolve(out) : reject(new Error('toBlob failed')), 'image/jpeg', 0.94);
-      } catch(e) { URL.revokeObjectURL(blobUrl); reject(e); }
+      const canvas = document.createElement('canvas');
+      canvas.width  = W;
+      canvas.height = H;
+      const ctx = canvas.getContext('2d');
+
+      // Draw original photo
+      ctx.drawImage(img, 0, 0, W, H);
+      URL.revokeObjectURL(src);
+
+      // Watermark — size scales with image, min 16px
+      const sz  = Math.max(16, Math.floor(Math.min(W, H) * 0.022));
+      const pad = sz;
+      const txt = '© zacharyroutsongphotography.com';
+
+      ctx.font         = 'bold ' + sz + 'px Arial, sans-serif';
+      ctx.textAlign    = 'right';
+      ctx.textBaseline = 'bottom';
+
+      // Dark stroke for legibility on any background
+      ctx.lineWidth   = Math.max(2, sz * 0.15);
+      ctx.lineJoin    = 'round';
+      ctx.strokeStyle = 'rgba(0,0,0,0.75)';
+      ctx.strokeText(txt, W - pad, H - pad);
+
+      // White fill
+      ctx.fillStyle = 'rgba(255,255,255,0.88)';
+      ctx.fillText(txt, W - pad, H - pad);
+
+      canvas.toBlob(function(out) {
+        if (out) resolve(out);
+        else reject(new Error('canvas.toBlob returned null'));
+      }, 'image/jpeg', 0.93);
     };
-    img.onerror = () => { URL.revokeObjectURL(blobUrl); reject(new Error('Image load failed')); };
-    img.src = blobUrl;
+
+    img.onerror = function() {
+      URL.revokeObjectURL(src);
+      reject(new Error('img.onerror fired'));
+    };
+
+    img.src = src;
   });
+}
+
+// Trigger a file download from a Blob
+function saveBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a   = document.createElement('a');
+  a.href     = url;
+  a.download = filename || 'photo.jpg';
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function() { URL.revokeObjectURL(url); }, 15000);
 }
 
 async function downloadPhoto(url, filename) {
   try {
-    const resp = await fetch(url);
-    let blob = await resp.blob();
-    if (isWatermarked) blob = await burnWatermark(blob);
-    const objectUrl = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href     = objectUrl;
-    a.download = filename || 'photo.jpg';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(() => URL.revokeObjectURL(objectUrl), 3000);
+    let blob = await fetchImageBlob(url);
+    if (isWatermarked) blob = await stampWatermark(blob);
+    saveBlob(blob, filename);
   } catch(err) {
-    console.error('Download error:', err);
+    console.error('downloadPhoto failed:', err);
+    // Last resort: open in new tab
     window.open(url, '_blank');
   }
 }

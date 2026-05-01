@@ -243,22 +243,30 @@ import Layout from '../layouts/Layout.astro';
 
         <hr class="divider" style="grid-column:1/-1"/>
 
+        <div class="field">
+          <label>Player last name (optional)</label>
+          <input type="text" id="f-player-name" placeholder="e.g. Smith"/>
+        </div>
+        <div class="field">
+          <label>Jersey # (optional)</label>
+          <input type="text" id="f-jersey" placeholder="e.g. 12"/>
+        </div>
+        <div class="field full">
+          <label>Position (optional)</label>
+          <input type="text" id="f-position" placeholder="e.g. Wide Receiver"/>
+        </div>
+
+        <hr class="divider" style="grid-column:1/-1"/>
+
         <div class="field full">
           <label>Additional notes (optional)</label>
-          <textarea id="f-notes" placeholder="Players to focus on, questions, anything else…"></textarea>
+          <textarea id="f-notes" placeholder="Questions, anything else…"></textarea>
         </div>
 
         <button type="submit" class="submit-btn" id="submit-btn">Confirm my booking</button>
       </div>
     </form>
 
-    <!-- Submitted -->
-    <div id="submit-success" style="display:none;text-align:center;padding:48px 24px;border:1px solid var(--border);border-radius:var(--radius-lg);margin-top:16px">
-      <div class="state-icon ok" style="display:flex"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-      <h2 style="font-size:18px;font-weight:400;margin-bottom:6px">Booking confirmed!</h2>
-      <p class="ztn-tag" id="success-ztn"></p>
-      <p style="font-size:13px;color:var(--text-3);line-height:1.7;max-width:360px;margin:0 auto">Check your email for the full invoice. Your gallery will be ready within 5–7 days after the event.</p>
-    </div>
   </div>
 </div>
 
@@ -379,6 +387,14 @@ document.getElementById('confirm-form').addEventListener('submit', async functio
   const token = new URLSearchParams(window.location.search).get('token');
   const venue = document.getElementById('f-venue').value.trim();
   const notes = document.getElementById('f-notes').value.trim();
+  const playerName = document.getElementById('f-player-name').value.trim();
+  const jersey    = document.getElementById('f-jersey').value.trim();
+  const position  = document.getElementById('f-position').value.trim();
+  const playerInfo = [
+    playerName && 'Player: ' + playerName,
+    jersey     && 'Jersey: #' + jersey,
+    position   && 'Position: ' + position,
+  ].filter(Boolean).join(', ');
 
   const allAddons = [];
   if (qPhotos > 0) allAddons.push({ name: 'Extra photos x' + qPhotos, price: qPhotos * 15 });
@@ -410,7 +426,7 @@ document.getElementById('confirm-form').addEventListener('submit', async functio
     if (gal) galleryId = gal.id;
 
     // ── Step 4: update booking in Supabase ──
-    const combinedNotes = [booking.notes, notes].filter(Boolean).join(' | ') || null;
+    const combinedNotes = [booking.notes, playerInfo, notes].filter(Boolean).join(' | ') || null;
     const { error: upErr } = await sb
       .from('bookings')
       .update({
@@ -445,9 +461,9 @@ document.getElementById('confirm-form').addEventListener('submit', async functio
       }),
     }).catch(() => {});
 
-    document.getElementById('confirm-form').style.display = 'none';
-    document.getElementById('success-ztn').textContent = ztn;
-    document.getElementById('submit-success').style.display = 'block';
+    document.getElementById('form-state').style.display = 'none';
+    document.getElementById('cs-ztn').textContent = ztn;
+    show('confirmed-state');
   } catch(err) {
     btn.disabled = false; btn.textContent = 'Confirm my booking';
     alert('Something went wrong: ' + err.message);

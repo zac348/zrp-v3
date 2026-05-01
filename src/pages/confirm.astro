@@ -222,7 +222,11 @@ import Layout from '../layouts/Layout.astro';
       <div class="form-grid">
         <div class="field full">
           <label>Venue / event location</label>
-          <input type="text" id="f-venue" placeholder="e.g. Valdosta High School Stadium" required/>
+          <div style="display:flex;gap:8px">
+            <input type="text" id="f-venue" placeholder="e.g. Valdosta High School Stadium" required style="flex:1;min-width:0"/>
+            <button type="button" id="travel-btn" onclick="checkTravel()" style="flex-shrink:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:0 14px;font-size:12px;color:var(--text-2);cursor:pointer;white-space:nowrap;height:40px;transition:border-color .15s">Check travel</button>
+          </div>
+          <div id="travel-status" style="font-size:11px;margin-top:5px;min-height:16px;color:var(--text-3)"></div>
         </div>
 
         <hr class="divider" style="grid-column:1/-1"/>
@@ -236,6 +240,7 @@ import Layout from '../layouts/Layout.astro';
           <div class="cost-line hide" id="cl-a0"><span></span><span></span></div>
           <div class="cost-line hide" id="cl-a1"><span></span><span></span></div>
           <div class="cost-line hide" id="cl-a2"><span></span><span></span></div>
+          <div class="cost-line hide" id="cl-travel"><span id="cl-travel-label">Travel fee</span><span id="cl-travel-v"></span></div>
           <div class="cost-line total"><span>Total</span><span id="cl-total"></span></div>
           <div class="cost-line deposit"><span>Deposit due at booking (50%)</span><span id="cl-deposit"></span></div>
           <div class="cost-line balance"><span>Balance due day of event</span><span id="cl-balance"></span></div>
@@ -279,6 +284,14 @@ const sb = createClient(
 
 let booking = null;
 let qPhotos = 0, qPrints = 0, addons = [];
+let travelFee = 0, travelMiles = 0;
+
+// Travel calculator constants
+const ZACH_LAT =  30.8524;   // 7545 Woodfield Rd, Valdosta GA 31601
+const ZACH_LNG = -83.2753;
+const GAS_PPG  =  3.20;      // $/gallon — update to current Valdosta average
+const CAR_MPG  =  22;
+const FREE_MI  =  15;
 
 // ── LOAD BOOKING ──
 async function init() {
@@ -360,7 +373,7 @@ function updateCost() {
   const basePkg = parseFloat((booking.total || '$0').replace('$', '')) || 0;
   const pc = qPhotos * 15, pr = qPrints * 3;
   const at = addons.reduce((s, a) => s + a.price, 0);
-  const total = basePkg + pc + pr + at;
+  const total = basePkg + pc + pr + at + travelFee;
   const deposit = Math.round(total * 50) / 100;
   const balance = total - deposit;
 
@@ -373,10 +386,64 @@ function updateCost() {
     if (a) { row.classList.remove('hide'); row.children[0].textContent = a.name; row.children[1].textContent = '+$' + a.price.toFixed(2); }
     else row.classList.add('hide');
   });
+  showLine('cl-travel', travelFee > 0, 'cl-travel-v', '+$' + travelFee.toFixed(2));
+  if (travelFee > 0) document.getElementById('cl-travel-label').textContent = `Travel (${travelMiles.toFixed(1)} mi)`;
   document.getElementById('cl-total').textContent   = '$' + total.toFixed(2);
   document.getElementById('cl-deposit').textContent = '$' + deposit.toFixed(2);
   document.getElementById('cl-balance').textContent = '$' + balance.toFixed(2);
 }
+
+// ── TRAVEL CALCULATOR ──
+async function checkTravel() {
+  const venue = document.getElementById('f-venue').value.trim();
+  if (!venue) { alert('Enter a venue address first.'); return; }
+
+  const btn    = document.getElementById('travel-btn');
+  const status = document.getElementById('travel-status');
+  btn.disabled = true; btn.textContent = 'Calculating…';
+  status.textContent = ''; status.style.color = 'var(--text-3)';
+
+  try {
+    // Geocode venue via Nominatim
+    const geoRes  = await fetch(
+      'https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' + encodeURIComponent(venue),
+      { headers: { 'User-Agent': 'ZRPhotos-Booking/1.0' } }
+    );
+    const geoData = await geoRes.json();
+    if (!geoData.length) throw new Error('Address not found — try adding city and state.');
+
+    const vLat = parseFloat(geoData[0].lat);
+    const vLng = parseFloat(geoData[0].lon);
+
+    // Driving distance via OSRM (free, no key required)
+    const osrmRes  = await fetch(
+      `https://router.project-osrm.org/route/v1/driving/${ZACH_LNG},${ZACH_LAT};${vLng},${vLat}?overview=false`
+    );
+    const osrmData = await osrmRes.json();
+    if (osrmData.code !== 'Ok') throw new Error('Could not calculate driving route.');
+
+    const miles = osrmData.routes[0].distance / 1609.34;
+    travelMiles = miles;
+
+    if (miles <= FREE_MI) {
+      travelFee = 0;
+      status.textContent = `${miles.toFixed(1)} mi away — no travel fee ✓`;
+      status.style.color = 'var(--green, #22c55e)';
+    } else {
+      // Round-trip fuel cost for miles beyond free zone
+      travelFee = Math.ceil((miles * 2 / CAR_MPG) * GAS_PPG * 100) / 100;
+      status.textContent = `${miles.toFixed(1)} mi away — $${travelFee.toFixed(2)} travel fee added`;
+      status.style.color = 'var(--text-2)';
+    }
+    updateCost();
+  } catch(e) {
+    status.textContent = e.message;
+    status.style.color = 'var(--red, #ef4444)';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Check travel';
+  }
+}
+window.checkTravel = checkTravel;
 
 // ── SUBMIT ──
 document.getElementById('confirm-form').addEventListener('submit', async function(e) {
@@ -400,6 +467,7 @@ document.getElementById('confirm-form').addEventListener('submit', async functio
   if (qPhotos > 0) allAddons.push({ name: 'Extra photos x' + qPhotos, price: qPhotos * 15 });
   if (qPrints > 0) allAddons.push({ name: 'Prints x' + qPrints,       price: qPrints * 3 });
   addons.forEach(a => allAddons.push(a));
+  if (travelFee > 0) allAddons.push({ name: `Travel fee (${travelMiles.toFixed(1)} mi)`, price: travelFee });
 
   try {
     // ── Step 1: get next ZTN number ──

@@ -283,6 +283,10 @@ async function init() {
     .eq('id', token)
     .single();
 
+  console.log('[confirm] token:', token);
+  console.log('[confirm] data:', data);
+  console.log('[confirm] error:', error);
+
   hide('loading-state');
 
   if (error || !data) { show('error-state'); return; }

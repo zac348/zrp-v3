@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 70 58" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="butt" stroke-linejoin="miter">
+  <!-- Z: top bar → diagonal → bottom bar -->
+  <polyline points="2,3 44,3 10,55 52,55"/>
+  <!-- R: vertical (shares Z's top-right corner) -->
+  <line x1="44" y1="3" x2="44" y2="55"/>
+  <!-- R: bump -->
+  <path d="M44,3 C66,3 66,29 44,29"/>
+  <!-- R: leg -->
+  <line x1="44" y1="29" x2="68" y2="55"/>
+</svg>

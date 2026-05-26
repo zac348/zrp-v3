@@ -185,6 +185,11 @@ import Layout from '../layouts/Layout.astro';
         <textarea id="f-notes" placeholder="Players to focus on, questions, etc."></textarea>
       </div>
 
+      <div class="agree-row">
+        <input type="checkbox" id="f-agree" required/>
+        <label for="f-agree">I have read and agree to the <a href="/privacy" target="_blank">Privacy Policy</a>. I confirm I am at least 13 years old, or I am a parent/guardian submitting this on behalf of a minor.</label>
+      </div>
+
       <button type="submit" class="submit-btn" id="submit-btn" disabled>Select a package to continue</button>
     </div>
   </form>

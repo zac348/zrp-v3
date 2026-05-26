@@ -39,7 +39,9 @@ const {
 
 {!noNav && (
   <nav class="nav">
-    <a href="/" class="nav-logo">ZRP</a>
+    <a href="/" class="nav-logo" aria-label="Zachary Routsong Photography">
+      <img src="/zr-logo.png" alt="ZR" class="nav-logo-img"/>
+    </a>
     <div class="nav-links">
       <a href="/#portfolio">Work</a>
       <a href="/#about">About</a>
@@ -71,6 +73,23 @@ const {
 )}
 
 <div class="toast" id="toast"></div>
+
+<div class="consent-bar" id="consent-bar">
+  <span>We collect booking info to complete your session. See our <a href="/privacy">Privacy Policy</a>. By booking, you confirm you're 13 or older (or a parent/guardian).</span>
+  <button onclick="dismissConsent()">Got it</button>
+</div>
+
+<script is:inline>
+  (function() {
+    if (!localStorage.getItem('zrp-consent')) {
+      document.getElementById('consent-bar').classList.add('show');
+    }
+  })();
+  function dismissConsent() {
+    localStorage.setItem('zrp-consent', '1');
+    document.getElementById('consent-bar').classList.remove('show');
+  }
+</script>
 
 <script is:inline>
   (function() {

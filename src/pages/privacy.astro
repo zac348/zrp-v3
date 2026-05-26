@@ -1,0 +1,125 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+<Layout title="Privacy Policy — Zachary Routsong Photography">
+<style is:global>
+.priv-page {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 56px 28px 96px;
+}
+.priv-page h1 {
+  font-size: 26px;
+  font-weight: 300;
+  letter-spacing: -.02em;
+  margin-bottom: 6px;
+}
+.priv-meta {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 36px;
+}
+.priv-page h2 {
+  font-size: 14px;
+  font-weight: 500;
+  margin-top: 36px;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+.priv-page p {
+  font-size: 13px;
+  line-height: 1.85;
+  color: var(--text-2);
+  margin-bottom: 12px;
+}
+.priv-page ul {
+  margin: 0 0 12px 0;
+  padding-left: 18px;
+}
+.priv-page ul li {
+  font-size: 13px;
+  line-height: 1.85;
+  color: var(--text-2);
+  margin-bottom: 3px;
+}
+.priv-page a { color: var(--text); text-decoration: underline; }
+.priv-page a:hover { opacity: .7; }
+.priv-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 28px 0;
+}
+.priv-callout {
+  background: var(--surface-dim);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px 18px;
+  margin-bottom: 28px;
+}
+.priv-callout p { margin-bottom: 0; }
+</style>
+
+<div class="priv-page">
+  <div class="sec-label" style="margin-bottom:8px">legal</div>
+  <h1>Privacy Policy</h1>
+  <p class="priv-meta">Effective May 25, 2025</p>
+
+  <p>I'm Zachary Routsong, a solo sports photographer based in Valdosta, Georgia. This page explains what information I collect when you book a session, why I need it, and who else sees it. I've tried to keep it short and plain.</p>
+
+  <hr class="priv-divider"/>
+
+  <h2>Important: children under 13</h2>
+  <div class="priv-callout">
+    <p>This site is not for children under 13. If you're booking a session for a young athlete, <strong>you — the parent or guardian — must be the one filling out the form</strong> and providing your own contact information. I do not knowingly collect personal information directly from children under 13. If you believe that happened by mistake, contact me and I'll delete it immediately. This is required by federal law (COPPA).</p>
+  </div>
+
+  <p>I may collect a player's name, jersey number, or position as part of coordinating the shoot. That information is used only to find and photograph the right athlete at the event — nothing else.</p>
+
+  <hr class="priv-divider"/>
+
+  <h2>What I collect and why</h2>
+  <p>When you submit a booking request, I collect:</p>
+  <ul>
+    <li><strong>Your name, email, and phone</strong> — to confirm your booking and send your gallery</li>
+    <li><strong>Event date, time, sport, and location</strong> — to show up at the right place at the right time</li>
+    <li><strong>Package and add-on selections</strong> — to put together your invoice</li>
+    <li><strong>Optional notes</strong> — anything extra you want me to know</li>
+  </ul>
+  <p>Your browser stores your light/dark mode preference locally on your device. That never leaves your computer.</p>
+
+  <hr class="priv-divider"/>
+
+  <h2>Who else sees your information</h2>
+  <p>I don't sell your data. I don't share it with advertisers. A few services touch it as part of running the site:</p>
+  <ul>
+    <li><strong>Supabase</strong> — stores booking data securely. <a href="https://supabase.com/privacy" target="_blank" rel="noopener">Privacy policy →</a></li>
+    <li><strong>Formspree</strong> — forwards your booking form to my email. <a href="https://formspree.io/legal/privacy-policy" target="_blank" rel="noopener">Privacy policy →</a></li>
+    <li><strong>Google Fonts</strong> — serves the fonts on this site; your IP is briefly visible to Google. <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Privacy policy →</a></li>
+    <li><strong>Nominatim &amp; OSRM</strong> — used only if you click "Check travel" to calculate driving distance from your venue. Your entered address is sent to these services to get coordinates and a route. No name or contact info is transmitted.</li>
+    <li><strong>Cloudflare</strong> — hosts and delivers this site; standard server logs (IP, browser type) are collected by them. <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener">Privacy policy →</a></li>
+  </ul>
+  <p>I may also disclose information if required by law or a valid court order.</p>
+
+  <hr class="priv-divider"/>
+
+  <h2>How long I keep it</h2>
+  <p>I keep booking records for as long as needed to deliver your photos and handle any questions afterward — generally a few years for basic business records. Client galleries are available for roughly 90 days after delivery, then removed. You can ask me to delete your information sooner at any time.</p>
+
+  <hr class="priv-divider"/>
+
+  <h2>Your choices</h2>
+  <p>You can ask me to access, correct, or delete any information I have about you. Just reach out directly:</p>
+  <ul>
+    <li>Phone: <a href="tel:2293001006">229-300-1006</a></li>
+    <li>Instagram: <a href="https://instagram.com/zacharyroutsongphotos" target="_blank" rel="noopener">@zacharyroutsongphotos</a></li>
+  </ul>
+  <p>I'll get back to you as soon as I can.</p>
+
+  <hr class="priv-divider"/>
+
+  <p style="font-size:12px;color:var(--text-3);line-height:1.8">If I make any meaningful changes to this policy, I'll update the date at the top. Questions? Just reach out.</p>
+</div>
+</Layout>

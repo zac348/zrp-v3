@@ -19,11 +19,14 @@ import Layout from '../layouts/Layout.astro';
   border-radius: var(--radius-lg);
   padding: 16px;
   cursor: pointer;
-  transition: border-color .15s, background .15s;
+  transition: border-color .2s, background .2s, transform .25s cubic-bezier(.16,1,.3,1), box-shadow .25s;
   position: relative;
+  opacity: 0;
+  animation: rise-in .6s cubic-bezier(.16,1,.3,1) both;
+  animation-delay: var(--d, 0s);
 }
-.pkg-card:hover { border-color: var(--border-2) }
-.pkg-card.sel { border-color: var(--text); background: var(--surface-dim) }
+.pkg-card:hover { border-color: var(--border-2); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(26,25,24,.08) }
+.pkg-card.sel { border-color: var(--text); background: var(--surface-dim); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(26,25,24,.1) }
 .pkg-badge {
   font-family: 'DM Mono', monospace;
   font-size: 8px;
@@ -90,9 +93,9 @@ import Layout from '../layouts/Layout.astro';
 </style>
 
 <div class="page">
-  <div class="sec-label" style="margin-bottom:6px">quick book</div>
-  <h1 style="font-size:24px;font-weight:300;letter-spacing:-.02em;margin-bottom:4px">Book a session</h1>
-  <p style="font-size:13px;color:var(--text-3);margin-bottom:32px">Simple booking for individual player or action shots.</p>
+  <div class="sec-label anim" style="margin-bottom:6px;--d:.05s">quick book</div>
+  <h1 class="anim" style="font-size:24px;font-weight:300;letter-spacing:-.02em;margin-bottom:4px;--d:.12s">Book a session</h1>
+  <p class="anim" style="font-size:13px;color:var(--text-3);margin-bottom:32px;--d:.2s">A fast, simple way to lock in your session.</p>
 
   <!-- PACKAGES -->
   <div class="sec-label">choose a package</div>
@@ -118,41 +121,38 @@ import Layout from '../layouts/Layout.astro';
 
       <hr class="divider" style="grid-column:1/-1"/>
 
-      <div class="field"><label>Event date</label>
+      <div class="field"><label>Session date</label>
         <input type="date" name="Event Date" id="edate" required onclick="this.showPicker()" onkeydown="return false" style="cursor:pointer"/>
       </div>
       <div class="field"><label>Start time</label>
         <input type="time" name="Start Time" id="etime" required onclick="this.showPicker()" onkeydown="return false" style="cursor:pointer"/>
       </div>
 
-      <div class="field"><label>Sport / event type</label>
+      <div class="field"><label>Session type</label>
         <select name="Sport" required>
           <option value="" disabled selected>Select…</option>
-          <option>Football</option><option>Basketball</option><option>Baseball / Softball</option>
-          <option>Soccer</option><option>Track &amp; Field</option><option>Volleyball</option>
-          <option>Wrestling</option><option>Swimming</option><option>Other</option>
+          <option>Portraits</option><option>Family</option><option>Senior photos</option>
+          <option>Couples / Engagement</option><option>Event</option><option>Sports</option>
+          <option>Branding / Product</option><option>Other</option>
         </select>
       </div>
       <div class="field"><label>General location</label>
-        <input type="text" name="Location" placeholder="e.g. Valdosta High School" required/>
+        <input type="text" name="Location" placeholder="e.g. Drexel Park, Valdosta" required/>
       </div>
 
       <hr class="divider" style="grid-column:1/-1"/>
 
-      <div class="field"><label>Player number</label>
-        <input type="text" name="Player Number" placeholder="e.g. 24"/>
+      <div class="field"><label>Who is this for? (optional)</label>
+        <input type="text" name="Subject" placeholder="e.g. Jordan Smith"/>
       </div>
-      <div class="field"><label>Player last name</label>
-        <input type="text" name="Player Last Name" placeholder="e.g. Smith"/>
-      </div>
-      <div class="field full"><label>Shot type</label>
+      <div class="field"><label>Shot style</label>
         <select name="Shot Type" required>
           <option value="" disabled selected>Select…</option>
-          <option>Action shots — in-game</option>
+          <option>Candid / documentary</option>
           <option>Portrait / posed</option>
-          <option>Both action &amp; portrait</option>
-          <option>Team photos</option>
-          <option>Sideline / candid</option>
+          <option>Both candid &amp; posed</option>
+          <option>Group photos</option>
+          <option>Full event coverage</option>
         </select>
       </div>
 
@@ -166,7 +166,7 @@ import Layout from '../layouts/Layout.astro';
           <div class="cost-line"><span id="cl-pkg-n"></span><span id="cl-pkg-p"></span></div>
           <div class="cost-line total"><span>Total</span><span id="cl-total"></span></div>
           <div class="cost-line deposit"><span>Deposit due now (50%)</span><span id="cl-deposit"></span></div>
-          <div class="cost-line balance"><span>Balance due day of event</span><span id="cl-balance"></span></div>
+          <div class="cost-line balance"><span>Balance due day of session</span><span id="cl-balance"></span></div>
         </div>
       </div>
 
@@ -174,7 +174,7 @@ import Layout from '../layouts/Layout.astro';
 
       <div class="field full">
         <label>Anything else? (optional)</label>
-        <textarea name="Notes" placeholder="Specific plays, players, questions…"></textarea>
+        <textarea name="Notes" placeholder="Ideas, must-have shots, questions…"></textarea>
       </div>
 
       <div class="agree-row">
@@ -198,7 +198,7 @@ const sb = createClient(
 // Falls back to these defaults if table is empty
 const DEFAULT_PKGS = [
   { name: 'Basic',    price: 40,  popular: false, features: ['1–2 hrs coverage', '25 edited photos', 'Private gallery link'] },
-  { name: 'Standard', price: 75,  popular: true,  features: ['Full game / 3 hrs', '60 edited photos', 'Private gallery link', '1 free 5×7 print'] },
+  { name: 'Standard', price: 75,  popular: true,  features: ['Up to 3 hrs coverage', '60 edited photos', 'Private gallery link', '1 free 5×7 print'] },
   { name: 'Premium',  price: 120, popular: false,  features: ['Full day coverage', '100+ edited photos', 'Private gallery link', '3 free 5×7 prints'] },
 ];
 
@@ -220,7 +220,7 @@ async function loadPackages() {
 function renderPackages(pkgs) {
   const grid = document.getElementById('pkg-grid');
   grid.innerHTML = pkgs.map((p, i) => `
-    <div class="pkg-card" id="pkg-${i}" onclick="selectPkg(${i},${JSON.stringify(p).replace(/"/g, '&quot;')})">
+    <div class="pkg-card" id="pkg-${i}" style="--d:${i * 0.08}s" onclick="selectPkg(${i},${JSON.stringify(p).replace(/"/g, '&quot;')})">
       ${p.popular ? '<span class="pkg-badge">Popular</span>' : ''}
       <div class="pkg-name">${p.name}</div>
       <div class="pkg-price">$${p.price}<small>/session</small></div>
@@ -275,9 +275,8 @@ document.getElementById('qbook-form').addEventListener('submit', async function(
       total:            '$' + selPkg.price.toFixed(2),
       deposit:          '$' + (selPkg.price / 2).toFixed(2),
       notes: [
-        fd.get('Player Number') ? 'Player #' + fd.get('Player Number') : '',
-        fd.get('Player Last Name') ? 'Player: ' + fd.get('Player Last Name') : '',
-        fd.get('Shot Type') ? 'Shot type: ' + fd.get('Shot Type') : '',
+        fd.get('Subject') ? 'For: ' + fd.get('Subject') : '',
+        fd.get('Shot Type') ? 'Shot style: ' + fd.get('Shot Type') : '',
         fd.get('Notes') || '',
       ].filter(Boolean).join(' | ') || null,
       status: 'pending',

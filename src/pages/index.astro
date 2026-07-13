@@ -51,21 +51,24 @@ import Layout from '../layouts/Layout.astro';
   overflow: hidden;
   cursor: pointer;
   position: relative;
+  opacity: 0;
+  animation: scale-in .6s cubic-bezier(.16,1,.3,1) both;
+  animation-delay: var(--d, 0s);
 }
 .grid-item img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: transform .5s ease;
+  transition: transform .6s cubic-bezier(.16,1,.3,1), filter .4s ease;
 }
-.grid-item:hover img { transform: scale(1.04) }
+.grid-item:hover img { transform: scale(1.05) }
 .grid-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(26,25,24,.45);
+  background: linear-gradient(to top, rgba(26,25,24,.65), rgba(26,25,24,0) 55%);
   opacity: 0;
-  transition: opacity .25s;
+  transition: opacity .3s;
   display: flex;
   align-items: flex-end;
   padding: 12px;
@@ -76,8 +79,11 @@ import Layout from '../layouts/Layout.astro';
   font-size: 9px;
   letter-spacing: .12em;
   text-transform: uppercase;
-  color: rgba(255,255,255,.85);
+  color: rgba(255,255,255,.9);
+  transform: translateY(6px);
+  transition: transform .3s cubic-bezier(.16,1,.3,1);
 }
+.grid-item:hover .grid-overlay span { transform: translateY(0) }
 .placeholder-cell {
   aspect-ratio: 4/3;
   background: var(--surface-dim);
@@ -92,17 +98,17 @@ import Layout from '../layouts/Layout.astro';
   color: var(--text-3);
 }
 
-/* SPORT TAGS */
-.sports-strip {
+/* CATEGORY TAGS */
+.cats-strip {
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
   padding: 28px 0;
 }
-.sports-inner { max-width: 860px; margin: 0 auto; padding: 0 28px }
-@media (max-width: 600px) { .sports-inner { padding: 0 18px } }
+.cats-inner { max-width: 860px; margin: 0 auto; padding: 0 28px }
+@media (max-width: 600px) { .cats-inner { padding: 0 18px } }
 
-.sport-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px }
-.sport-tag {
+.cat-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px }
+.cat-tag {
   font-family: 'DM Mono', monospace;
   font-size: 9px;
   letter-spacing: .09em;
@@ -111,17 +117,17 @@ import Layout from '../layouts/Layout.astro';
   border-radius: 3px;
   padding: 5px 11px;
   cursor: pointer;
-  transition: all .15s;
+  transition: border-color .2s, color .2s, background .2s, transform .2s cubic-bezier(.16,1,.3,1);
   background: var(--surface);
   user-select: none;
 }
-.sport-tag:hover { border-color: var(--border-2); color: var(--text) }
-.sport-tag.active { border-color: var(--text); color: var(--text); background: var(--surface-dim) }
-.sport-tag.disabled { opacity: .35; cursor: default; pointer-events: none }
+.cat-tag:hover { border-color: var(--border-2); color: var(--text); transform: translateY(-1px) }
+.cat-tag.active { border-color: var(--text); color: var(--text); background: var(--surface-dim) }
+.cat-tag.disabled { opacity: .35; cursor: default; pointer-events: none }
 
 .port-nudge { font-size: 12px; color: var(--text-3); text-align: center; margin-top: 16px; transition: opacity .3s }
 .port-count { font-size: 11px; color: var(--text-3); text-align: center; margin-top: 8px; font-family: 'DM Mono', monospace }
-.port-sport-label {
+.port-cat-label {
   font-family: 'DM Mono', monospace;
   font-size: 9px;
   letter-spacing: .14em;
@@ -172,7 +178,8 @@ import Layout from '../layouts/Layout.astro';
   border-radius: var(--radius-lg);
   overflow: hidden;
 }
-.stat { background: var(--surface); padding: 20px }
+.stat { background: var(--surface); padding: 20px; transition: background .2s }
+.stat:hover { background: var(--surface-dim) }
 .stat-n {
   font-size: 26px;
   font-weight: 300;
@@ -192,44 +199,44 @@ import Layout from '../layouts/Layout.astro';
 
 <!-- HERO -->
 <div class="hero">
-  <p class="hero-eyebrow">Sports Photography · Valdosta, Georgia</p>
-  <h1 class="hero-title">Zachary Routsong<br/>Photography</h1>
-  <p class="hero-sub">Sharp edits. Private galleries. Straightforward pricing. Built for athletes and families who want real photos, not just highlights.</p>
-  <a href="/book" class="btn">Book a session</a>
+  <p class="hero-eyebrow anim" style="--d:.05s">Photography · Valdosta, Georgia</p>
+  <h1 class="hero-title anim" style="--d:.15s">Zachary Routsong<br/>Photography</h1>
+  <p class="hero-sub anim" style="--d:.3s">Portraits, events, sports, and everything worth remembering. Sharp edits, private galleries, and straightforward pricing — real photos that look like the moment felt.</p>
+  <span class="anim" style="--d:.45s;display:inline-block"><a href="/book" class="btn">Book a session</a></span>
 </div>
 
 <!-- PORTFOLIO -->
-<div class="section" id="portfolio" style="padding-top: 56px">
+<div class="section reveal" id="portfolio" style="padding-top: 56px">
   <div class="sec-label">portfolio</div>
-  <div class="port-sport-label" id="port-sport-label"></div>
+  <div class="port-cat-label" id="port-cat-label"></div>
   <div class="grid" id="portfolio-grid">
     <div class="placeholder-cell"><span>Loading…</span></div>
     <div class="placeholder-cell"><span>Loading…</span></div>
     <div class="placeholder-cell"><span>Loading…</span></div>
   </div>
-  <p class="port-nudge" id="port-nudge">Click a sport below to filter →</p>
+  <p class="port-nudge" id="port-nudge">Click a category below to filter →</p>
   <p class="port-count" id="port-count"></p>
 </div>
 
-<!-- SPORT FILTER -->
-<div class="sports-strip">
-  <div class="sports-inner">
-    <div class="sec-label">sports covered</div>
-    <div class="sport-tags" id="sports-tags">
-      <span class="sport-tag disabled">Loading…</span>
+<!-- CATEGORY FILTER -->
+<div class="cats-strip reveal">
+  <div class="cats-inner">
+    <div class="sec-label">categories</div>
+    <div class="cat-tags" id="cat-tags">
+      <span class="cat-tag disabled">Loading…</span>
     </div>
   </div>
 </div>
 
 <!-- ABOUT -->
-<div class="section" id="about" style="padding-top: 64px">
+<div class="section reveal" id="about" style="padding-top: 64px">
   <div class="sec-label">about</div>
   <div class="about-grid">
     <img src="/zachary.jpg" alt="Zachary Routsong" class="about-photo"/>
     <div>
       <div class="about-text">
         <h2>Zachary Routsong</h2>
-        <p>Based in Valdosta, Georgia. I shoot sports — football, basketball, baseball, track, and everything in between. My focus is on delivering sharp, well-edited images that actually look like the moment felt.</p>
+        <p>Based in Valdosta, Georgia. I shoot a little bit of everything — portraits, families, events, sports, and the in-between moments that make them worth keeping. My focus is on delivering sharp, well-edited images that actually look like the moment felt.</p>
         <p>Every shoot comes with a private online gallery, fast turnaround, and straightforward pricing. No fluff.</p>
         <div style="margin-top: 22px; margin-bottom: 28px">
           <a href="/book" class="btn">Book a session</a>
@@ -239,7 +246,7 @@ import Layout from '../layouts/Layout.astro';
         <div class="stat"><div class="stat-n" id="stat-starting-price">$40</div><div class="stat-l">Starting price</div></div>
         <div class="stat"><div class="stat-n">5–7</div><div class="stat-l">Day turnaround</div></div>
         <div class="stat"><div class="stat-n">25+</div><div class="stat-l">Edited photos</div></div>
-        <div class="stat"><div class="stat-n">All</div><div class="stat-l">Sports covered</div></div>
+        <div class="stat"><div class="stat-n">Any</div><div class="stat-l">Occasion covered</div></div>
       </div>
     </div>
   </div>
@@ -259,7 +266,7 @@ const sb = createClient(
   import.meta.env.PUBLIC_SUPABASE_ANON_KEY
 );
 
-let allPhotos = [], activeSport = null;
+let allPhotos = [], activeCat = null;
 
 async function loadPortfolio() {
   const { data, error } = await sb
@@ -272,59 +279,59 @@ async function loadPortfolio() {
     document.getElementById('portfolio-grid').innerHTML =
       '<div class="placeholder-cell"><span>Coming soon</span></div>'.repeat(3);
     document.getElementById('port-nudge').style.display = 'none';
-    document.getElementById('sports-tags').innerHTML =
-      '<span class="sport-tag disabled">No photos yet</span>';
+    document.getElementById('cat-tags').innerHTML =
+      '<span class="cat-tag disabled">No photos yet</span>';
     return;
   }
 
   allPhotos = data;
 
-  // Build sport counts
-  const sportCounts = {};
-  data.forEach(p => { if (p.sport) sportCounts[p.sport] = (sportCounts[p.sport] || 0) + 1; });
-  const sports = Object.keys(sportCounts).sort();
+  // Build category counts (the `sport` column doubles as the photo's category)
+  const catCounts = {};
+  data.forEach(p => { if (p.sport) catCounts[p.sport] = (catCounts[p.sport] || 0) + 1; });
+  const cats = Object.keys(catCounts).sort();
 
-  const tagsEl = document.getElementById('sports-tags');
-  if (!sports.length) {
-    tagsEl.innerHTML = '<span class="sport-tag disabled">No tagged photos yet</span>';
+  const tagsEl = document.getElementById('cat-tags');
+  if (!cats.length) {
+    tagsEl.innerHTML = '<span class="cat-tag disabled">No tagged photos yet</span>';
   } else {
     tagsEl.innerHTML =
-      sports.map(s =>
-        `<span class="sport-tag" onclick="filterSport('${s}')">${s} <span style="opacity:.55;font-size:8px">(${sportCounts[s]})</span></span>`
+      cats.map(c =>
+        `<span class="cat-tag" onclick="filterCat('${c}')">${c} <span style="opacity:.55;font-size:8px">(${catCounts[c]})</span></span>`
       ).join('') +
-      '<span class="sport-tag" onclick="filterSport(null)" id="tag-all" style="display:none">Show all</span>';
+      '<span class="cat-tag" onclick="filterCat(null)" id="tag-all" style="display:none">Show all</span>';
   }
 
   showRandom();
 }
 
 function showRandom() {
-  activeSport = null;
+  activeCat = null;
   const shuffled = [...allPhotos].sort(() => Math.random() - .5).slice(0, 3);
   renderGrid(shuffled);
   const nudge = document.getElementById('port-nudge');
   nudge.style.opacity = '1';
-  nudge.textContent = 'Click a sport below to filter →';
+  nudge.textContent = 'Click a category below to filter →';
   document.getElementById('port-count').textContent = '';
-  document.getElementById('port-sport-label').style.display = 'none';
-  document.querySelectorAll('.sport-tag').forEach(t => t.classList.remove('active'));
+  document.getElementById('port-cat-label').style.display = 'none';
+  document.querySelectorAll('.cat-tag').forEach(t => t.classList.remove('active'));
   const tagAll = document.getElementById('tag-all');
   if (tagAll) tagAll.style.display = 'none';
 }
 
-function filterSport(sport) {
-  activeSport = sport;
-  if (!sport) { showRandom(); return; }
-  const filtered = allPhotos.filter(p => p.sport === sport);
+function filterCat(cat) {
+  activeCat = cat;
+  if (!cat) { showRandom(); return; }
+  const filtered = allPhotos.filter(p => p.sport === cat);
   renderGrid(filtered);
-  const label = document.getElementById('port-sport-label');
-  label.textContent = sport;
+  const label = document.getElementById('port-cat-label');
+  label.textContent = cat;
   label.style.display = 'block';
   document.getElementById('port-nudge').style.opacity = '0';
   document.getElementById('port-count').textContent =
-    filtered.length + ' photo' + (filtered.length !== 1 ? 's' : '') + ' · ' + sport;
-  document.querySelectorAll('.sport-tag').forEach(t =>
-    t.classList.toggle('active', t.textContent.trim().startsWith(sport))
+    filtered.length + ' photo' + (filtered.length !== 1 ? 's' : '') + ' · ' + cat;
+  document.querySelectorAll('.cat-tag').forEach(t =>
+    t.classList.toggle('active', t.textContent.trim().startsWith(cat))
   );
   const tagAll = document.getElementById('tag-all');
   if (tagAll) tagAll.style.display = 'inline-block';
@@ -333,13 +340,14 @@ function filterSport(sport) {
 function renderGrid(photos) {
   const g = document.getElementById('portfolio-grid');
   if (!photos.length) {
-    g.innerHTML = '<div class="placeholder-cell" style="grid-column:1/-1;aspect-ratio:auto;padding:48px"><span>No photos for this sport yet</span></div>';
+    g.innerHTML = '<div class="placeholder-cell" style="grid-column:1/-1;aspect-ratio:auto;padding:48px"><span>No photos in this category yet</span></div>';
     return;
   }
   g.innerHTML = '';
-  photos.forEach(p => {
+  photos.forEach((p, i) => {
     const el = document.createElement('div');
     el.className = 'grid-item';
+    el.style.setProperty('--d', (i * 0.07) + 's');
     el.innerHTML = `<img src="${p.url}" alt="${p.sport || ''}" loading="lazy"/>
       <div class="grid-overlay"><span>${p.sport || ''}</span></div>`;
     el.addEventListener('click', () => openLB(p.url));
@@ -348,7 +356,7 @@ function renderGrid(photos) {
 }
 
 // Expose filter to global scope for inline onclick
-window.filterSport = filterSport;
+window.filterCat = filterCat;
 
 function openLB(url) {
   document.getElementById('lb-img').src = url;
@@ -358,7 +366,6 @@ window.openLB = openLB;
 
 function closeLB() {
   document.getElementById('lb').classList.remove('open');
-  document.getElementById('lb-img').src = '';
 }
 window.closeLB = closeLB;
 

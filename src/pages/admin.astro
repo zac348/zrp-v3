@@ -432,12 +432,12 @@ html,body { height: 100% }
   <div class="tab" id="tab-upload">
     <h1 class="main-title">Upload photos</h1>
     <p class="main-sub">Add photos to your portfolio or a client gallery.</p>
-    <div class="field"><label>Sport / event</label>
+    <div class="field"><label>Category</label>
       <select id="up-sport">
-        <option value="">Select sport…</option>
-        <option>Football</option><option>Basketball</option><option>Baseball</option>
-        <option>Softball</option><option>Soccer</option><option>Track & Field</option>
-        <option>Volleyball</option><option>Wrestling</option><option>Swimming</option><option>Other</option>
+        <option value="">Select category…</option>
+        <option>Portraits</option><option>Family</option><option>Seniors</option>
+        <option>Couples</option><option>Events</option><option>Sports</option>
+        <option>Branding</option><option>Nature</option><option>Other</option>
       </select>
     </div>
     <div class="field"><label>Client gallery (optional)</label><select id="up-gallery"><option value="">Portfolio only</option></select></div>
@@ -463,10 +463,10 @@ html,body { height: 100% }
       <div class="bulk-actions" id="bulk-actions" style="display:none">
         <div style="display:flex;align-items:center;gap:6px">
           <select id="bulk-sport" class="bulk-select">
-            <option value="">Change sport…</option>
-            <option>Football</option><option>Basketball</option><option>Baseball</option>
-            <option>Softball</option><option>Soccer</option><option>Track & Field</option>
-            <option>Volleyball</option><option>Wrestling</option><option>Swimming</option><option>Other</option>
+            <option value="">Change category…</option>
+            <option>Portraits</option><option>Family</option><option>Seniors</option>
+            <option>Couples</option><option>Events</option><option>Sports</option>
+            <option>Branding</option><option>Nature</option><option>Other</option>
           </select>
           <button class="btn-sm on-ink" onclick="bulkChangeSport()">Apply</button>
         </div>
@@ -485,7 +485,7 @@ html,body { height: 100% }
     <h1 class="main-title">Client galleries</h1>
     <p class="main-sub">Create private galleries and share the link with clients.</p>
     <div class="gal-form">
-      <div class="field"><label>Gallery name</label><input type="text" id="new-gal-name" placeholder="e.g. Smith Family — Football 2025"/></div>
+      <div class="field"><label>Gallery name</label><input type="text" id="new-gal-name" placeholder="e.g. Smith Family — Fall 2025"/></div>
       <button class="btn" onclick="createGallery()" style="align-self:flex-end">Create gallery</button>
     </div>
     <div class="sec-label">all galleries</div>
@@ -556,7 +556,7 @@ html,body { height: 100% }
         <div class="field" style="margin:0"><label>From</label><input type="time" id="block-start" value="09:00"/></div>
         <div class="field" style="margin:0"><label>To</label><input type="time" id="block-end" value="17:00"/></div>
       </div>
-      <div class="field"><label>Note (optional)</label><input type="text" id="block-note" placeholder="e.g. Football game booked"/></div>
+      <div class="field"><label>Note (optional)</label><input type="text" id="block-note" placeholder="e.g. Session booked"/></div>
       <div class="editor-actions">
         <button class="btn" onclick="saveBlock()">Save</button>
         <button class="btn-sm" onclick="closeEditor()">Cancel</button>
@@ -755,7 +755,7 @@ function renderPhotos() {
       <img src="${p.url}" alt="" loading="lazy"
         onclick="togglePhotoSelect('${p.id}',!selectedPhotoIds.has('${p.id}'))" style="cursor:pointer"/>
       <div class="photo-card-info">
-        <div class="photo-sport">${p.sport || 'No sport'}</div>
+        <div class="photo-sport">${p.sport || 'No category'}</div>
         <div class="photo-name">${p.file_name}</div>
       </div>
       <div class="photo-actions">
@@ -849,7 +849,7 @@ async function bulkChangeSport() {
   const sport = document.getElementById('bulk-sport').value;
   if (!sport || !selectedPhotoIds.size) return;
   await sb.from('portfolio_photos').update({ sport }).in('id', [...selectedPhotoIds]);
-  await loadPhotos(); toast('Sport updated');
+  await loadPhotos(); toast('Category updated');
 }
 window.bulkChangeSport = bulkChangeSport;
 
@@ -1043,7 +1043,7 @@ function bookingCard(b) {
     <div class="booking-details">
       <div class="booking-detail"><strong>Date</strong>${b.event_date || '—'}</div>
       <div class="booking-detail"><strong>Time</strong>${b.event_time || '—'}</div>
-      <div class="booking-detail"><strong>Sport</strong>${b.sport_type || '—'}</div>
+      <div class="booking-detail"><strong>Session</strong>${b.sport_type || '—'}</div>
       <div class="booking-detail"><strong>Venue</strong>${venue}</div>
       <div class="booking-detail"><strong>Total</strong>${b.total || '—'}</div>
       <div class="booking-detail"><strong>Deposit</strong>${b.deposit || '—'}</div>

@@ -280,7 +280,6 @@ window.openLB = openLB;
 function closeLB(e) {
   if (e && e.target !== document.getElementById('lb') && e.target !== document.querySelector('.lb-close')) return;
   document.getElementById('lb').classList.remove('open');
-  document.getElementById('lb-img').src = '';
 }
 window.closeLB = closeLB;
 

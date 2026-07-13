@@ -225,10 +225,10 @@ async function loadInvoice() {
   // Meta cells
   const meta = document.getElementById('inv-meta');
   const metaItems = [
-    b.event_date    && ['Event date',  b.event_date],
-    b.event_time    && ['Start time',  b.event_time],
-    b.sport_type    && ['Sport',       b.sport_type],
-    (b.venue_address || b.event_location) && ['Venue', b.venue_address || b.event_location],
+    b.event_date    && ['Session date', b.event_date],
+    b.event_time    && ['Start time',   b.event_time],
+    b.sport_type    && ['Session type', b.sport_type],
+    (b.venue_address || b.event_location) && ['Location', b.venue_address || b.event_location],
   ].filter(Boolean);
   meta.innerHTML = metaItems.map(([k, v]) =>
     `<div class="inv-meta-cell"><div class="inv-meta-label">${k}</div><div class="inv-meta-val">${v}</div></div>`
@@ -263,7 +263,7 @@ async function loadInvoice() {
   totalsEl.innerHTML = `
     <div class="inv-total-row big"><span>Total</span><span>$${total.toFixed(2)}</span></div>
     <div class="inv-total-row"><span>Deposit (50%)</span><span>$${deposit.toFixed(2)}</span></div>
-    <div class="inv-total-row${balance <= 0 ? ' green' : ''}"><span>Balance due day of event</span><span>${balance <= 0 ? 'Paid' : '$' + balance.toFixed(2)}</span></div>
+    <div class="inv-total-row${balance <= 0 ? ' green' : ''}"><span>Balance due day of session</span><span>${balance <= 0 ? 'Paid' : '$' + balance.toFixed(2)}</span></div>
   `;
 
   document.getElementById('inv-content').style.display = 'block';

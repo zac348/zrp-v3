@@ -9,7 +9,7 @@ interface Props {
 }
 const {
   title,
-  description = 'Sports photography based in Valdosta, GA.',
+  description = 'Photography based in Valdosta, GA — portraits, events, sports, and more.',
   noNav = false,
   noFooter = false,
 } = Astro.props;
@@ -89,6 +89,25 @@ const {
     localStorage.setItem('zrp-consent', '1');
     document.getElementById('consent-bar').classList.remove('show');
   }
+</script>
+
+<!-- Scroll reveal: adds .in to .reveal elements as they enter the viewport -->
+<script is:inline>
+  (function() {
+    if (!('IntersectionObserver' in window)) {
+      document.querySelectorAll('.reveal').forEach(function(el) { el.classList.add('in'); });
+      return;
+    }
+    var io = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('.reveal').forEach(function(el) { io.observe(el); });
+  })();
 </script>
 
 <script is:inline>

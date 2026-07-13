@@ -64,13 +64,13 @@ function confirmEmail(name, b, ztn, venue, addons, total, deposit, balance, invo
   const rows = [
     b.event_date && ['Date', b.event_date],
     b.event_time && ['Time', b.event_time],
-    b.sport_type && ['Sport', b.sport_type],
-    venue        && ['Venue', venue],
+    b.sport_type && ['Session', b.sport_type],
+    venue        && ['Location', venue],
     b.package_selected && ['Package', b.package_selected],
     addons.length && ['Add-ons', addons.map(a => a.name).join(', ')],
     total  != null && ['Total', '$' + Number(total).toFixed(2)],
     deposit != null && ['Deposit due', '$' + Number(deposit).toFixed(2)],
-    balance != null && ['Balance due day of event', '$' + Number(balance).toFixed(2)],
+    balance != null && ['Balance due day of session', '$' + Number(balance).toFixed(2)],
   ].filter(Boolean);
 
   return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
@@ -84,7 +84,7 @@ function confirmEmail(name, b, ztn, venue, addons, total, deposit, balance, invo
     ${rows.map(([k,v]) => `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e8e7e6;font-size:12px"><span style="color:#999">${k}</span><span style="font-weight:500">${v}</span></div>`).join('')}
   </div>
   <a href="${invoiceUrl}" style="display:inline-block;background:#1a1918;color:#fff;text-decoration:none;font-size:14px;font-weight:500;padding:13px 28px;border-radius:6px;margin-bottom:28px">View invoice →</a>
-  <p style="font-size:11px;color:#bbb;line-height:1.7;margin:0">Your booking number is <strong style="color:#999">${ztn}</strong>. Your gallery will be delivered within 5–7 days after the event.</p>
+  <p style="font-size:11px;color:#bbb;line-height:1.7;margin:0">Your booking number is <strong style="color:#999">${ztn}</strong>. Your gallery will be delivered within 5–7 days after your session.</p>
 </div>
 </body></html>`;
 }
@@ -94,10 +94,10 @@ function zachEmail(name, email, b, ztn, venue, addons, total) {
     ['Client', name || '—'],
     ['Email',  email || '—'],
     b.phone      && ['Phone',   b.phone],
-    b.event_date && ['Date',    b.event_date],
-    b.event_time && ['Time',    b.event_time],
-    b.sport_type && ['Sport',   b.sport_type],
-    venue        && ['Venue',   venue],
+    b.event_date && ['Date',     b.event_date],
+    b.event_time && ['Time',     b.event_time],
+    b.sport_type && ['Session',  b.sport_type],
+    venue        && ['Location', venue],
     b.package_selected && ['Package', b.package_selected],
     addons.length && ['Add-ons', addons.map(a => a.name + ' +$' + Number(a.price).toFixed(2)).join(', ')],
     total != null && ['Total',  '$' + Number(total).toFixed(2)],

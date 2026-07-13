@@ -165,7 +165,7 @@ import Layout from '../layouts/Layout.astro';
   <div id="form-state" style="display:none">
     <div class="sec-label" style="margin-bottom:6px">complete booking</div>
     <h1 style="font-size:24px;font-weight:300;letter-spacing:-.02em;margin-bottom:4px">Finalize your session</h1>
-    <p style="font-size:13px;color:var(--text-3);margin-bottom:28px">Add your venue, any extras, and we're set.</p>
+    <p style="font-size:13px;color:var(--text-3);margin-bottom:28px">Add your location, any extras, and we're set.</p>
 
     <!-- Booking summary -->
     <div class="summary-card">
@@ -173,7 +173,7 @@ import Layout from '../layouts/Layout.astro';
         <div class="summary-item"><strong>Client</strong><span id="sum-name"></span></div>
         <div class="summary-item"><strong>Package</strong><span id="sum-pkg"></span></div>
         <div class="summary-item"><strong>Date</strong><span id="sum-date"></span></div>
-        <div class="summary-item"><strong>Sport</strong><span id="sum-sport"></span></div>
+        <div class="summary-item"><strong>Session</strong><span id="sum-sport"></span></div>
       </div>
     </div>
 
@@ -217,13 +217,13 @@ import Layout from '../layouts/Layout.astro';
     </div>
 
     <!-- Details form -->
-    <div class="sec-label">event details</div>
+    <div class="sec-label">session details</div>
     <form id="confirm-form">
       <div class="form-grid">
         <div class="field full">
-          <label>Venue / event location</label>
+          <label>Session location</label>
           <div style="display:flex;gap:8px">
-            <input type="text" id="f-venue" placeholder="e.g. Valdosta High School Stadium" required style="flex:1;min-width:0"/>
+            <input type="text" id="f-venue" placeholder="e.g. Drexel Park, Valdosta" required style="flex:1;min-width:0"/>
             <button type="button" id="travel-btn" onclick="checkTravel()" style="flex-shrink:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:0 14px;font-size:12px;color:var(--text-2);cursor:pointer;white-space:nowrap;height:40px;transition:border-color .15s">Check travel</button>
           </div>
           <div id="travel-status" style="font-size:11px;margin-top:5px;min-height:16px;color:var(--text-3)"></div>
@@ -243,21 +243,21 @@ import Layout from '../layouts/Layout.astro';
           <div class="cost-line hide" id="cl-travel"><span id="cl-travel-label">Travel fee</span><span id="cl-travel-v"></span></div>
           <div class="cost-line total"><span>Total</span><span id="cl-total"></span></div>
           <div class="cost-line deposit"><span>Deposit due at booking (50%)</span><span id="cl-deposit"></span></div>
-          <div class="cost-line balance"><span>Balance due day of event</span><span id="cl-balance"></span></div>
+          <div class="cost-line balance"><span>Balance due day of session</span><span id="cl-balance"></span></div>
         </div>
 
         <hr class="divider" style="grid-column:1/-1"/>
 
-        <div class="field">
-          <label>Player last name (optional)</label>
-          <input type="text" id="f-player-name" placeholder="e.g. Smith"/>
+        <div class="field full">
+          <label>Who is this session for? (optional)</label>
+          <input type="text" id="f-player-name" placeholder="e.g. Jordan Smith"/>
         </div>
         <div class="field">
-          <label>Jersey # (optional)</label>
+          <label>Jersey # (sports only, optional)</label>
           <input type="text" id="f-jersey" placeholder="e.g. 12"/>
         </div>
-        <div class="field full">
-          <label>Position (optional)</label>
+        <div class="field">
+          <label>Position (sports only, optional)</label>
           <input type="text" id="f-position" placeholder="e.g. Wide Receiver"/>
         </div>
 
@@ -458,7 +458,7 @@ document.getElementById('confirm-form').addEventListener('submit', async functio
   const jersey    = document.getElementById('f-jersey').value.trim();
   const position  = document.getElementById('f-position').value.trim();
   const playerInfo = [
-    playerName && 'Player: ' + playerName,
+    playerName && 'For: ' + playerName,
     jersey     && 'Jersey: #' + jersey,
     position   && 'Position: ' + position,
   ].filter(Boolean).join(', ');

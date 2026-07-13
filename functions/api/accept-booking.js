@@ -51,7 +51,7 @@ export async function onRequestPost(context) {
 function acceptEmail(name, b, confirmUrl) {
   const rows = [
     b.event_date       && ['Date',    b.event_date],
-    b.sport_type       && ['Sport',   b.sport_type],
+    b.sport_type       && ['Session', b.sport_type],
     b.package_selected && ['Package', b.package_selected],
     b.total            && ['Total',   b.total],
   ].filter(Boolean);
@@ -61,7 +61,7 @@ function acceptEmail(name, b, confirmUrl) {
 <div style="max-width:520px;margin:0 auto;padding:44px 24px">
   <p style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:#999;margin:0 0 36px">Zachary Routsong Photography</p>
   <h1 style="font-size:24px;font-weight:300;letter-spacing:-.02em;color:#1a1918;margin:0 0 10px">Your booking was accepted</h1>
-  <p style="font-size:13px;color:#666;line-height:1.8;margin:0 0 28px">Hi ${name}, your session request has been accepted. Click below to finish your booking — you'll set your venue, any add-ons, and final notes.</p>
+  <p style="font-size:13px;color:#666;line-height:1.8;margin:0 0 28px">Hi ${name}, your session request has been accepted. Click below to finish your booking — you'll set your location, any add-ons, and final notes.</p>
   ${rows.length ? `<div style="background:#f7f6f5;border:1px solid #e8e7e6;border-radius:8px;padding:18px;margin-bottom:28px">
     ${rows.map(([k,v]) => `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #e8e7e6;font-size:12px"><span style="color:#999">${k}</span><span style="font-weight:500">${v}</span></div>`).join('')}
   </div>` : ''}

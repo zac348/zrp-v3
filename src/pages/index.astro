@@ -4,27 +4,91 @@ import Layout from '../layouts/Layout.astro';
 <Layout title="Zachary Routsong Photography">
 
 <style is:global>
+.hero-wrap {
+  position: relative;
+  overflow: hidden;
+  /* bottom edge is drawn by the marquee's top border */
+}
+/* Ambient aura — two drifting light pools behind the hero */
+.hero-wrap::before,
+.hero-wrap::after {
+  content: '';
+  position: absolute;
+  width: 480px;
+  height: 480px;
+  border-radius: 50%;
+  filter: blur(70px);
+  pointer-events: none;
+}
+.hero-wrap::before {
+  top: -180px;
+  left: -100px;
+  background: radial-gradient(circle, var(--aura-1), transparent 65%);
+  animation: drift-a 18s ease-in-out infinite alternate;
+}
+.hero-wrap::after {
+  top: -80px;
+  right: -160px;
+  background: radial-gradient(circle, var(--aura-2), transparent 65%);
+  animation: drift-b 22s ease-in-out infinite alternate;
+}
+@keyframes drift-a { to { transform: translate(90px, 60px) scale(1.2) } }
+@keyframes drift-b { to { transform: translate(-70px, 90px) scale(1.15) } }
+
 .hero {
   max-width: 860px;
   margin: 0 auto;
-  padding: 72px 28px 56px;
-  border-bottom: 1px solid var(--border);
+  padding: 84px 28px 64px;
+  position: relative;
+  z-index: 2;
 }
 .hero-eyebrow {
   font-family: 'DM Mono', monospace;
   font-size: 10px;
   letter-spacing: .18em;
   text-transform: uppercase;
-  color: var(--text-3);
+  color: var(--accent);
   margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.hero-eyebrow::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 12px var(--accent);
+  animation: pulse-dot 2.6s ease-in-out infinite;
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1) }
+  50%      { opacity: .45; transform: scale(.8) }
 }
 .hero-title {
   font-size: clamp(32px, 5.5vw, 52px);
   font-weight: 300;
   letter-spacing: -.025em;
   line-height: 1.15;
-  color: var(--text);
   margin-bottom: 28px;
+  background: linear-gradient(105deg,
+    var(--text) 0%, var(--text) 42%,
+    var(--accent-bright) 50%,
+    var(--text) 58%, var(--text) 100%);
+  background-size: 250% 100%;
+  background-position: 100% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation:
+    rise-in .7s cubic-bezier(.16,1,.3,1) .15s both,
+    title-shimmer 7s ease-in-out 1.4s infinite;
+}
+@keyframes title-shimmer {
+  0%       { background-position: 100% 0 }
+  45%, 100% { background-position: -150% 0 }
 }
 .hero-sub {
   font-size: 14px;
@@ -84,6 +148,16 @@ import Layout from '../layouts/Layout.astro';
   transition: transform .3s cubic-bezier(.16,1,.3,1);
 }
 .grid-item:hover .grid-overlay span { transform: translateY(0) }
+.grid-item::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 0 1px var(--accent);
+  opacity: 0;
+  transition: opacity .3s;
+  pointer-events: none;
+}
+.grid-item:hover::after { opacity: .6 }
 .placeholder-cell {
   aspect-ratio: 4/3;
   background: var(--surface-dim);
@@ -121,8 +195,18 @@ import Layout from '../layouts/Layout.astro';
   background: var(--surface);
   user-select: none;
 }
-.cat-tag:hover { border-color: var(--border-2); color: var(--text); transform: translateY(-1px) }
-.cat-tag.active { border-color: var(--text); color: var(--text); background: var(--surface-dim) }
+.cat-tag:hover {
+  border-color: var(--accent);
+  color: var(--text);
+  transform: translateY(-1px);
+  box-shadow: 0 0 16px var(--accent-glow);
+}
+.cat-tag.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--surface-dim);
+  box-shadow: 0 0 16px var(--accent-glow);
+}
 .cat-tag.disabled { opacity: .35; cursor: default; pointer-events: none }
 
 .port-nudge { font-size: 12px; color: var(--text-3); text-align: center; margin-top: 16px; transition: opacity .3s }
@@ -154,6 +238,11 @@ import Layout from '../layouts/Layout.astro';
   object-position: center top;
   border-radius: var(--radius-lg);
   display: block;
+  transition: transform .5s cubic-bezier(.16,1,.3,1), box-shadow .5s;
+}
+.about-photo:hover {
+  transform: scale(1.015) rotate(-.4deg);
+  box-shadow: 0 12px 44px rgba(0,0,0,.25), 0 0 40px var(--accent-glow);
 }
 
 .about-text h2 {
@@ -180,6 +269,8 @@ import Layout from '../layouts/Layout.astro';
 }
 .stat { background: var(--surface); padding: 20px; transition: background .2s }
 .stat:hover { background: var(--surface-dim) }
+.stat-n { transition: color .25s }
+.stat:hover .stat-n { color: var(--accent) }
 .stat-n {
   font-size: 26px;
   font-weight: 300;
@@ -198,11 +289,21 @@ import Layout from '../layouts/Layout.astro';
 </style>
 
 <!-- HERO -->
-<div class="hero">
-  <p class="hero-eyebrow anim" style="--d:.05s">Photography · Valdosta, Georgia</p>
-  <h1 class="hero-title anim" style="--d:.15s">Zachary Routsong<br/>Photography</h1>
-  <p class="hero-sub anim" style="--d:.3s">Portraits, events, sports, and everything worth remembering. Sharp edits, private galleries, and straightforward pricing — real photos that look like the moment felt.</p>
-  <span class="anim" style="--d:.45s;display:inline-block"><a href="/book" class="btn">Book a session</a></span>
+<div class="hero-wrap">
+  <div class="hero">
+    <p class="hero-eyebrow anim" style="--d:.05s">Photography · Valdosta, Georgia</p>
+    <h1 class="hero-title">Zachary Routsong<br/>Photography</h1>
+    <p class="hero-sub anim" style="--d:.3s">Portraits, events, sports, and everything worth remembering. Sharp edits, private galleries, and straightforward pricing — real photos that look like the moment felt.</p>
+    <span class="anim" style="--d:.45s;display:inline-block"><a href="/book" class="btn">Book a session</a></span>
+  </div>
+</div>
+
+<!-- MARQUEE -->
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-track">
+    <span>Portraits<i>✦</i></span><span>Families<i>✦</i></span><span>Seniors<i>✦</i></span><span>Couples<i>✦</i></span><span>Events<i>✦</i></span><span>Sports<i>✦</i></span><span>Branding<i>✦</i></span><span>Valdosta&nbsp;GA<i>✦</i></span>
+    <span>Portraits<i>✦</i></span><span>Families<i>✦</i></span><span>Seniors<i>✦</i></span><span>Couples<i>✦</i></span><span>Events<i>✦</i></span><span>Sports<i>✦</i></span><span>Branding<i>✦</i></span><span>Valdosta&nbsp;GA<i>✦</i></span>
+  </div>
 </div>
 
 <!-- PORTFOLIO -->

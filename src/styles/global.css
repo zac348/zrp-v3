@@ -29,6 +29,14 @@
   --radius:    5px;
   --radius-sm: 3px;
   --radius-lg: 8px;
+
+  /* Accent — golden hour */
+  --accent:        #A8721F;
+  --accent-bright: #C08A2E;
+  --accent-glow:   rgba(192,138,46,.14);
+  --aura-1:        rgba(192,138,46,.10);
+  --aura-2:        rgba(124,58,237,.06);
+  --grain-opacity: .03;
 }
 
 /* ── DARK MODE ── */
@@ -56,7 +64,17 @@ html.dark {
   --amber-border: rgba(247,144,9,.25);
   --purple:       #9E77ED;
   --purple-bg:    rgba(158,119,237,.1);
+
+  /* Accent — brighter in the dark */
+  --accent:        #E8A33D;
+  --accent-bright: #F2B65C;
+  --accent-glow:   rgba(232,163,61,.22);
+  --aura-1:        rgba(232,163,61,.13);
+  --aura-2:        rgba(158,119,237,.10);
+  --grain-opacity: .055;
 }
+
+::selection { background: var(--accent); color: #16150F }
 
 html { scroll-behavior: smooth }
 
@@ -116,7 +134,70 @@ body {
   }
   .reveal { opacity: 1; transform: none }
   html { scroll-behavior: auto }
+  #cursor-glow { display: none }
 }
+
+/* ── FILM GRAIN ── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 256px 256px;
+  opacity: var(--grain-opacity);
+  pointer-events: none;
+  z-index: 900;
+}
+
+/* ── CURSOR GLOW ── */
+#cursor-glow {
+  position: fixed;
+  top: 0; left: 0;
+  width: 640px; height: 640px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--accent-glow), transparent 62%);
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity .8s ease;
+  will-change: transform;
+}
+
+/* ── MARQUEE ── */
+.marquee {
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+  padding: 13px 0;
+  position: relative;
+}
+.marquee::before, .marquee::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 80px;
+  z-index: 2;
+  pointer-events: none;
+}
+.marquee::before { left: 0; background: linear-gradient(to right, var(--bg), transparent) }
+.marquee::after  { right: 0; background: linear-gradient(to left, var(--bg), transparent) }
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 30s linear infinite;
+}
+.marquee-track span {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: .28em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  white-space: nowrap;
+  padding-right: 20px;
+}
+.marquee-track span i { font-style: normal; color: var(--accent); padding-left: 20px }
+@keyframes marquee { to { transform: translateX(-50%) } }
+@media (prefers-reduced-motion: reduce) { .marquee-track { animation: none } }
 
 /* ── NAVIGATION ── */
 .nav {
@@ -127,10 +208,16 @@ body {
   height: 56px;
   border-bottom: 1px solid var(--border);
   background: var(--bg);
+  background: color-mix(in srgb, var(--bg) 72%, transparent);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  backdrop-filter: blur(14px) saturate(1.4);
   position: sticky;
   top: 0;
   z-index: 100;
   gap: 16px;
+}
+@supports not (backdrop-filter: blur(14px)) {
+  .nav { background: var(--bg) }
 }
 
 .nav-logo {
@@ -202,7 +289,7 @@ html.dark .nav-logo-img {
 .btn:hover {
   background: var(--ink-hover);
   transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(26,25,24,.18);
+  box-shadow: 0 4px 14px rgba(26,25,24,.18), 0 0 24px var(--accent-glow);
 }
 .btn:active { transform: translateY(0) scale(.98); box-shadow: none }
 .btn:disabled { opacity: .45; cursor: not-allowed; transform: none; box-shadow: none }

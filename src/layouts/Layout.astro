@@ -27,9 +27,9 @@ const {
   <!-- Theme: run before paint to avoid flash -->
   <script is:inline>
     (function() {
+      // Dark is the default vibe — only go light if the visitor explicitly chose it
       var stored = localStorage.getItem('zrp-theme');
-      var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      if (stored === 'dark' || (!stored && prefersDark)) {
+      if (stored !== 'light') {
         document.documentElement.classList.add('dark');
       }
     })();
@@ -72,6 +72,8 @@ const {
   </footer>
 )}
 
+<div id="cursor-glow" aria-hidden="true"></div>
+
 <div class="toast" id="toast"></div>
 
 <div class="consent-bar" id="consent-bar">
@@ -89,6 +91,29 @@ const {
     localStorage.setItem('zrp-consent', '1');
     document.getElementById('consent-bar').classList.remove('show');
   }
+</script>
+
+<!-- Cursor glow: soft light that trails the pointer (desktop only) -->
+<script is:inline>
+  (function() {
+    var glow = document.getElementById('cursor-glow');
+    if (!glow) return;
+    if (window.matchMedia('(pointer: coarse)').matches) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var tx = window.innerWidth / 2, ty = window.innerHeight / 3, x = tx, y = ty, running = false;
+    function loop() {
+      x += (tx - x) * .07;
+      y += (ty - y) * .07;
+      glow.style.transform = 'translate(' + (x - 320) + 'px,' + (y - 320) + 'px)';
+      requestAnimationFrame(loop);
+    }
+    window.addEventListener('mousemove', function(e) {
+      tx = e.clientX; ty = e.clientY;
+      glow.style.opacity = '1';
+      if (!running) { running = true; loop(); }
+    }, { passive: true });
+    document.documentElement.addEventListener('mouseleave', function() { glow.style.opacity = '0'; });
+  })();
 </script>
 
 <!-- Scroll reveal: adds .in to .reveal elements as they enter the viewport -->

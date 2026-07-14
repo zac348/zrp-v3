@@ -26,14 +26,20 @@ import Layout from '../layouts/Layout.astro';
   animation-delay: var(--d, 0s);
 }
 .pkg-card:hover { border-color: var(--border-2); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(26,25,24,.08) }
-.pkg-card.sel { border-color: var(--text); background: var(--surface-dim); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(26,25,24,.1) }
+.pkg-card.sel {
+  border-color: var(--accent);
+  background: var(--surface-dim);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(26,25,24,.1), 0 0 28px var(--accent-glow);
+}
 .pkg-badge {
   font-family: 'DM Mono', monospace;
   font-size: 8px;
   letter-spacing: .1em;
   text-transform: uppercase;
-  background: var(--text);
-  color: var(--bg);
+  background: var(--accent);
+  color: #16150F;
+  box-shadow: 0 0 14px var(--accent-glow);
   padding: 2px 7px;
   border-radius: 3px;
   position: absolute;

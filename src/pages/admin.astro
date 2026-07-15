@@ -574,6 +574,13 @@ html,body { height: 100% }
     <div id="pricing-list"><p class="no-data">Loading…</p></div>
     <div class="sec-label" style="margin-top:24px">add-ons</div>
     <div id="addon-list"><p class="no-data">Loading…</p></div>
+    <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;align-items:center">
+      <input type="text" id="new-addon-name" placeholder="New add-on (e.g. Second photographer)" style="flex:1;min-width:200px"/>
+      <input type="number" id="new-addon-price" placeholder="$" min="0" style="width:90px"/>
+      <button class="btn-sm on-ink" onclick="addAddon()">Add</button>
+      <button class="btn-sm" onclick="seedAddons()">Add starter pack</button>
+    </div>
+    <p style="font-size:11px;color:var(--text-3);margin-top:8px">Available add-ons show up on the client's booking confirmation page automatically.</p>
   </div>
 
   <!-- COUPONS -->
@@ -1351,16 +1358,64 @@ function renderPricing(packages, addons) {
   }).join('');
 
   const aList = document.getElementById('addon-list');
-  if (!addons.length) { aList.innerHTML = '<p class="no-data">No add-ons in database yet.</p>'; }
+  if (!addons.length) { aList.innerHTML = '<p class="no-data">No add-ons yet — use "Add starter pack" below to load the standard set.</p>'; }
   else aList.innerHTML = addons.map(a => `
     <div class="addon-card${a.available===false?' unavailable':''}">
       <div><div class="addon-name">${a.addon_name}</div><div class="addon-price">$${a.price}</div></div>
-      <label class="avail-toggle">
-        <input type="checkbox" ${a.available!==false?'checked':''} onchange="toggleAvail('${a.id}',this.checked,'addon')"/>
-        Mark unavailable
-      </label>
+      <div style="display:flex;align-items:center;gap:14px">
+        <label class="avail-toggle">
+          <input type="checkbox" ${a.available!==false?'checked':''} onchange="toggleAvail('${a.id}',this.checked,'addon')"/>
+          Available
+        </label>
+        <button class="btn-sm red" onclick="deleteAddon('${a.id}')">Delete</button>
+      </div>
     </div>`).join('');
 }
+
+// ── ADD-ON MANAGEMENT ──
+const STARTER_ADDONS = [
+  { addon_name: 'Rush delivery (24 hrs)',      price: 40 },
+  { addon_name: 'Extended coverage (+1 hour)', price: 30 },
+  { addon_name: 'Second photographer',         price: 75 },
+  { addon_name: 'Video highlight reel',        price: 50 },
+  { addon_name: 'Social media crop pack',      price: 10 },
+  { addon_name: 'All unedited photos',         price: 25 },
+  { addon_name: 'Printed photo album',         price: 60 },
+  { addon_name: 'Canvas print (16×20)',        price: 45 },
+];
+
+async function addAddon() {
+  const name  = document.getElementById('new-addon-name').value.trim();
+  const price = parseFloat(document.getElementById('new-addon-price').value);
+  if (!name || !isFinite(price) || price < 0) { toast('Enter an add-on name and price'); return; }
+  const { error } = await sb.from('addon_pricing').insert({ addon_name: name, price, available: true });
+  if (error) { toast('Could not add: ' + error.message); return; }
+  document.getElementById('new-addon-name').value = '';
+  document.getElementById('new-addon-price').value = '';
+  await loadPricing(); toast('Add-on added');
+}
+window.addAddon = addAddon;
+
+async function seedAddons() {
+  const { data } = await sb.from('addon_pricing').select('addon_name');
+  const existing = new Set((data || []).map(a => (a.addon_name || '').toLowerCase()));
+  const missing = STARTER_ADDONS
+    .filter(a => !existing.has(a.addon_name.toLowerCase()))
+    .map(a => ({ ...a, available: true }));
+  if (!missing.length) { toast('Starter add-ons are already in the list'); return; }
+  const { error } = await sb.from('addon_pricing').insert(missing);
+  if (error) { toast('Could not add: ' + error.message); return; }
+  await loadPricing(); toast(missing.length + ' add-ons added');
+}
+window.seedAddons = seedAddons;
+
+async function deleteAddon(id) {
+  if (!confirm('Delete this add-on? Clients will no longer see it.')) return;
+  const { error } = await sb.from('addon_pricing').delete().eq('id', id);
+  if (error) { toast('Could not delete: ' + error.message); return; }
+  await loadPricing(); toast('Add-on deleted');
+}
+window.deleteAddon = deleteAddon;
 
 function toggleSale(id, checked) {
   const saleInput = document.getElementById('pr-sale-'+id);

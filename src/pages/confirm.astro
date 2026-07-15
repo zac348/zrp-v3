@@ -200,19 +200,8 @@ import Layout from '../layouts/Layout.astro';
           <div class="qty-sub" id="qs-prints">0 prints · $0.00</div>
         </div>
       </div>
-      <div class="addons-toggles">
-        <div class="toggle-pill" data-name="Rush delivery (24 hrs)" data-price="40" onclick="togAddon(this)">
-          <div class="toggle-left"><div class="toggle-box"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"/></svg></div><span class="toggle-name">Rush delivery</span></div>
-          <span class="toggle-price">+$40</span>
-        </div>
-        <div class="toggle-pill" data-name="Video highlight reel" data-price="50" onclick="togAddon(this)">
-          <div class="toggle-left"><div class="toggle-box"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"/></svg></div><span class="toggle-name">Video reel</span></div>
-          <span class="toggle-price">+$50</span>
-        </div>
-        <div class="toggle-pill" data-name="Social media crop pack" data-price="10" onclick="togAddon(this)">
-          <div class="toggle-left"><div class="toggle-box"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"/></svg></div><span class="toggle-name">Social crops</span></div>
-          <span class="toggle-price">+$10</span>
-        </div>
+      <div class="addons-toggles" id="addons-toggles">
+        <!-- populated from addon_pricing; falls back to defaults -->
       </div>
     </div>
 
@@ -237,9 +226,7 @@ import Layout from '../layouts/Layout.astro';
           <div class="cost-line" id="cl-pkg"><span id="cl-pkg-n"></span><span id="cl-pkg-p"></span></div>
           <div class="cost-line hide" id="cl-photos"><span>Extra photos</span><span id="cl-photos-v"></span></div>
           <div class="cost-line hide" id="cl-prints"><span>Printed 4×6</span><span id="cl-prints-v"></span></div>
-          <div class="cost-line hide" id="cl-a0"><span></span><span></span></div>
-          <div class="cost-line hide" id="cl-a1"><span></span><span></span></div>
-          <div class="cost-line hide" id="cl-a2"><span></span><span></span></div>
+          <div id="cl-addons"></div>
           <div class="cost-line hide" id="cl-travel"><span id="cl-travel-label">Travel fee</span><span id="cl-travel-v"></span></div>
           <div class="cost-line total"><span>Total</span><span id="cl-total"></span></div>
           <div class="cost-line deposit"><span>Deposit due at booking (50%)</span><span id="cl-deposit"></span></div>
@@ -328,9 +315,43 @@ async function init() {
   document.getElementById('sum-date').textContent  = data.event_date || '—';
   document.getElementById('sum-sport').textContent = data.sport_type || '—';
 
-  // Set up cost box baseline
+  // Load add-on catalog, then set up cost box baseline
+  await loadAddons();
   updateCost();
   show('form-state');
+}
+
+// ── ADD-ON CATALOG ──
+const DEFAULT_ADDONS = [
+  { name: 'Rush delivery (24 hrs)',  price: 40 },
+  { name: 'Video highlight reel',    price: 50 },
+  { name: 'Social media crop pack',  price: 10 },
+];
+
+function esc(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+async function loadAddons() {
+  let list = [];
+  try {
+    const { data } = await sb
+      .from('addon_pricing')
+      .select('addon_name, price, available')
+      .order('price');
+    if (data && data.length) {
+      list = data
+        .filter(a => a.available !== false)
+        .map(a => ({ name: a.addon_name, price: Number(a.price) }));
+    }
+  } catch (_) {}
+  if (!list.length) list = DEFAULT_ADDONS;
+
+  document.getElementById('addons-toggles').innerHTML = list.map(a => `
+    <div class="toggle-pill" data-name="${esc(a.name)}" data-price="${a.price}" onclick="togAddon(this)">
+      <div class="toggle-left"><div class="toggle-box"><svg viewBox="0 0 10 8"><polyline points="1,4 4,7 9,1"/></svg></div><span class="toggle-name">${esc(a.name)}</span></div>
+      <span class="toggle-price">+$${a.price}</span>
+    </div>`).join('');
 }
 
 function show(id) { document.getElementById(id).style.display = 'block'; }
@@ -381,11 +402,9 @@ function updateCost() {
   document.getElementById('cl-pkg-p').textContent = '$' + basePkg.toFixed(2);
   showLine('cl-photos', qPhotos > 0, 'cl-photos-v', qPhotos + ' set' + (qPhotos !== 1 ? 's' : '') + ' · +$' + pc.toFixed(2));
   showLine('cl-prints', qPrints > 0, 'cl-prints-v', qPrints + ' print' + (qPrints !== 1 ? 's' : '') + ' · +$' + pr.toFixed(2));
-  ['cl-a0','cl-a1','cl-a2'].forEach((cid, i) => {
-    const row = document.getElementById(cid), a = addons[i];
-    if (a) { row.classList.remove('hide'); row.children[0].textContent = a.name; row.children[1].textContent = '+$' + a.price.toFixed(2); }
-    else row.classList.add('hide');
-  });
+  document.getElementById('cl-addons').innerHTML = addons.map(a =>
+    `<div class="cost-line"><span>${esc(a.name)}</span><span>+$${a.price.toFixed(2)}</span></div>`
+  ).join('');
   showLine('cl-travel', travelFee > 0, 'cl-travel-v', '+$' + travelFee.toFixed(2));
   if (travelFee > 0) document.getElementById('cl-travel-label').textContent = `Travel (${travelMiles.toFixed(1)} mi)`;
   document.getElementById('cl-total').textContent   = '$' + total.toFixed(2);

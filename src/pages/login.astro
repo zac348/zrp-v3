@@ -18,8 +18,22 @@ body { min-height: 100vh; display: flex; align-items: center; justify-content: c
 .sub { font-size: 12px; color: var(--text-3); text-align: center; margin-bottom: 32px }
 .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px }
 .err { font-size: 11px; color: var(--red); text-align: center; margin-top: 10px; display: none }
+.ok  { font-size: 11px; color: var(--green); text-align: center; margin-top: 10px; display: none }
 .back { display: block; text-align: center; margin-top: 20px; font-size: 11px; color: var(--text-3); text-decoration: none; transition: color .15s }
 .back:hover { color: var(--text) }
+.forgot {
+  display: block;
+  margin: 14px auto 0;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 11px;
+  color: var(--text-3);
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color .15s;
+}
+.forgot:hover { color: var(--text) }
 </style>
 
 <div class="box">
@@ -38,6 +52,8 @@ body { min-height: 100vh; display: flex; align-items: center; justify-content: c
 
   <button class="btn" style="width:100%;margin-top:4px" id="login-btn" onclick="doLogin()">Sign in</button>
   <p class="err" id="err-msg"></p>
+  <p class="ok" id="ok-msg"></p>
+  <button class="forgot" id="forgot-btn" onclick="forgotPw()">Forgot password?</button>
   <a href="/" class="back">← Back to site</a>
 </div>
 
@@ -53,24 +69,63 @@ sb.auth.getSession().then(({ data }) => {
   if (data.session) window.location.href = '/admin';
 });
 
+function showErr(msg) {
+  const errEl = document.getElementById('err-msg');
+  document.getElementById('ok-msg').style.display = 'none';
+  errEl.textContent = msg;
+  errEl.style.display = 'block';
+}
+function showOk(msg) {
+  const okEl = document.getElementById('ok-msg');
+  document.getElementById('err-msg').style.display = 'none';
+  okEl.textContent = msg;
+  okEl.style.display = 'block';
+}
+
+// Translate Supabase errors into something specific
+function friendlyError(error) {
+  const m = (error && error.message) || '';
+  if (m.includes('Invalid login credentials')) return 'Wrong email or password.';
+  if (m.includes('Email not confirmed'))       return 'This email has not been confirmed yet.';
+  if (m.includes('rate limit') || m.includes('too many')) return 'Too many attempts — wait a minute and try again.';
+  if (m.includes('Failed to fetch') || m.includes('NetworkError')) return 'Could not reach the login service — check your connection and try again.';
+  return m || 'Something went wrong — try again.';
+}
+
 async function doLogin() {
   const email    = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value;
   const btn      = document.getElementById('login-btn');
-  const errEl    = document.getElementById('err-msg');
-  errEl.style.display = 'none';
+  document.getElementById('err-msg').style.display = 'none';
   btn.disabled = true; btn.textContent = 'Signing in…';
 
   const { error } = await sb.auth.signInWithPassword({ email, password });
   if (error) {
-    errEl.textContent = 'Invalid credentials — try again.';
-    errEl.style.display = 'block';
+    showErr(friendlyError(error));
     btn.disabled = false; btn.textContent = 'Sign in';
   } else {
     window.location.href = '/admin';
   }
 }
 window.doLogin = doLogin;
+
+async function forgotPw() {
+  const email = document.getElementById('email').value.trim();
+  if (!email) { showErr('Type your email in the box above first, then click "Forgot password?" again.'); return; }
+  const btn = document.getElementById('forgot-btn');
+  btn.disabled = true; btn.textContent = 'Sending…';
+
+  const { error } = await sb.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + '/reset',
+  });
+  btn.disabled = false; btn.textContent = 'Forgot password?';
+  if (error) {
+    showErr(friendlyError(error));
+  } else {
+    showOk('If an account exists for ' + email + ', a reset link is on its way. Check your inbox.');
+  }
+}
+window.forgotPw = forgotPw;
 
 document.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 </script>

@@ -1,0 +1,120 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+<Layout title="Reset Password — ZRP" noNav={true} noFooter={true}>
+<style is:global>
+body { min-height: 100vh; display: flex; align-items: center; justify-content: center }
+.box { width: 100%; max-width: 340px; padding: 0 24px }
+.logo {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  text-align: center;
+  margin-bottom: 40px;
+}
+.title { font-size: 20px; font-weight: 300; text-align: center; margin-bottom: 4px; letter-spacing: -.02em }
+.sub { font-size: 12px; color: var(--text-3); text-align: center; margin-bottom: 32px }
+.field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px }
+.err { font-size: 11px; color: var(--red); text-align: center; margin-top: 10px; display: none }
+.ok  { font-size: 11px; color: var(--green); text-align: center; margin-top: 10px; display: none }
+.back { display: block; text-align: center; margin-top: 20px; font-size: 11px; color: var(--text-3); text-decoration: none; transition: color .15s }
+.back:hover { color: var(--text) }
+</style>
+
+<div class="box">
+  <p class="logo">Zachary Routsong Photography</p>
+  <h1 class="title">Set a new password</h1>
+  <p class="sub" id="sub-msg">Checking your reset link…</p>
+
+  <div id="form-wrap" style="display:none">
+    <div class="field">
+      <label>New password</label>
+      <input type="password" id="pw1" placeholder="••••••••" autocomplete="new-password"/>
+    </div>
+    <div class="field">
+      <label>Confirm new password</label>
+      <input type="password" id="pw2" placeholder="••••••••" autocomplete="new-password"/>
+    </div>
+    <button class="btn" style="width:100%;margin-top:4px" id="save-btn" onclick="savePw()">Save new password</button>
+  </div>
+
+  <p class="err" id="err-msg"></p>
+  <p class="ok" id="ok-msg"></p>
+  <a href="/login" class="back">← Back to login</a>
+</div>
+
+<script>
+import { createClient } from '@supabase/supabase-js';
+const sb = createClient(
+  import.meta.env.PUBLIC_SUPABASE_URL,
+  import.meta.env.PUBLIC_SUPABASE_ANON_KEY
+);
+
+const subEl  = document.getElementById('sub-msg');
+const formEl = document.getElementById('form-wrap');
+const errEl  = document.getElementById('err-msg');
+const okEl   = document.getElementById('ok-msg');
+
+let linkOk = false;
+
+function enableForm() {
+  if (linkOk) return;
+  linkOk = true;
+  subEl.textContent = 'Choose a new password for your admin account.';
+  formEl.style.display = 'block';
+  errEl.style.display = 'none';
+}
+
+// The reset link signs the visitor in with a temporary recovery session.
+// supabase-js parses it from the URL automatically; we just wait for it.
+sb.auth.onAuthStateChange((_event, session) => {
+  if (session) enableForm();
+});
+sb.auth.getSession().then(({ data }) => {
+  if (data.session) enableForm();
+});
+setTimeout(() => {
+  if (!linkOk) {
+    subEl.textContent = 'This reset link is invalid or has expired.';
+    errEl.textContent = 'Go back to the login page and click "Forgot password?" to get a fresh link.';
+    errEl.style.display = 'block';
+  }
+}, 2500);
+
+async function savePw() {
+  const p1 = document.getElementById('pw1').value;
+  const p2 = document.getElementById('pw2').value;
+  errEl.style.display = 'none';
+
+  if (p1.length < 8) {
+    errEl.textContent = 'Password needs to be at least 8 characters.';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (p1 !== p2) {
+    errEl.textContent = 'Passwords do not match.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  const btn = document.getElementById('save-btn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+
+  const { error } = await sb.auth.updateUser({ password: p1 });
+  if (error) {
+    errEl.textContent = error.message || 'Could not update the password — try again.';
+    errEl.style.display = 'block';
+    btn.disabled = false; btn.textContent = 'Save new password';
+  } else {
+    okEl.textContent = 'Password updated — taking you to the dashboard…';
+    okEl.style.display = 'block';
+    setTimeout(() => { window.location.href = '/admin'; }, 1200);
+  }
+}
+window.savePw = savePw;
+
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && linkOk) savePw(); });
+</script>
+</Layout>

@@ -1,17 +1,19 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0 }
 
 :root {
-  /* Palette — warm off-white light mode */
-  --bg:           #F9F9F7;
-  --surface:      #FFFFFF;
-  --surface-dim:  #F2F2EF;
-  --border:       #E5E5E0;
-  --border-2:     #CCCCC7;
-  --text:         #1A1918;
-  --text-2:       #6B6967;
-  --text-3:       #AEADA9;
-  --ink:          #1A1918;
-  --ink-hover:    #2E2D2C;
+  /* Palette — warm paper, light mode */
+  --bg:           #F4F1EA;
+  --surface:      #FBF9F4;
+  --surface-dim:  #ECE8DE;
+  --border:       #DFDACE;
+  --border-2:     #C4BDAC;
+  --text:         #191713;
+  --text-2:       #5F5A4F;
+  --text-3:       #A39C8B;
+  --ink:          #191713;
+  --ink-hover:    #2E2B24;
+
+  --font-serif: 'Fraunces', Georgia, 'Times New Roman', serif;
 
   /* Status — kept vivid for UX clarity */
   --red:          #C8291E;
@@ -26,9 +28,10 @@
   --purple:       #7C3AED;
   --purple-bg:    rgba(124,58,237,.07);
 
-  --radius:    5px;
-  --radius-sm: 3px;
-  --radius-lg: 8px;
+  /* Square corners — print, not app */
+  --radius:    0px;
+  --radius-sm: 0px;
+  --radius-lg: 0px;
 
   /* Accent — muted gold, interactive states only */
   --accent: #A8721F;
@@ -36,16 +39,16 @@
 
 /* ── DARK MODE ── */
 html.dark {
-  --bg:          #111110;
-  --surface:     #1C1B1A;
-  --surface-dim: #242322;
-  --border:      #302F2E;
-  --border-2:    #403F3D;
-  --text:        #EEEDE9;
-  --text-2:      #9A9895;
-  --text-3:      #605E5C;
-  --ink:         #EEEDE9;
-  --ink-hover:   #FFFFFF;
+  --bg:          #12100E;
+  --surface:     #1A1815;
+  --surface-dim: #23201C;
+  --border:      #2E2A25;
+  --border-2:    #413C34;
+  --text:        #EDEAE2;
+  --text-2:      #9C968A;
+  --text-3:      #625D52;
+  --ink:         #EDEAE2;
+  --ink-hover:   #FFFDF7;
 
   /* Status colors — slightly brighter in dark mode */
   --red:          #F04438;
@@ -76,6 +79,13 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   animation: page-in .4s ease both;
+}
+
+/* Headlines are set in serif everywhere */
+h1, h2 {
+  font-family: var(--font-serif);
+  font-weight: 340;
+  letter-spacing: -.01em;
 }
 
 /* ── MOTION SYSTEM ── */
@@ -132,19 +142,13 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 0 28px;
-  height: 56px;
+  height: 60px;
   border-bottom: 1px solid var(--border);
   background: var(--bg);
-  background: color-mix(in srgb, var(--bg) 72%, transparent);
-  -webkit-backdrop-filter: blur(14px) saturate(1.4);
-  backdrop-filter: blur(14px) saturate(1.4);
   position: sticky;
   top: 0;
   z-index: 100;
   gap: 16px;
-}
-@supports not (backdrop-filter: blur(14px)) {
-  .nav { background: var(--bg) }
 }
 
 .nav-logo {
@@ -198,28 +202,26 @@ html.dark .nav-logo-img {
 /* ── BUTTONS ── */
 .btn {
   display: inline-block;
-  background: var(--ink);
-  color: var(--bg);
-  padding: 9px 20px;
-  border-radius: var(--radius);
-  font-size: 13px;
+  background: none;
+  color: var(--text);
+  padding: 11px 22px;
+  border: 1px solid var(--text);
+  border-radius: 0;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
   font-weight: 500;
+  letter-spacing: .14em;
+  text-transform: uppercase;
   text-decoration: none;
-  border: none;
   cursor: pointer;
-  transition: background .15s, opacity .15s, transform .2s cubic-bezier(.16,1,.3,1), box-shadow .2s;
+  transition: background .2s, color .2s;
   white-space: nowrap;
-  font-family: inherit;
   line-height: 1.4;
 }
 
-.btn:hover {
-  background: var(--ink-hover);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(26,25,24,.18);
-}
-.btn:active { transform: translateY(0) scale(.98); box-shadow: none }
-.btn:disabled { opacity: .45; cursor: not-allowed; transform: none; box-shadow: none }
+.btn:hover { background: var(--text); color: var(--bg) }
+.btn:active { opacity: .85 }
+.btn:disabled { opacity: .4; cursor: not-allowed; background: none; color: var(--text) }
 
 .btn-sm {
   font-family: 'DM Mono', monospace;
@@ -325,16 +327,37 @@ input[type="time"] { cursor: pointer }
 /* ── FOOTER ── */
 footer {
   border-top: 1px solid var(--border);
+  margin-top: auto;
+}
+
+.footer-cta {
+  display: block;
+  padding: 56px 28px;
+  font-family: var(--font-serif);
+  font-weight: 320;
+  font-size: clamp(34px, 7vw, 72px);
+  letter-spacing: -.02em;
+  line-height: 1.05;
+  color: var(--text);
+  text-decoration: none;
+  border-bottom: 1px solid var(--border);
+  transition: color .2s, padding-left .3s cubic-bezier(.16,1,.3,1);
+}
+.footer-cta em { font-style: italic }
+.footer-cta span { display: inline-block; transition: transform .3s cubic-bezier(.16,1,.3,1); margin-left: .3em }
+.footer-cta:hover { padding-left: 44px }
+.footer-cta:hover span { transform: translateX(10px) }
+
+.footer-meta {
   padding: 20px 28px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
   gap: 8px;
-  margin-top: auto;
 }
 
-footer span { font-size: 12px; color: var(--text-3) }
+.footer-meta span { font-size: 12px; color: var(--text-3) }
 
 .foot-links { display: flex; gap: 20px }
 .foot-links a {
@@ -344,6 +367,7 @@ footer span { font-size: 12px; color: var(--text-3) }
   transition: color .15s;
 }
 .foot-links a:hover { color: var(--text) }
+@media (max-width: 600px) { .footer-cta { padding: 40px 18px } .footer-cta:hover { padding-left: 30px } }
 
 /* ── TOAST ── */
 .toast {

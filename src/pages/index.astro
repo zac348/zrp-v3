@@ -4,69 +4,116 @@ import Layout from '../layouts/Layout.astro';
 <Layout title="Zachary Routsong Photography">
 
 <style is:global>
+/* ── HERO ── */
 .hero {
-  max-width: 860px;
-  margin: 0 auto;
-  padding: 72px 28px 56px;
+  padding: 96px 28px 72px;
   border-bottom: 1px solid var(--border);
 }
-.hero-eyebrow {
+.hero-inner { max-width: 1060px; margin: 0 auto }
+.hero-kicker {
   font-family: 'DM Mono', monospace;
   font-size: 10px;
-  letter-spacing: .18em;
+  letter-spacing: .2em;
   text-transform: uppercase;
   color: var(--text-3);
-  margin-bottom: 18px;
+  margin-bottom: 26px;
 }
-.hero-title {
-  font-size: clamp(32px, 5.5vw, 52px);
-  font-weight: 300;
-  letter-spacing: -.025em;
-  line-height: 1.15;
+.hero-name {
+  font-family: var(--font-serif);
+  font-weight: 320;
+  font-size: clamp(52px, 11vw, 148px);
+  line-height: .96;
+  letter-spacing: -.03em;
   color: var(--text);
-  margin-bottom: 28px;
+  margin: 0 0 36px;
 }
-.hero-sub {
+.hero-name span { display: block }
+.hero-name .indent { margin-left: clamp(24px, 9vw, 130px); font-style: italic }
+.hero-foot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.hero-role {
   font-size: 14px;
   color: var(--text-2);
-  margin-bottom: 32px;
-  max-width: 440px;
   line-height: 1.7;
+  max-width: 380px;
 }
+.hero-role em { font-family: var(--font-serif); font-style: italic; color: var(--text); font-size: 15px }
 
-.section { max-width: 860px; margin: 0 auto; padding: 0 28px 72px }
-@media (max-width: 600px) { .section { padding: 0 18px 56px } }
-
-/* PORTFOLIO GRID */
-.grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 3px;
+/* ── SECTION SCAFFOLD ── */
+.section { max-width: 1060px; margin: 0 auto; padding: 72px 28px }
+.sec-head {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 36px;
 }
-@media (max-width: 560px) { .grid { grid-template-columns: repeat(2, 1fr) } }
+.sec-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--text-3);
+  letter-spacing: .1em;
+}
+.sec-head h2 {
+  font-size: 26px;
+  color: var(--text);
+  margin: 0;
+}
+.sec-head .rule { flex: 1; height: 1px; background: var(--border); align-self: center }
 
+/* ── WORK / FILTER INDEX ── */
+.work-index {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 22px;
+  margin-bottom: 28px;
+}
+.cat-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  background: none;
+  border: none;
+  padding: 0 0 3px;
+  border-bottom: 1px solid transparent;
+  cursor: pointer;
+  transition: color .2s, border-color .2s;
+  user-select: none;
+}
+.cat-tag:hover { color: var(--text) }
+.cat-tag.active { color: var(--text); border-bottom-color: var(--accent) }
+.cat-tag.disabled { opacity: .45; cursor: default; pointer-events: none }
+
+/* ── MASONRY GRID ── */
+.grid { columns: 3 260px; column-gap: 14px }
 .grid-item {
-  aspect-ratio: 4/3;
-  background: var(--surface-dim);
+  break-inside: avoid;
+  margin-bottom: 14px;
+  position: relative;
   overflow: hidden;
   cursor: pointer;
-  position: relative;
+  background: var(--surface-dim);
   opacity: 0;
   animation: scale-in .6s cubic-bezier(.16,1,.3,1) both;
   animation-delay: var(--d, 0s);
 }
 .grid-item img {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  height: auto;
   display: block;
-  transition: transform .6s cubic-bezier(.16,1,.3,1), filter .4s ease;
+  transition: transform .6s cubic-bezier(.16,1,.3,1);
 }
-.grid-item:hover img { transform: scale(1.05) }
+.grid-item:hover img { transform: scale(1.04) }
 .grid-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(26,25,24,.65), rgba(26,25,24,0) 55%);
+  background: linear-gradient(to top, rgba(18,16,14,.6), rgba(18,16,14,0) 45%);
   opacity: 0;
   transition: opacity .3s;
   display: flex;
@@ -77,14 +124,13 @@ import Layout from '../layouts/Layout.astro';
 .grid-overlay span {
   font-family: 'DM Mono', monospace;
   font-size: 9px;
-  letter-spacing: .12em;
+  letter-spacing: .14em;
   text-transform: uppercase;
-  color: rgba(255,255,255,.9);
-  transform: translateY(6px);
-  transition: transform .3s cubic-bezier(.16,1,.3,1);
+  color: rgba(255,253,247,.9);
 }
-.grid-item:hover .grid-overlay span { transform: translateY(0) }
 .placeholder-cell {
+  break-inside: avoid;
+  margin-bottom: 14px;
   aspect-ratio: 4/3;
   background: var(--surface-dim);
   border: 1px solid var(--border);
@@ -97,51 +143,19 @@ import Layout from '../layouts/Layout.astro';
   font-size: 9px;
   color: var(--text-3);
 }
-
-/* CATEGORY TAGS */
-.cats-strip {
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-  padding: 28px 0;
-}
-.cats-inner { max-width: 860px; margin: 0 auto; padding: 0 28px }
-@media (max-width: 600px) { .cats-inner { padding: 0 18px } }
-
-.cat-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px }
-.cat-tag {
+.port-count {
   font-family: 'DM Mono', monospace;
-  font-size: 9px;
-  letter-spacing: .09em;
-  color: var(--text-2);
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  padding: 5px 11px;
-  cursor: pointer;
-  transition: border-color .2s, color .2s, background .2s, transform .2s cubic-bezier(.16,1,.3,1);
-  background: var(--surface);
-  user-select: none;
-}
-.cat-tag:hover { border-color: var(--border-2); color: var(--text); transform: translateY(-1px) }
-.cat-tag.active { border-color: var(--accent); color: var(--accent); background: var(--surface-dim) }
-.cat-tag.disabled { opacity: .35; cursor: default; pointer-events: none }
-
-.port-nudge { font-size: 12px; color: var(--text-3); text-align: center; margin-top: 16px; transition: opacity .3s }
-.port-count { font-size: 11px; color: var(--text-3); text-align: center; margin-top: 8px; font-family: 'DM Mono', monospace }
-.port-cat-label {
-  font-family: 'DM Mono', monospace;
-  font-size: 9px;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  color: var(--text-2);
-  margin-bottom: 8px;
-  display: none;
+  font-size: 10px;
+  letter-spacing: .08em;
+  color: var(--text-3);
+  margin-top: 18px;
 }
 
-/* ABOUT */
+/* ── ABOUT ── */
 .about-grid {
   display: grid;
-  grid-template-columns: 420px 1fr;
-  gap: 56px;
+  grid-template-columns: 380px 1fr;
+  gap: 64px;
   align-items: start;
 }
 @media (max-width: 860px) { .about-grid { grid-template-columns: 1fr 1fr; gap: 36px } }
@@ -152,110 +166,106 @@ import Layout from '../layouts/Layout.astro';
   aspect-ratio: 3/4;
   object-fit: cover;
   object-position: center top;
-  border-radius: var(--radius-lg);
   display: block;
-  transition: transform .5s cubic-bezier(.16,1,.3,1), box-shadow .5s;
-}
-.about-photo:hover {
-  transform: scale(1.01);
-  box-shadow: 0 12px 36px rgba(0,0,0,.22);
 }
 
-.about-text h2 {
-  font-size: 22px;
-  font-weight: 400;
-  letter-spacing: -.02em;
-  margin-bottom: 14px;
+.about-lede {
+  font-family: var(--font-serif);
+  font-weight: 330;
+  font-size: clamp(20px, 2.6vw, 27px);
+  line-height: 1.45;
+  letter-spacing: -.01em;
+  color: var(--text);
+  margin-bottom: 20px;
 }
-.about-text p {
-  font-size: 13px;
+.about-lede em { font-style: italic }
+.about-body {
+  font-size: 13.5px;
   color: var(--text-2);
   line-height: 1.85;
-  margin-bottom: 10px;
+  max-width: 480px;
+  margin-bottom: 32px;
 }
 
-.stats {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1px;
-  background: var(--border);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
+/* fact rows instead of stat boxes */
+.facts { list-style: none; margin: 0 0 32px; padding: 0; max-width: 480px }
+.facts li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 11px 0;
+  border-top: 1px solid var(--border);
 }
-.stat { background: var(--surface); padding: 20px; transition: background .2s }
-.stat:hover { background: var(--surface-dim) }
-.stat-n {
-  font-size: 26px;
-  font-weight: 300;
-  color: var(--text);
-  letter-spacing: -.03em;
-  line-height: 1;
-  margin-bottom: 4px;
-}
-.stat-l {
+.facts li:last-child { border-bottom: 1px solid var(--border) }
+.facts .f-label {
   font-family: 'DM Mono', monospace;
   font-size: 9px;
-  letter-spacing: .09em;
+  letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--text-3);
+}
+.facts .f-value {
+  font-family: var(--font-serif);
+  font-size: 17px;
+  color: var(--text);
 }
 </style>
 
 <!-- HERO -->
-<div class="hero">
-  <p class="hero-eyebrow anim" style="--d:.05s">Photography · Valdosta, Georgia</p>
-  <h1 class="hero-title anim" style="--d:.15s">Zachary Routsong<br/>Photography</h1>
-  <p class="hero-sub anim" style="--d:.3s">Portraits, families, events, and sports. Every session comes with a private online gallery, quick turnaround, and simple pricing.</p>
-  <span class="anim" style="--d:.45s;display:inline-block"><a href="/book" class="btn">Book a session</a></span>
-</div>
+<header class="hero">
+  <div class="hero-inner">
+    <p class="hero-kicker anim" style="--d:.05s">Photographer — Valdosta, Georgia</p>
+    <h1 class="hero-name">
+      <span class="anim" style="--d:.12s">Zachary</span>
+      <span class="indent anim" style="--d:.22s">Routsong</span>
+    </h1>
+    <div class="hero-foot">
+      <p class="hero-role anim" style="--d:.34s"><em>Portraits, families, events &amp; sports.</em><br/>Every session comes with a private online gallery, quick turnaround, and simple pricing.</p>
+      <span class="anim" style="--d:.45s"><a href="/book" class="btn">Book a session</a></span>
+    </div>
+  </div>
+</header>
 
-<!-- PORTFOLIO -->
-<div class="section reveal" id="portfolio" style="padding-top: 56px">
-  <div class="sec-label">portfolio</div>
-  <div class="port-cat-label" id="port-cat-label"></div>
+<!-- WORK -->
+<section class="section reveal" id="portfolio">
+  <div class="sec-head">
+    <span class="sec-num">01</span>
+    <h2>Selected work</h2>
+    <span class="rule"></span>
+  </div>
+  <div class="work-index" id="cat-tags">
+    <button class="cat-tag disabled">Loading…</button>
+  </div>
   <div class="grid" id="portfolio-grid">
     <div class="placeholder-cell"><span>Loading…</span></div>
     <div class="placeholder-cell"><span>Loading…</span></div>
     <div class="placeholder-cell"><span>Loading…</span></div>
   </div>
-  <p class="port-nudge" id="port-nudge">Click a category below to filter →</p>
   <p class="port-count" id="port-count"></p>
-</div>
-
-<!-- CATEGORY FILTER -->
-<div class="cats-strip reveal">
-  <div class="cats-inner">
-    <div class="sec-label">categories</div>
-    <div class="cat-tags" id="cat-tags">
-      <span class="cat-tag disabled">Loading…</span>
-    </div>
-  </div>
-</div>
+</section>
 
 <!-- ABOUT -->
-<div class="section reveal" id="about" style="padding-top: 64px">
-  <div class="sec-label">about</div>
+<section class="section reveal" id="about" style="border-top:1px solid var(--border)">
+  <div class="sec-head">
+    <span class="sec-num">02</span>
+    <h2>About</h2>
+    <span class="rule"></span>
+  </div>
   <div class="about-grid">
     <img src="/zachary.jpg" alt="Zachary Routsong" class="about-photo"/>
     <div>
-      <div class="about-text">
-        <h2>Zachary Routsong</h2>
-        <p>Based in Valdosta, Georgia. I shoot a little bit of everything — portraits, families, events, and sports. My focus is on delivering sharp, well-edited images that actually look like the moment felt.</p>
-        <p>Every shoot comes with a private online gallery, fast turnaround, and straightforward pricing. No fluff.</p>
-        <div style="margin-top: 22px; margin-bottom: 28px">
-          <a href="/book" class="btn">Book a session</a>
-        </div>
-      </div>
-      <div class="stats">
-        <div class="stat"><div class="stat-n" id="stat-starting-price">$40</div><div class="stat-l">Starting price</div></div>
-        <div class="stat"><div class="stat-n">5–7</div><div class="stat-l">Day turnaround</div></div>
-        <div class="stat"><div class="stat-n">25+</div><div class="stat-l">Edited photos</div></div>
-        <div class="stat"><div class="stat-n">Any</div><div class="stat-l">Occasion covered</div></div>
-      </div>
+      <p class="about-lede">Based in Valdosta. I shoot a little bit of everything — the goal is photos that <em>look like the moment felt.</em></p>
+      <p class="about-body">Portraits, families, events, and sports. Sharp, well-edited images, delivered through a private gallery within the week. No fluff, no upsells at the door.</p>
+      <ul class="facts">
+        <li><span class="f-label">Starting price</span><span class="f-value" id="stat-starting-price">$40</span></li>
+        <li><span class="f-label">Turnaround</span><span class="f-value">5–7 days</span></li>
+        <li><span class="f-label">Edited photos</span><span class="f-value">25+ per session</span></li>
+        <li><span class="f-label">Coverage</span><span class="f-value">Valdosta &amp; nearby</span></li>
+      </ul>
+      <a href="/book" class="btn">Book a session</a>
     </div>
   </div>
-</div>
+</section>
 
 <!-- LIGHTBOX -->
 <div class="lightbox" id="lb" onclick="closeLB()">
@@ -281,87 +291,62 @@ async function loadPortfolio() {
     .order('created_at', { ascending: false });
 
   if (error || !data || !data.length) {
-    document.getElementById('portfolio-grid').innerHTML =
-      '<div class="placeholder-cell"><span>Coming soon</span></div>'.repeat(3);
-    document.getElementById('port-nudge').style.display = 'none';
-    document.getElementById('cat-tags').innerHTML =
-      '<span class="cat-tag disabled">No photos yet</span>';
+    // No photos yet — hide the whole section instead of showing empty boxes
+    document.getElementById('portfolio').style.display = 'none';
     return;
   }
 
   allPhotos = data;
 
-  // Build category counts (the `sport` column doubles as the photo's category)
+  // Category counts (the `sport` column doubles as the photo's category)
   const catCounts = {};
   data.forEach(p => { if (p.sport) catCounts[p.sport] = (catCounts[p.sport] || 0) + 1; });
   const cats = Object.keys(catCounts).sort();
 
   const tagsEl = document.getElementById('cat-tags');
   if (!cats.length) {
-    tagsEl.innerHTML = '<span class="cat-tag disabled">No tagged photos yet</span>';
+    tagsEl.innerHTML = '<button class="cat-tag disabled">No tagged photos yet</button>';
   } else {
     tagsEl.innerHTML =
+      '<button class="cat-tag active" id="tag-all" onclick="filterCat(null)">All</button>' +
       cats.map(c =>
-        `<span class="cat-tag" onclick="filterCat('${c}')">${c} <span style="opacity:.55;font-size:8px">(${catCounts[c]})</span></span>`
-      ).join('') +
-      '<span class="cat-tag" onclick="filterCat(null)" id="tag-all" style="display:none">Show all</span>';
+        `<button class="cat-tag" onclick="filterCat('${c}')">${c} <span style="opacity:.55">(${catCounts[c]})</span></button>`
+      ).join('');
   }
 
-  showRandom();
-}
-
-function showRandom() {
-  activeCat = null;
-  const shuffled = [...allPhotos].sort(() => Math.random() - .5).slice(0, 3);
-  renderGrid(shuffled);
-  const nudge = document.getElementById('port-nudge');
-  nudge.style.opacity = '1';
-  nudge.textContent = 'Click a category below to filter →';
-  document.getElementById('port-count').textContent = '';
-  document.getElementById('port-cat-label').style.display = 'none';
-  document.querySelectorAll('.cat-tag').forEach(t => t.classList.remove('active'));
-  const tagAll = document.getElementById('tag-all');
-  if (tagAll) tagAll.style.display = 'none';
+  filterCat(null);
 }
 
 function filterCat(cat) {
   activeCat = cat;
-  if (!cat) { showRandom(); return; }
-  const filtered = allPhotos.filter(p => p.sport === cat);
-  renderGrid(filtered);
-  const label = document.getElementById('port-cat-label');
-  label.textContent = cat;
-  label.style.display = 'block';
-  document.getElementById('port-nudge').style.opacity = '0';
+  const photos = cat ? allPhotos.filter(p => p.sport === cat) : allPhotos;
+  renderGrid(photos);
   document.getElementById('port-count').textContent =
-    filtered.length + ' photo' + (filtered.length !== 1 ? 's' : '') + ' · ' + cat;
-  document.querySelectorAll('.cat-tag').forEach(t =>
-    t.classList.toggle('active', t.textContent.trim().startsWith(cat))
-  );
-  const tagAll = document.getElementById('tag-all');
-  if (tagAll) tagAll.style.display = 'inline-block';
+    photos.length + ' photograph' + (photos.length !== 1 ? 's' : '') + (cat ? ' — ' + cat : '');
+  document.querySelectorAll('.cat-tag').forEach(t => {
+    const label = t.textContent.trim();
+    t.classList.toggle('active', cat ? label.startsWith(cat) : t.id === 'tag-all');
+  });
 }
+window.filterCat = filterCat;
 
 function renderGrid(photos) {
   const g = document.getElementById('portfolio-grid');
   if (!photos.length) {
-    g.innerHTML = '<div class="placeholder-cell" style="grid-column:1/-1;aspect-ratio:auto;padding:48px"><span>No photos in this category yet</span></div>';
+    g.innerHTML = '<div class="placeholder-cell" style="aspect-ratio:auto;padding:48px"><span>No photos in this category yet</span></div>';
     return;
   }
   g.innerHTML = '';
   photos.forEach((p, i) => {
     const el = document.createElement('div');
     el.className = 'grid-item';
-    el.style.setProperty('--d', (i * 0.07) + 's');
+    el.style.setProperty('--d', (Math.min(i, 8) * 0.06) + 's');
     el.innerHTML = `<img src="${p.url}" alt="${p.sport || ''}" loading="lazy"/>
       <div class="grid-overlay"><span>${p.sport || ''}</span></div>`;
     el.addEventListener('click', () => openLB(p.url));
     g.appendChild(el);
   });
 }
-
-// Expose filter to global scope for inline onclick
-window.filterCat = filterCat;
 
 function openLB(url) {
   document.getElementById('lb-img').src = url;

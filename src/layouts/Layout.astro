@@ -23,7 +23,7 @@ const {
   <meta name="description" content={description}/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..600&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
   <!-- Theme: run before paint to avoid flash -->
   <script is:inline>
     (function() {
@@ -62,12 +62,15 @@ const {
 
 {!noFooter && (
   <footer>
-    <span>© 2025 Zachary Routsong Photography</span>
-    <div class="foot-links">
-      <a href="tel:2293001006">229-300-1006</a>
-      <a href="https://instagram.com/zacharyroutsongphotos" target="_blank" rel="noopener">@zacharyroutsongphotos</a>
-      <a href="/book">Book now</a>
-      <a href="/privacy">Privacy Policy</a>
+    <a href="/book" class="footer-cta">Book a <em>session</em><span>→</span></a>
+    <div class="footer-meta">
+      <span>© 2026 Zachary Routsong Photography</span>
+      <div class="foot-links">
+        <a href="tel:2293001006">229-300-1006</a>
+        <a href="https://instagram.com/zacharyroutsongphotos" target="_blank" rel="noopener">@zacharyroutsongphotos</a>
+        <a href="/book">Book now</a>
+        <a href="/privacy">Privacy</a>
+      </div>
     </div>
   </footer>
 )}

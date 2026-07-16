@@ -80,6 +80,90 @@ import Layout from '../layouts/Layout.astro';
 @media (max-width: 480px) { .form-grid { grid-template-columns: 1fr } }
 .field.full { grid-column: 1/-1 }
 
+/* AVAILABILITY CALENDAR */
+.cal { border: 1px solid var(--border); padding: 14px; background: var(--surface) }
+.cal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px }
+.cal-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.cal-nav {
+  background: none;
+  border: 1px solid var(--border);
+  width: 26px; height: 26px;
+  cursor: pointer;
+  color: var(--text-2);
+  font-size: 13px;
+  line-height: 1;
+  transition: border-color .15s, color .15s;
+}
+.cal-nav:hover:not(:disabled) { border-color: var(--text); color: var(--text) }
+.cal-nav:disabled { opacity: .3; cursor: default }
+.cal-dow, .cal-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px }
+.cal-dow span {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  text-align: center;
+  padding: 3px 0 6px;
+}
+.cal-d {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--text-2);
+  background: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  position: relative;
+  transition: border-color .15s, color .15s, background .15s;
+}
+.cal-d:hover:not(:disabled) { border-color: var(--border-2); color: var(--text) }
+.cal-d:disabled { cursor: default; color: var(--text-3); opacity: .4 }
+.cal-d.blocked { text-decoration: line-through }
+.cal-d.sel { border-color: var(--accent); color: var(--text); background: var(--surface-dim) }
+.cal-d.empty { visibility: hidden }
+.cal-d .dot {
+  position: absolute;
+  bottom: 3px; left: 50%;
+  transform: translateX(-50%);
+  width: 3px; height: 3px;
+  border-radius: 50%;
+}
+.cal-legend {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.cal-legend span { display: flex; align-items: center; gap: 5px }
+.cal-legend i { width: 4px; height: 4px; border-radius: 50%; display: inline-block }
+.lg-strike { text-decoration: line-through }
+.cal-picked {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: .08em;
+  color: var(--text-2);
+  margin-top: 8px;
+  min-height: 15px;
+}
+.cal-picked b { color: var(--accent); font-weight: 500 }
+
 /* COST BOX */
 .cost-box {
   grid-column: 1/-1;
@@ -160,15 +244,30 @@ import Layout from '../layouts/Layout.astro';
 
       <hr class="divider" style="grid-column:1/-1"/>
 
-      <div class="field">
+      <div class="field full">
         <label>Session date</label>
-        <input type="date" id="f-date" required onclick="this.showPicker()" onkeydown="return false" style="cursor:pointer"/>
+        <input type="hidden" id="f-date"/>
+        <div class="cal">
+          <div class="cal-head">
+            <button type="button" class="cal-nav" onclick="calShift(-1)" aria-label="Previous month">‹</button>
+            <span class="cal-title" id="cal-title">—</span>
+            <button type="button" class="cal-nav" onclick="calShift(1)" aria-label="Next month">›</button>
+          </div>
+          <div class="cal-dow"><span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span></div>
+          <div class="cal-days" id="cal-days"></div>
+          <div class="cal-legend">
+            <span><i style="background:var(--green)"></i>open</span>
+            <span><i style="background:var(--amber)"></i>limited</span>
+            <span class="lg-strike">15</span><span style="margin-left:-6px">booked</span>
+          </div>
+        </div>
+        <p class="cal-picked" id="cal-picked"></p>
       </div>
       <div class="field">
         <label>Start time</label>
         <input type="time" id="f-time" onclick="this.showPicker()" onkeydown="return false" style="cursor:pointer"/>
       </div>
-      <div class="field full">
+      <div class="field">
         <label>Session type</label>
         <select id="f-sport" required>
           <option value="" disabled selected>Select…</option>
@@ -177,6 +276,9 @@ import Layout from '../layouts/Layout.astro';
           <option>Branding / Product</option><option>Other</option>
         </select>
       </div>
+
+      <!-- per-session-type follow-up questions render here -->
+      <div id="type-questions" style="display:contents"></div>
 
       <hr class="divider" style="grid-column:1/-1"/>
 
@@ -271,12 +373,173 @@ function selectPkg(i, pkg) {
 }
 window.selectPkg = selectPkg;
 
+// ── AVAILABILITY CALENDAR ──
+// Reads the same `availability` table the admin marks up:
+// full-day 'unavailable' = not bookable; 'partial' = bookable with a heads-up.
+let availBlocks = [], calY, calM, pickedDate = null, pickedPartial = false;
+
+function localToday() {
+  const n = new Date();
+  return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;
+}
+
+function dayStatus(ds) {
+  const bs = availBlocks.filter(b => b.date === ds);
+  if (!bs.length) return null;
+  if (bs.some(b => b.status === 'unavailable' && !b.start_time)) return 'unavailable';
+  if (bs.some(b => b.status === 'partial' || (b.status === 'unavailable' && b.start_time))) return 'partial';
+  if (bs.some(b => b.status === 'available')) return 'available';
+  return null;
+}
+
+async function loadAvailability() {
+  try {
+    const { data } = await sb.from('availability')
+      .select('date, status, start_time')
+      .gte('date', localToday());
+    availBlocks = data || [];
+  } catch (_) {}
+  renderCal();
+}
+
+function renderCal() {
+  const today = localToday();
+  document.getElementById('cal-title').textContent =
+    new Date(calY, calM, 1).toLocaleString('default', { month: 'long', year: 'numeric' });
+
+  // don't navigate into the past
+  const n = new Date();
+  document.querySelector('.cal-nav').disabled = (calY === n.getFullYear() && calM === n.getMonth());
+
+  const grid = document.getElementById('cal-days');
+  grid.innerHTML = '';
+  const firstDay = new Date(calY, calM, 1).getDay();
+  const daysInMonth = new Date(calY, calM + 1, 0).getDate();
+  const monthStr = `${calY}-${String(calM + 1).padStart(2, '0')}`;
+
+  for (let i = 0; i < firstDay; i++) {
+    const el = document.createElement('div');
+    el.className = 'cal-d empty';
+    grid.appendChild(el);
+  }
+  for (let d = 1; d <= daysInMonth; d++) {
+    const ds = `${monthStr}-${String(d).padStart(2, '0')}`;
+    const status = dayStatus(ds);
+    const isPast = ds < today;
+    const blocked = status === 'unavailable';
+
+    const el = document.createElement('button');
+    el.type = 'button';
+    el.textContent = d;
+    let cls = 'cal-d';
+    if (blocked) cls += ' blocked';
+    if (ds === pickedDate) cls += ' sel';
+    el.className = cls;
+    el.disabled = isPast || blocked;
+
+    if (!isPast && (status === 'partial' || status === 'available')) {
+      const dot = document.createElement('span');
+      dot.className = 'dot';
+      dot.style.background = status === 'partial' ? 'var(--amber)' : 'var(--green)';
+      el.appendChild(dot);
+    }
+    if (!el.disabled) el.addEventListener('click', () => pickDate(ds, status === 'partial'));
+    grid.appendChild(el);
+  }
+}
+
+function pickDate(ds, partial) {
+  pickedDate = ds;
+  pickedPartial = partial;
+  document.getElementById('f-date').value = ds;
+  const nice = new Date(ds + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+  document.getElementById('cal-picked').innerHTML =
+    'Selected — <b>' + nice + '</b>' + (partial ? ' · limited availability, time will be confirmed' : '');
+  renderCal();
+}
+
+function calShift(dir) {
+  calM += dir;
+  if (calM > 11) { calM = 0; calY++; }
+  if (calM < 0)  { calM = 11; calY--; }
+  renderCal();
+}
+window.calShift = calShift;
+
+// ── SESSION-TYPE FOLLOW-UP QUESTIONS ──
+const TYPE_QUESTIONS = {
+  'Portraits': [
+    { label: 'Who is the session for?', ph: 'e.g. Just me / my daughter' },
+    { label: 'Indoor or outdoor?', options: ['Outdoor', 'Indoor', 'Both', 'Not sure'] },
+  ],
+  'Family': [
+    { label: 'How many people?', ph: 'e.g. 5', type: 'number' },
+    { label: 'Young kids or pets coming?', ph: 'e.g. Two kids (3 & 6), one dog' },
+  ],
+  'Senior photos': [
+    { label: 'School & class year', ph: 'e.g. Valdosta High, 2027' },
+    { label: 'Outfit changes?', options: ['1 outfit', '2 outfits', '3+', 'Not sure'] },
+  ],
+  'Couples / Engagement': [
+    { label: "Partner's name", ph: 'e.g. Sam' },
+    { label: 'Surprise proposal?', options: ['No', 'Yes — keep it a secret'] },
+  ],
+  'Event': [
+    { label: 'What kind of event?', ph: 'e.g. Birthday, graduation party' },
+    { label: 'Rough guest count', ph: 'e.g. 40', type: 'number' },
+  ],
+  'Sports': [
+    { label: 'Sport & team', ph: 'e.g. Football — Valdosta Wildcats' },
+    { label: 'Player name & number', ph: 'e.g. Jordan Smith, #24' },
+  ],
+  'Branding / Product': [
+    { label: 'Business / brand name', ph: 'e.g. South GA Coffee Co.' },
+    { label: 'What are we shooting?', ph: 'e.g. Menu items, headshots' },
+  ],
+  'Other': [
+    { label: 'What do you have in mind?', ph: 'Tell me a little about it' },
+  ],
+};
+
+function renderTypeQuestions() {
+  const type = document.getElementById('f-sport').value;
+  const qs = TYPE_QUESTIONS[type] || [];
+  const wrap = document.getElementById('type-questions');
+  wrap.innerHTML = qs.map((q, i) => {
+    const cls = qs.length === 1 ? 'field full' : 'field';
+    if (q.options) {
+      return `<div class="${cls}"><label>${q.label}</label>
+        <select class="tq" data-label="${q.label}">
+          <option value="" selected>Select… (optional)</option>
+          ${q.options.map(o => `<option>${o}</option>`).join('')}
+        </select></div>`;
+    }
+    return `<div class="${cls}"><label>${q.label}</label>
+      <input type="${q.type || 'text'}" class="tq" data-label="${q.label}" placeholder="${q.ph || ''}"/></div>`;
+  }).join('');
+}
+
+function collectTypeAnswers() {
+  return [...document.querySelectorAll('#type-questions .tq')]
+    .map(el => ({ label: el.dataset.label, val: el.value.trim() }))
+    .filter(a => a.val)
+    .map(a => a.label.replace(/\?$/, '') + ': ' + a.val)
+    .join(' | ');
+}
+
+document.getElementById('f-sport').addEventListener('change', renderTypeQuestions);
+
 document.getElementById('book-form').addEventListener('submit', async function(e) {
   e.preventDefault();
   if (!selPkg) { alert('Please select a package first.'); return; }
+  if (!document.getElementById('f-date').value) { alert('Pick an open date on the calendar first.'); return; }
 
   const btn = document.getElementById('submit-btn');
   btn.disabled = true; btn.textContent = 'Sending…';
+
+  const typeAnswers = collectTypeAnswers();
+  const freeNotes   = document.getElementById('f-notes').value.trim();
+  const dateNote    = pickedPartial ? 'Client picked a limited-availability day' : '';
 
   try {
     await sb.from('bookings').insert({
@@ -290,7 +553,7 @@ document.getElementById('book-form').addEventListener('submit', async function(e
       package_selected: selPkg.name + ' — $' + selPkg.price,
       total:            '$' + selPkg.price.toFixed(2),
       deposit:          '$' + (selPkg.price / 2).toFixed(2),
-      notes:            document.getElementById('f-notes').value.trim() || null,
+      notes:            [typeAnswers, dateNote, freeNotes].filter(Boolean).join(' | ') || null,
       status:           'pending',
     });
   } catch(err) {
@@ -308,6 +571,11 @@ document.getElementById('book-form').addEventListener('submit', async function(e
   document.getElementById('success-state').classList.add('show');
 });
 
+const _now = new Date();
+calY = _now.getFullYear();
+calM = _now.getMonth();
+renderCal();
+loadAvailability();
 loadPackages();
 </script>
 </Layout>

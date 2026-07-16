@@ -301,6 +301,24 @@ document.getElementById('qbook-form').addEventListener('submit', async function(
   this.submit();
 });
 
+// Availability guard — reject dates Zachary marked fully unavailable
+let qbBlocks = [];
+(async () => {
+  try {
+    const n = new Date();
+    const today = `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;
+    const { data } = await sb.from('availability').select('date, status, start_time').gte('date', today);
+    qbBlocks = data || [];
+  } catch(_) {}
+})();
+document.getElementById('edate').addEventListener('change', function() {
+  const blocked = qbBlocks.some(b => b.date === this.value && b.status === 'unavailable' && !b.start_time);
+  if (blocked) {
+    alert('Zachary is already booked on that date — please pick another day.');
+    this.value = '';
+  }
+});
+
 loadPackages();
 </script>
 </Layout>

@@ -1114,10 +1114,21 @@ async function acceptBooking(id, name) {
       }),
     });
     const d = await res.json();
-    if (d.emailSent) toast('Email sent to ' + booking.email);
-    else toast('Email not sent: ' + (d.debug || d.resendError || 'unknown'));
+    if (d.emailSent) {
+      toast('Email sent to ' + booking.email);
+    } else {
+      const reason = d.debug || d.resendError || 'unknown error';
+      alert(
+        'Booking accepted, but the confirmation email did NOT send.\n\n' +
+        'Reason: ' + reason + '\n\n' +
+        'The client has not received their link. You can reach them directly at ' +
+        booking.email + ' — or fix the email setup (see HANDOFF.md) and accept again.'
+      );
+      console.error('accept-booking email not sent:', reason);
+    }
   } catch(e) {
-    toast('Accepted — email failed: ' + e.message);
+    alert('Booking accepted, but the confirmation email failed to send (' + e.message +
+          ').\n\nThe client at ' + booking.email + ' has not received their link.');
     console.error('Email error:', e);
   }
 }

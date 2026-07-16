@@ -27,12 +27,20 @@ Everything you need to run **zrphotos.net** day to day. No coding required for a
 
 ## Bookings (Bookings tab) — the flow
 
-1. Client submits a request on `/book` → shows up as **pending**.
-2. You click **Accept** → the client gets an email with a private link to finalize (location, add-ons, travel check). *(This email requires the `RESEND_API_KEY` setup below.)*
+1. Client submits a request on `/book` or `/quick-book` → shows up as **pending**, and **you get a "New booking request" email** right away.
+2. You click **Accept** → the client gets an email with a private link to finalize (location, add-ons, travel check).
 3. Client finishes → status becomes **confirmed**, a gallery is auto-created, and both of you get confirmation emails with the invoice link.
 4. After you deliver the photos, click **Mark delivered**.
 
 Booking notes contain everything the client entered: session-type answers (e.g. "Sport & team: …"), coupon used, and their free-text notes.
+
+## Emails — how they work
+
+Every email on the site (new-booking alerts to you, accept links, confirmations) goes through **Resend** (resend.com). There is no Formspree anymore.
+
+- **You'll always be notified of new bookings** as long as `RESEND_API_KEY` and `ZACHARY_EMAIL` are set (below). Even without them, the booking still lands in your admin panel — you just won't get the email.
+- **Emailing clients needs a verified domain.** Resend's default sender can only email *your own* address. To send accept/confirmation emails to *clients*, verify your domain (e.g. `zrphotos.net`) in the Resend dashboard and set `FROM_EMAIL` to an address on it (e.g. `bookings@zrphotos.net`). Until then, client emails may not deliver.
+- **If an accept email fails, the admin now tells you** — you'll get a popup saying the client didn't get their link, so it never fails silently.
 
 ## Availability (Availability tab)
 
@@ -78,15 +86,14 @@ These live in the **Cloudflare Pages dashboard** → your project → Settings:
 |---|---|---|
 | `PUBLIC_SUPABASE_URL` | Environment variables | The whole site's data |
 | `PUBLIC_SUPABASE_ANON_KEY` | Environment variables | The whole site's data |
-| `PUBLIC_FORMSPREE_ID` | Environment variables | Quick-book email delivery |
-| `RESEND_API_KEY` | Environment variables | Accept/confirmation emails to clients |
+| `RESEND_API_KEY` | Environment variables | **All emails** (new-booking alerts, accept links, confirmations) |
+| `ZACHARY_EMAIL` | Environment variables | Your new-booking + confirmation notices |
 | `SITE_URL` (`https://zrphotos.net`) | Environment variables | Links inside emails |
-| `FROM_EMAIL` (optional) | Environment variables | Email "from" address |
-| `ZACHARY_EMAIL` (optional) | Environment variables | Your copy of confirmations |
+| `FROM_EMAIL` (verified domain) | Environment variables | Emails **to clients** (needs Resend domain verification) |
 | `PHOTOS` → your R2 bucket | Functions → R2 bucket bindings | Photo upload/delete |
 | `R2_BASE_URL` | Environment variables | Photo URLs |
 
-If accept/confirm emails ever stop arriving, `RESEND_API_KEY` (resend.com) is the first thing to check — bookings still work without it, but clients won't get their links.
+If emails ever stop arriving, check `RESEND_API_KEY` and `ZACHARY_EMAIL` first — bookings still save without them, but you won't get notified. For client emails specifically, confirm your domain is verified in Resend and `FROM_EMAIL` uses it.
 
 ## Quick troubleshooting
 

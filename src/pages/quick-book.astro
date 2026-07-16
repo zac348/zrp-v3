@@ -111,9 +111,7 @@ import Layout from '../layouts/Layout.astro';
 
   <!-- FORM -->
   <div class="sec-label">your details</div>
-  <form id="qbook-form" action={`https://formspree.io/f/${import.meta.env.PUBLIC_FORMSPREE_ID}`} method="POST">
-    <input type="hidden" name="_subject" value="New quick booking — ZRP"/>
-    <input type="hidden" name="_next"    value="/thanks"/>
+  <form id="qbook-form">
     <input type="hidden" name="Package"  id="h-pkg"/>
     <input type="hidden" name="Total"    id="h-total"/>
     <input type="hidden" name="Deposit"  id="h-deposit"/>
@@ -266,6 +264,12 @@ document.getElementById('qbook-form').addEventListener('submit', async function(
 
   // Save to Supabase
   const fd = new FormData(this);
+  const combinedNotes = [
+    fd.get('Subject') ? 'For: ' + fd.get('Subject') : '',
+    fd.get('Shot Type') ? 'Shot style: ' + fd.get('Shot Type') : '',
+    fd.get('Notes') || '',
+  ].filter(Boolean).join(' | ') || null;
+
   try {
     await sb.from('bookings').insert({
       booking_number:   bookingNum,
@@ -280,26 +284,36 @@ document.getElementById('qbook-form').addEventListener('submit', async function(
       package_selected: selPkg.name + ' — $' + selPkg.price,
       total:            '$' + selPkg.price.toFixed(2),
       deposit:          '$' + (selPkg.price / 2).toFixed(2),
-      notes: [
-        fd.get('Subject') ? 'For: ' + fd.get('Subject') : '',
-        fd.get('Shot Type') ? 'Shot style: ' + fd.get('Shot Type') : '',
-        fd.get('Notes') || '',
-      ].filter(Boolean).join(' | ') || null,
+      notes: combinedNotes,
       status: 'pending',
     });
-  } catch(_) {}
+  } catch(err) {
+    btn.disabled = false; btn.textContent = 'Send booking request';
+    alert('Something went wrong — please try again.');
+    return;
+  }
 
-  // Send via Formspree
+  // Notify the owner by email (fire-and-forget — booking is already saved)
+  fetch('/api/notify-booking', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name: [fd.get('First Name'), fd.get('Last Name')].filter(Boolean).join(' '),
+      email: fd.get('Email'),
+      phone: fd.get('Phone') || null,
+      event_date: fd.get('Event Date'),
+      event_time: fd.get('Start Time'),
+      session_type: fd.get('Sport'),
+      event_location: fd.get('Location'),
+      package_selected: selPkg.name + ' — $' + selPkg.price,
+      total: '$' + selPkg.price.toFixed(2),
+      notes: combinedNotes,
+      source: 'Quick book',
+    }),
+  }).catch(() => {});
+
   sessionStorage.setItem('zrp_booking_num', bookingNum);
-  try {
-    const res = await fetch(this.action, {
-      method: 'POST', body: fd, headers: { Accept: 'application/json' },
-    });
-    if (res.ok) { window.location.href = '/thanks'; return; }
-  } catch(_) {}
-
-  // Formspree fallback — submit normally
-  this.submit();
+  window.location.href = '/thanks';
 });
 
 // Availability guard — reject dates Zachary marked fully unavailable

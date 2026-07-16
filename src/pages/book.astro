@@ -624,19 +624,26 @@ document.getElementById('book-form').addEventListener('submit', async function(e
   }
   const finalTotal = Math.max(0, Math.round((selPkg.price - disc) * 100) / 100);
 
+  const first = document.getElementById('f-first').value.trim();
+  const last  = document.getElementById('f-last').value.trim();
+  const email = document.getElementById('f-email').value.trim();
+  const phone = document.getElementById('f-phone').value.trim() || null;
+  const sessionType = document.getElementById('f-sport').value;
+  const combinedNotes = [typeAnswers, dateNote, couponNote, freeNotes].filter(Boolean).join(' | ') || null;
+
   try {
     await sb.from('bookings').insert({
-      first_name:       document.getElementById('f-first').value.trim(),
-      last_name:        document.getElementById('f-last').value.trim(),
-      email:            document.getElementById('f-email').value.trim(),
-      phone:            document.getElementById('f-phone').value.trim() || null,
+      first_name:       first,
+      last_name:        last,
+      email:            email,
+      phone:            phone,
       event_date:       document.getElementById('f-date').value || null,
       event_time:       document.getElementById('f-time').value || null,
-      sport_type:       document.getElementById('f-sport').value,
+      sport_type:       sessionType,
       package_selected: selPkg.name + ' — $' + selPkg.price,
       total:            '$' + finalTotal.toFixed(2),
       deposit:          '$' + (finalTotal / 2).toFixed(2),
-      notes:            [typeAnswers, dateNote, couponNote, freeNotes].filter(Boolean).join(' | ') || null,
+      notes:            combinedNotes,
       status:           'pending',
     });
   } catch(err) {
@@ -644,6 +651,23 @@ document.getElementById('book-form').addEventListener('submit', async function(e
     alert('Something went wrong — please try again.');
     return;
   }
+
+  // Notify the owner by email (fire-and-forget — booking is already saved)
+  fetch('/api/notify-booking', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name: [first, last].filter(Boolean).join(' '),
+      email, phone,
+      event_date: document.getElementById('f-date').value || null,
+      event_time: document.getElementById('f-time').value || null,
+      session_type: sessionType,
+      package_selected: selPkg.name + ' — $' + finalTotal.toFixed(2),
+      total: '$' + finalTotal.toFixed(2),
+      notes: combinedNotes,
+      source: 'Full booking',
+    }),
+  }).catch(() => {});
 
   document.getElementById('book-form').style.display = 'none';
   document.querySelector('.pkg-grid').style.display = 'none';

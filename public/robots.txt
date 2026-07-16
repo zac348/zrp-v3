@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /login
+Disallow: /reset
+Disallow: /confirm
+Disallow: /invoice
+Disallow: /gallery
+Disallow: /coupon-card

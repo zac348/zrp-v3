@@ -1,0 +1,96 @@
+# ZRP Website — Owner's Guide
+
+Everything you need to run **zrphotos.net** day to day. No coding required for any of it.
+
+---
+
+## Logging in
+
+- Admin dashboard: **zrphotos.net/login** → then you land on `/admin`
+- Forgot your password? Click **"Forgot password?"** on the login page — it emails you a reset link that opens `zrphotos.net/reset`.
+- To change your email/password or add another admin: **supabase.com/dashboard** → your project → **Authentication → Users**. Anyone in that list can access the admin panel, so only add people you trust.
+- One-time setup check: in Supabase → **Authentication → URL Configuration → Redirect URLs**, make sure `https://zrphotos.net/reset` is listed — the password-reset email needs it.
+
+## Uploading photos (Upload tab)
+
+1. Pick a **Category** (Portraits, Family, Sports…) — this powers the homepage filter.
+2. Tick **"Show on homepage shuffle"** if the photo should appear in the homepage portfolio grid. Untagged/unticked photos stay off the homepage.
+3. Click the drop zone (or drag files in). Photos are stored in Cloudflare R2.
+4. Scroll down on the same tab to see **all photos**: select several (click photos or checkboxes) to bulk-change category, add to a client gallery, or delete.
+5. If the homepage has zero photos, the whole "Selected work" section hides itself — it reappears automatically once photos exist.
+
+## Client galleries (Galleries tab)
+
+- Create a gallery, add photos to it (from the Upload tab's bulk actions), and share the link with your client.
+- **Privacy model: the link IS the password.** Gallery links are long random URLs — anyone who has one can view and download. Don't post gallery links publicly; send them directly to the client.
+- Galleries created automatically when a booking is confirmed get a random link too.
+
+## Bookings (Bookings tab) — the flow
+
+1. Client submits a request on `/book` → shows up as **pending**.
+2. You click **Accept** → the client gets an email with a private link to finalize (location, add-ons, travel check). *(This email requires the `RESEND_API_KEY` setup below.)*
+3. Client finishes → status becomes **confirmed**, a gallery is auto-created, and both of you get confirmation emails with the invoice link.
+4. After you deliver the photos, click **Mark delivered**.
+
+Booking notes contain everything the client entered: session-type answers (e.g. "Sport & team: …"), coupon used, and their free-text notes.
+
+## Availability (Availability tab)
+
+Whatever you mark here is what clients see on the `/book` calendar:
+
+- **Unavailable (full day)** → the date is struck out and unclickable for clients.
+- **Partial** → clients can pick it but see "limited availability — time will be confirmed."
+- **Available** → shows a green dot (a little "I'm open" signal).
+- Days you haven't touched look like normal bookable days. **Keep this tab current** — it's your only calendar defense.
+- "Bulk select" lets you mark many days at once.
+
+## Pricing (Pricing tab)
+
+- **Packages:** edit base price, set a sale price + "On sale" toggle, or mark a package unavailable (it disappears from the booking page).
+- **Add-ons:** these appear on the client's booking-confirmation page automatically when marked Available. Use **"Add starter pack"** to load 8 standard ones (rush delivery, extra hour, second photographer, video reel, social crops, unedited photos, album, canvas). Add your own with the name + price form; delete ones you don't offer.
+
+## Coupons (Coupons tab)
+
+- Create a code (percent off, fixed $ off, or travel-fee waiver), optionally with an expiry date or max uses.
+- Share it directly or via the **copy link** button — links look like `zrphotos.net/book?coupon=CODE` and pre-fill the code for the client.
+- Clients enter codes in the **Promo code** box on the booking page; the discount shows in their estimate and carries through to the invoice.
+- ⚠️ **If a known-good code says "Invalid code":** the coupons table needs a read policy for visitors. In Supabase → SQL Editor, run:
+  ```sql
+  create policy "public can read active coupons"
+  on coupons for select to anon using (active = true);
+  ```
+- Note: the "uses" counter is informational — the site doesn't auto-increment it when a client redeems (you'll see the code in the booking's notes instead).
+
+## Envelopes & coupon cards
+
+The **Envelopes** tab and `/coupon-card` page generate print-ready PNGs (photo-delivery envelopes and physical coupon cards). Fill in the fields, click Download.
+
+## How the website gets updated (deploys)
+
+- The site's code lives at **github.com/zac348/zrp-v3**. Any push to `master` makes **Cloudflare Pages** rebuild and publish the live site automatically (~1–2 minutes).
+- Content changes (photos, prices, availability, coupons, bookings) happen in the **admin panel** and are live instantly — no deploy needed.
+
+## Required settings (already configured — don't delete!)
+
+These live in the **Cloudflare Pages dashboard** → your project → Settings:
+
+| Setting | Where | What breaks without it |
+|---|---|---|
+| `PUBLIC_SUPABASE_URL` | Environment variables | The whole site's data |
+| `PUBLIC_SUPABASE_ANON_KEY` | Environment variables | The whole site's data |
+| `PUBLIC_FORMSPREE_ID` | Environment variables | Quick-book email delivery |
+| `RESEND_API_KEY` | Environment variables | Accept/confirmation emails to clients |
+| `SITE_URL` (`https://zrphotos.net`) | Environment variables | Links inside emails |
+| `FROM_EMAIL` (optional) | Environment variables | Email "from" address |
+| `ZACHARY_EMAIL` (optional) | Environment variables | Your copy of confirmations |
+| `PHOTOS` → your R2 bucket | Functions → R2 bucket bindings | Photo upload/delete |
+| `R2_BASE_URL` | Environment variables | Photo URLs |
+
+If accept/confirm emails ever stop arriving, `RESEND_API_KEY` (resend.com) is the first thing to check — bookings still work without it, but clients won't get their links.
+
+## Quick troubleshooting
+
+- **Page looks broken/unstyled right after an update** → mid-deploy hiccup; hard-refresh (Cmd+Shift+R).
+- **Can't log in** → reset the password via "Forgot password?", or directly in Supabase → Authentication → Users.
+- **A date clients shouldn't book is selectable** → mark it Unavailable in the Availability tab.
+- **Coupon says invalid** → see the SQL note in the Coupons section above.

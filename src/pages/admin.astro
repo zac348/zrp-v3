@@ -217,7 +217,7 @@ html,body { height: 100% }
 .cal-day.available   { background: var(--green-bg); color: var(--green) }
 .cal-day.bulk-sel    { outline: 2px solid var(--text) !important; outline-offset: -2px; background: var(--surface-dim) !important; color: var(--text) !important }
 
-.bulk-bar {
+.cal-bulk-bar {
   display: none;
   align-items: center;
   gap: 8px;
@@ -228,7 +228,7 @@ html,body { height: 100% }
   padding: 12px 16px;
   margin-bottom: 16px;
 }
-.bulk-bar.visible { display: flex }
+.cal-bulk-bar.visible { display: flex }
 .bulk-bar-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--text-3); margin-right: 4px }
 .cal-dot { width: 4px; height: 4px; border-radius: 50% }
 .cal-legend { display: flex; gap: 14px; padding: 12px 18px; border-top: 1px solid var(--border); flex-wrap: wrap }
@@ -513,7 +513,7 @@ html,body { height: 100% }
     <p class="main-sub" id="avail-sub">Click any date to mark it available, partial, or unavailable.</p>
 
     <!-- Bulk bar -->
-    <div class="bulk-bar" id="bulk-bar">
+    <div class="cal-bulk-bar" id="cal-bulk-bar">
       <span class="bulk-bar-label" id="bulk-count-label">0 days selected</span>
       <button class="btype-btn" onclick="applyBulk('unavailable')">Full day — unavailable</button>
       <button class="btype-btn" onclick="applyBulk('available')">Mark available</button>
@@ -760,7 +760,7 @@ function renderPhotos() {
           onchange="togglePhotoSelect('${p.id}',this.checked)" onclick="event.stopPropagation()"/>
       </div>
       <img src="${p.url}" alt="" loading="lazy"
-        onclick="togglePhotoSelect('${p.id}',!selectedPhotoIds.has('${p.id}'))" style="cursor:pointer"/>
+        onclick="photoCardClick('${p.id}')" style="cursor:pointer"/>
       <div class="photo-card-info">
         <div class="photo-sport">${p.sport || 'No category'}</div>
         <div class="photo-name">${p.file_name}</div>
@@ -806,6 +806,10 @@ function togglePhotoSelect(id, checked) {
 }
 window.togglePhotoSelect = togglePhotoSelect;
 
+// Clicking the photo itself toggles selection (inline handlers can't see module scope)
+function photoCardClick(id) { togglePhotoSelect(id, !selectedPhotoIds.has(id)); }
+window.photoCardClick = photoCardClick;
+
 function toggleSelectAll(checked) { allPhotos.forEach(p => togglePhotoSelect(p.id, checked)); }
 window.toggleSelectAll = toggleSelectAll;
 
@@ -836,12 +840,18 @@ async function togHP(id, current) {
 }
 window.togHP = togHP;
 
+// The upload/delete API functions verify this Supabase session token server-side
+async function apiAuthHeader() {
+  const { data } = await sb.auth.getSession();
+  return { Authorization: 'Bearer ' + (data.session?.access_token || '') };
+}
+
 async function delPhoto(id, storagePath) {
   if (!confirm('Delete this photo? This cannot be undone.')) return;
   if (storagePath) {
     await fetch('/api/delete-photo', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...(await apiAuthHeader()) },
       body: JSON.stringify({ key: storagePath }),
     });
   }
@@ -877,7 +887,7 @@ async function bulkDelete() {
   if (paths.length) {
     await fetch('/api/delete-photo', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...(await apiAuthHeader()) },
       body: JSON.stringify({ keys: paths }),
     });
   }
@@ -911,7 +921,7 @@ async function handleFiles(files) {
     fd.append('file', file);
     let key, url;
     try {
-      const res  = await fetch('/api/upload', { method: 'POST', body: fd });
+      const res  = await fetch('/api/upload', { method: 'POST', body: fd, headers: await apiAuthHeader() });
       const json = await res.json();
       if (json.error) { status.textContent = `Error: ${json.error}`; continue; }
       key = json.key; url = json.url;
@@ -1064,7 +1074,6 @@ function bookingCard(b) {
       ${status === 'pending'   ? `<button class="btn-sm green"  onclick="acceptBooking('${b.id}','${name.replace(/'/g,'\\\'')}')" title="Accept and email client with confirm link">Accept</button>` : ''}
       ${status === 'accepted'  ? `<button class="btn-sm on-ink" onclick="setStatus('${b.id}','confirmed')">Mark confirmed</button>` : ''}
       ${status === 'confirmed' ? `<button class="btn-sm on-ink" onclick="setStatus('${b.id}','delivered')">Mark delivered</button>` : ''}
-      ${status !== 'cancelled' && status !== 'pending' ? `<button class="btn-sm" onclick="setStatus('${b.id}','delivered')">Mark delivered</button>` : ''}
       ${status !== 'cancelled' ? `<button class="btn-sm red"    onclick="setStatus('${b.id}','cancelled')">Cancel</button>` : ''}
       ${status !== 'pending'   ? `<button class="btn-sm"        onclick="setStatus('${b.id}','pending')">Reset</button>` : ''}
       ${b.ztn_number ? `<a class="btn-sm" href="/invoice?ztn=${b.ztn_number}" target="_blank">Invoice</a>` : ''}
@@ -1144,7 +1153,7 @@ function toggleBulkMode() {
 window.toggleBulkMode = toggleBulkMode;
 
 function updateCalBulkBar() {
-  const bar = document.getElementById('bulk-bar');
+  const bar = document.getElementById('cal-bulk-bar');
   const count = selectedDates.size;
   bar.classList.toggle('visible', bulkMode);
   document.getElementById('bulk-count-label').textContent = count + ' day' + (count !== 1 ? 's' : '') + ' selected';

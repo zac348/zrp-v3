@@ -291,10 +291,6 @@ async function init() {
     .eq('id', token)
     .single();
 
-  console.log('[confirm] token:', token);
-  console.log('[confirm] data:', data);
-  console.log('[confirm] error:', error);
-
   hide('loading-state');
 
   if (error || !data) { show('error-state'); return; }
@@ -444,6 +440,15 @@ async function checkTravel() {
     const miles = osrmData.routes[0].distance / 1609.34;
     travelMiles = miles;
 
+    // A travel-type coupon redeemed at booking waives the fee entirely
+    if (/\(travel fee waived\)/.test(booking?.notes || '')) {
+      travelFee = 0;
+      status.textContent = `${miles.toFixed(1)} mi away — travel fee waived by coupon ✓`;
+      status.style.color = 'var(--green, #22c55e)';
+      updateCost();
+      return;
+    }
+
     if (miles <= FREE_MI) {
       travelFee = 0;
       status.textContent = `${miles.toFixed(1)} mi away — no travel fee ✓`;
@@ -507,7 +512,7 @@ document.getElementById('confirm-form').addEventListener('submit', async functio
     let galleryId = null;
     const { data: gal } = await sb
       .from('client_galleries')
-      .insert({ name: galleryName, slug: ztn.toLowerCase(), watermarked: false })
+      .insert({ name: galleryName, slug: ztn.toLowerCase() + '-' + Math.random().toString(36).slice(2, 8), watermarked: false })
       .select('id')
       .single();
     if (gal) galleryId = gal.id;

@@ -35,18 +35,19 @@ import Layout from '../layouts/Layout.astro';
   align-items: center;
   gap: 8px;
   margin-top: 16px;
-  font-size: 12px;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
   font-weight: 500;
-  color: var(--bg);
-  background: var(--ink);
-  padding: 9px 18px;
-  border-radius: var(--radius);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--text);
+  background: none;
+  border: 1px solid var(--text);
+  padding: 11px 20px;
   cursor: pointer;
-  border: none;
-  transition: background .15s;
-  font-family: 'DM Sans', sans-serif;
+  transition: background .2s, color .2s;
 }
-.dl-all:hover { background: var(--ink-hover) }
+.dl-all:hover { background: var(--text); color: var(--bg) }
 
 .gallery-grid {
   display: grid;
@@ -80,7 +81,6 @@ import Layout from '../layouts/Layout.astro';
   color: rgba(255,255,255,.9);
   background: rgba(0,0,0,.4);
   border: 1px solid rgba(255,255,255,.15);
-  border-radius: 3px;
   padding: 4px 10px;
   cursor: pointer;
   transition: background .15s;
@@ -125,7 +125,6 @@ import Layout from '../layouts/Layout.astro';
   color: rgba(255,255,255,.6);
   background: rgba(255,255,255,.08);
   border: 1px solid rgba(255,255,255,.12);
-  border-radius: 3px;
   padding: 6px 14px;
   cursor: pointer;
   transition: all .15s;

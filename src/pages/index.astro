@@ -151,6 +151,68 @@ import Layout from '../layouts/Layout.astro';
   margin-top: 18px;
 }
 
+/* ── FOLDER TABS ── */
+.folder-tabs {
+  display: flex;
+  gap: 6px;
+  position: relative;
+  z-index: 2;
+  margin-bottom: -1px;
+  padding-left: 14px;
+}
+.folder-tab {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  background: var(--surface-dim);
+  border: 1px solid var(--border);
+  border-bottom: none;
+  border-radius: 4px 4px 0 0;
+  padding: 10px 20px 9px;
+  cursor: pointer;
+  transition: color .2s, background .2s;
+}
+.folder-tab:hover { color: var(--text) }
+.folder-tab.active {
+  background: var(--bg);
+  color: var(--text);
+}
+.folder-panel {
+  border: 1px solid var(--border);
+  padding: 36px 32px;
+  background: var(--bg);
+}
+@media (max-width: 600px) { .folder-panel { padding: 24px 18px } }
+
+/* ── GEAR GRID ── */
+.gear-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 12px;
+}
+.gear-card { background: var(--bg); border: 1px solid var(--border); padding: 22px 20px; transition: background .2s }
+.gear-card:hover { background: var(--surface-dim) }
+.gear-icon { width: 44px; height: 44px; color: var(--text-2); margin-bottom: 14px }
+.gear-icon svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round }
+.gear-name {
+  font-family: var(--font-serif);
+  font-size: 17px;
+  color: var(--text);
+  margin-bottom: 5px;
+}
+.gear-spec { font-size: 12px; color: var(--text-2); line-height: 1.6; margin-bottom: 10px }
+.gear-uses {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  line-height: 1.8;
+}
+.gear-uses::before { content: 'used for — '; color: var(--accent) }
+
 /* ── ABOUT ── */
 .about-grid {
   display: grid;
@@ -244,25 +306,92 @@ import Layout from '../layouts/Layout.astro';
   <p class="port-count" id="port-count"></p>
 </section>
 
-<!-- ABOUT -->
+<!-- ABOUT / GEAR -->
 <section class="section reveal" id="about" style="border-top:1px solid var(--border)">
   <div class="sec-head">
     <span class="sec-num">02</span>
     <h2>About</h2>
     <span class="rule"></span>
   </div>
-  <div class="about-grid">
-    <img src="/zachary.jpg" alt="Zachary Routsong" class="about-photo"/>
-    <div>
-      <p class="about-lede">Based in Valdosta. I shoot a little bit of everything — the goal is photos that <em>look like the moment felt.</em></p>
-      <p class="about-body">Portraits, families, events, and sports. Sharp, well-edited images, delivered through a private gallery within the week. No fluff, no upsells at the door.</p>
-      <ul class="facts">
-        <li><span class="f-label">Starting price</span><span class="f-value" id="stat-starting-price">$40</span></li>
-        <li><span class="f-label">Turnaround</span><span class="f-value">5–7 days</span></li>
-        <li><span class="f-label">Edited photos</span><span class="f-value">25+ per session</span></li>
-        <li><span class="f-label">Coverage</span><span class="f-value">Valdosta &amp; nearby</span></li>
-      </ul>
-      <a href="/book" class="btn">Book a session</a>
+
+  <div class="folder-tabs" role="tablist">
+    <button class="folder-tab active" id="ft-about" role="tab" onclick="showPanel('about')">About me</button>
+    <button class="folder-tab" id="ft-gear" role="tab" onclick="showPanel('gear')">My gear</button>
+  </div>
+
+  <div class="folder-panel">
+    <!-- ABOUT ME -->
+    <div id="panel-about">
+      <div class="about-grid">
+        <img src="/zachary.jpg" alt="Zachary Routsong" class="about-photo"/>
+        <div>
+          <p class="about-lede">Based in Valdosta. I shoot a little bit of everything — the goal is photos that <em>look like the moment felt.</em></p>
+          <p class="about-body">Portraits, families, events, and sports. Sharp, well-edited images, delivered through a private gallery within the week. No fluff, no upsells at the door.</p>
+          <ul class="facts">
+            <li><span class="f-label">Starting price</span><span class="f-value" id="stat-starting-price">$40</span></li>
+            <li><span class="f-label">Turnaround</span><span class="f-value">5–7 days</span></li>
+            <li><span class="f-label">Edited photos</span><span class="f-value">25+ per session</span></li>
+            <li><span class="f-label">Coverage</span><span class="f-value">Valdosta &amp; nearby</span></li>
+          </ul>
+          <a href="/book" class="btn">Book a session</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- MY GEAR -->
+    <div id="panel-gear" style="display:none">
+      <div class="gear-grid">
+
+        <div class="gear-card">
+          <div class="gear-icon"><svg viewBox="0 0 44 44"><rect x="5" y="14" width="34" height="21" rx="2"/><path d="M15 14l2.5-4h9l2.5 4"/><circle cx="22" cy="24.5" r="6.5"/><circle cx="22" cy="24.5" r="3"/><path d="M33 19h2.5"/></svg></div>
+          <div class="gear-name">Sony A7 III</div>
+          <p class="gear-spec">24MP full-frame mirrorless. Fast autofocus, strong in low light.</p>
+          <p class="gear-uses">Every session</p>
+        </div>
+
+        <div class="gear-card">
+          <div class="gear-icon"><svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="14"/><circle cx="22" cy="22" r="8.5"/><circle cx="22" cy="22" r="3.5"/></svg></div>
+          <div class="gear-name">Tamron 28–75mm f/2.8</div>
+          <p class="gear-spec">Fast standard zoom — the everyday lens. Sharp wide open.</p>
+          <p class="gear-uses">Portraits · Families · Events</p>
+        </div>
+
+        <div class="gear-card">
+          <div class="gear-icon"><svg viewBox="0 0 44 44"><rect x="4" y="17" width="24" height="11" rx="1.5"/><path d="M28 15.5h8v14h-8"/><path d="M12 17v11M19 17v11"/></svg></div>
+          <div class="gear-name">Sony 55–210mm</div>
+          <p class="gear-spec">f/4.5–6.3 telephoto zoom. Reach for shots from the stands.</p>
+          <p class="gear-uses">Sports · Candids at distance</p>
+        </div>
+
+        <div class="gear-card">
+          <div class="gear-icon"><svg viewBox="0 0 44 44"><circle cx="10" cy="12" r="4.5"/><circle cx="34" cy="12" r="4.5"/><circle cx="10" cy="32" r="4.5"/><circle cx="34" cy="32" r="4.5"/><rect x="16" y="18" width="12" height="8" rx="2"/><path d="M13 15l4 4M31 15l-4 4M13 29l4-4M31 29l-4-4"/></svg></div>
+          <div class="gear-name">DJI Mini 3</div>
+          <p class="gear-spec">4K aerial camera, under 249g. Angles you can't get from the ground.</p>
+          <p class="gear-uses">Aerials · Venues · Outdoor events</p>
+        </div>
+
+        <div class="gear-card">
+          <div class="gear-icon"><svg viewBox="0 0 44 44"><rect x="15" y="7" width="13" height="17" rx="3.5"/><path d="M18 12h7M21.5 24v6c0 5 8 3 8 8"/><circle cx="29.5" cy="39" r="2"/></svg></div>
+          <div class="gear-name">DJI Mic Mini</div>
+          <p class="gear-spec">Ultra-light wireless mic. Clean audio without cables in the shot.</p>
+          <p class="gear-uses">Interviews · Video add-ons</p>
+        </div>
+
+        <div class="gear-card">
+          <div class="gear-icon"><svg viewBox="0 0 44 44"><rect x="14.5" y="5" width="15" height="34" rx="4.5"/><circle cx="22" cy="14" r="5.5"/><circle cx="22" cy="14" r="2"/><path d="M18 31h8"/></svg></div>
+          <div class="gear-name">Insta360</div>
+          <p class="gear-spec">360° capture with the invisible-stick effect. Angles that follow the action.</p>
+          <p class="gear-uses">Action cams · Behind the scenes</p>
+        </div>
+
+        <div class="gear-card">
+          <div class="gear-icon"><svg viewBox="0 0 44 44"><rect x="5.5" y="17" width="14" height="11" rx="5"/><rect x="24.5" y="17" width="14" height="11" rx="5"/><path d="M19.5 20.5c1.5-1.5 3.5-1.5 5 0M5.5 19.5L2.5 17M38.5 19.5l3-2.5"/><circle cx="9" cy="20" r="1.2"/></svg></div>
+          <div class="gear-name">Meta Ray-Bans</div>
+          <p class="gear-spec">Hands-free POV camera built into glasses.</p>
+          <p class="gear-uses">POV clips · Behind the scenes</p>
+        </div>
+
+      </div>
     </div>
   </div>
 </section>
@@ -360,6 +489,15 @@ function closeLB() {
 window.closeLB = closeLB;
 
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLB(); });
+
+// ── ABOUT / GEAR FOLDER TABS ──
+function showPanel(which) {
+  document.getElementById('panel-about').style.display = which === 'about' ? 'block' : 'none';
+  document.getElementById('panel-gear').style.display  = which === 'gear'  ? 'block' : 'none';
+  document.getElementById('ft-about').classList.toggle('active', which === 'about');
+  document.getElementById('ft-gear').classList.toggle('active', which === 'gear');
+}
+window.showPanel = showPanel;
 
 async function loadStartingPrice() {
   try {

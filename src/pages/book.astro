@@ -236,6 +236,10 @@ import Layout from '../layouts/Layout.astro';
   <!-- FORM -->
   <div class="sec-label">your details</div>
   <form id="book-form">
+    <!-- honeypot: invisible to humans, irresistible to bots -->
+    <div style="position:absolute;left:-5000px;top:auto;height:0;overflow:hidden" aria-hidden="true">
+      <input type="text" id="f-website" name="website" tabindex="-1" autocomplete="off"/>
+    </div>
     <div class="form-grid">
       <div class="field"><label>First name</label><input type="text" id="f-first" placeholder="Jordan" required/></div>
       <div class="field"><label>Last name</label><input type="text"  id="f-last"  placeholder="Smith"  required/></div>
@@ -308,7 +312,11 @@ import Layout from '../layouts/Layout.astro';
 
       <div class="agree-row">
         <input type="checkbox" id="f-agree" required/>
-        <label for="f-agree">I have read and agree to the <a href="/privacy" target="_blank">Privacy Policy</a>. I confirm I am at least 13 years old, or I am a parent/guardian submitting this on behalf of a minor.</label>
+        <label for="f-agree">I have read and agree to the <a href="/terms" target="_blank">Terms</a> and <a href="/privacy" target="_blank">Privacy Policy</a>. I confirm I am at least 13 years old, or I am a parent/guardian submitting this on behalf of a minor.</label>
+      </div>
+      <div class="agree-row">
+        <input type="checkbox" id="f-portfolio"/>
+        <label for="f-portfolio">Optional: it's OK to feature photos from my session in Zachary's portfolio and social media.</label>
       </div>
 
       <button type="submit" class="submit-btn" id="submit-btn" disabled>Select a package to continue</button>
@@ -595,10 +603,27 @@ function collectTypeAnswers() {
 
 document.getElementById('f-sport').addEventListener('change', renderTypeQuestions);
 
+const PAGE_LOADED = Date.now();
+
+function showSuccessState() {
+  document.getElementById('book-form').style.display = 'none';
+  document.querySelector('.pkg-grid').style.display = 'none';
+  document.querySelectorAll('.sec-label').forEach(el => el.style.display = 'none');
+  document.querySelector('h1').style.display = 'none';
+  document.querySelector('p[style*="text-3"]').style.display = 'none';
+  document.getElementById('success-state').classList.add('show');
+}
+
 document.getElementById('book-form').addEventListener('submit', async function(e) {
   e.preventDefault();
   if (!selPkg) { alert('Please select a package first.'); return; }
   if (!document.getElementById('f-date').value) { alert('Pick an open date on the calendar first.'); return; }
+
+  // Anti-spam: honeypot filled or form completed inhumanly fast → fake success, save nothing
+  if (document.getElementById('f-website').value || Date.now() - PAGE_LOADED < 3000) {
+    showSuccessState();
+    return;
+  }
 
   const btn = document.getElementById('submit-btn');
   btn.disabled = true; btn.textContent = 'Sending…';
@@ -629,7 +654,9 @@ document.getElementById('book-form').addEventListener('submit', async function(e
   const email = document.getElementById('f-email').value.trim();
   const phone = document.getElementById('f-phone').value.trim() || null;
   const sessionType = document.getElementById('f-sport').value;
-  const combinedNotes = [typeAnswers, dateNote, couponNote, freeNotes].filter(Boolean).join(' | ') || null;
+  const portfolioNote = document.getElementById('f-portfolio').checked
+    ? 'Portfolio use: approved' : 'Portfolio use: not approved';
+  const combinedNotes = [typeAnswers, dateNote, couponNote, portfolioNote, freeNotes].filter(Boolean).join(' | ') || null;
 
   try {
     await sb.from('bookings').insert({
@@ -669,13 +696,7 @@ document.getElementById('book-form').addEventListener('submit', async function(e
     }),
   }).catch(() => {});
 
-  document.getElementById('book-form').style.display = 'none';
-  document.querySelector('.pkg-grid').style.display = 'none';
-  document.querySelector('[style*="choose a package"]')?.style && null;
-  document.querySelectorAll('.sec-label').forEach(el => el.style.display = 'none');
-  document.querySelector('h1').style.display = 'none';
-  document.querySelector('p[style*="text-3"]').style.display = 'none';
-  document.getElementById('success-state').classList.add('show');
+  showSuccessState();
 });
 
 const _now = new Date();

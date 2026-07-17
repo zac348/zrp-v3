@@ -1096,6 +1096,24 @@ async function acceptBooking(id, name) {
   await loadBookings();
   toast('Accepted ✓');
 
+  // Step 2.5: auto-block the session date on the availability calendar
+  // (cancelling a booking does NOT auto-unblock — remove the block manually if needed)
+  if (booking.event_date) {
+    try {
+      const { data: existing } = await sb.from('availability')
+        .select('id').eq('date', booking.event_date).eq('status', 'unavailable');
+      if (!existing || !existing.length) {
+        await sb.from('availability').insert({
+          date: booking.event_date,
+          status: 'unavailable',
+          note: 'Booked — ' + name,
+        });
+        await loadBlocks();
+        toast('Calendar: ' + booking.event_date + ' blocked');
+      }
+    } catch (e) { console.error('auto-block failed:', e); }
+  }
+
   // Step 3: send email
   try {
     const res = await fetch('/api/accept-booking', {

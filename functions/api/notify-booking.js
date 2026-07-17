@@ -34,25 +34,66 @@ export async function onRequestPost(context) {
   const from = env.FROM_EMAIL || 'ZRP <onboarding@resend.dev>';
   const name = b.name || 'Someone';
 
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: { 'Authorization': 'Bearer ' + env.RESEND_API_KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      from,
-      to,
-      reply_to: b.email || undefined,
-      subject: `New booking request — ${name}` + (b.session_type ? ` (${b.session_type})` : ''),
-      html: notifyEmail(b),
-    }),
-  });
-
-  if (!res.ok) {
-    const err = await res.text();
-    console.error('notify-booking Resend error:', err);
-    return Response.json({ ok: true, emailSent: false, resendError: err });
+  async function send(payload) {
+    try {
+      const res = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + env.RESEND_API_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) console.error('notify-booking Resend error:', await res.text());
+      return res.ok;
+    } catch (e) {
+      console.error('notify-booking send error:', e);
+      return false;
+    }
   }
 
-  return Response.json({ ok: true, emailSent: true });
+  // 1) Heads-up to the owner (reply-to goes to the client)
+  const ownerSent = await send({
+    from,
+    to,
+    reply_to: b.email || undefined,
+    subject: `New booking request — ${name}` + (b.session_type ? ` (${b.session_type})` : ''),
+    html: notifyEmail(b),
+  });
+
+  // 2) Instant "we got it" acknowledgment to the client (reply-to goes to the owner)
+  let clientAcked = false;
+  if (b.email) {
+    clientAcked = await send({
+      from,
+      to: b.email,
+      reply_to: to,
+      subject: 'Request received — Zachary Routsong Photography',
+      html: ackEmail(b),
+    });
+  }
+
+  return Response.json({ ok: true, emailSent: ownerSent, clientAcked });
+}
+
+function ackEmail(b) {
+  const first = (b.name || '').split(' ')[0] || 'there';
+  const rows = [
+    b.event_date       && ['Date',     b.event_date + (b.event_time ? ' · ' + b.event_time : '')],
+    b.session_type     && ['Session',  b.session_type],
+    b.package_selected && ['Package',  b.package_selected],
+    b.total            && ['Estimate', b.total],
+  ].filter(Boolean);
+
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#1a1918">
+<div style="max-width:520px;margin:0 auto;padding:44px 24px">
+  <p style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:#999;margin:0 0 36px">Zachary Routsong Photography</p>
+  <h1 style="font-size:24px;font-weight:300;letter-spacing:-.02em;color:#1a1918;margin:0 0 10px">Got your request</h1>
+  <p style="font-size:13px;color:#666;line-height:1.8;margin:0 0 24px">Hi ${first}, thanks for reaching out — your session request came through. Zachary will look it over and get back to you within 24 hours. Nothing is confirmed (and nothing is owed) until you hear back.</p>
+  ${rows.length ? `<div style="background:#f7f6f5;border:1px solid #e8e7e6;border-radius:8px;padding:18px;margin-bottom:24px">
+    ${rows.map(([k, v]) => `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #e8e7e6;font-size:12px"><span style="color:#999">${k}</span><span style="font-weight:500">${v}</span></div>`).join('')}
+  </div>` : ''}
+  <p style="font-size:11px;color:#bbb;line-height:1.7;margin:0">Questions in the meantime? Just reply to this email or call 229-300-1006.</p>
+</div>
+</body></html>`;
 }
 
 function notifyEmail(b) {

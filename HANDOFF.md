@@ -27,18 +27,28 @@ Everything you need to run **zrphotos.net** day to day. No coding required for a
 
 ## Bookings (Bookings tab) — the flow
 
-1. Client submits a request on `/book` or `/quick-book` → shows up as **pending**, and **you get a "New booking request" email** right away.
-2. You click **Accept** → the client gets an email with a private link to finalize (location, add-ons, travel check).
+1. Client submits a request on `/book` or `/quick-book` → shows up as **pending**, **you get a "New booking request" email**, and **the client instantly gets a "got your request" acknowledgment**.
+2. You click **Accept** → the client gets an email with a private link to finalize (location, add-ons, travel check), and **the session date is automatically blocked** on the availability calendar so nobody else can book it. (Cancelling a booking does *not* auto-unblock — remove the block in the Availability tab if the date frees up.)
 3. Client finishes → status becomes **confirmed**, a gallery is auto-created, and both of you get confirmation emails with the invoice link.
 4. After you deliver the photos, click **Mark delivered**.
 
-Booking notes contain everything the client entered: session-type answers (e.g. "Sport & team: …"), coupon used, and their free-text notes.
+Booking notes contain everything the client entered: session-type answers (e.g. "Sport & team: …"), coupon used, **whether they approved portfolio use of their photos**, and their free-text notes.
+
+## Terms & photo permission
+
+- The site has a **Terms of Service** at `/terms` — clients agree to it when booking. **Read it once and make sure the policies match how you actually work** (it currently says: 50% deposit, 48-hour reschedule/cancellation notice, 5–7 day delivery, 90-day galleries, you keep copyright, clients get personal-use rights). Edit the page if any of that isn't right.
+- Every booking form has an **optional checkbox** asking permission to feature the client's photos in your portfolio/social media. Their answer is recorded in the booking's notes ("Portfolio use: approved / not approved"). **Only post photos from sessions that approved it.**
+
+## Spam protection
+
+The booking forms have an invisible bot trap (honeypot + a minimum fill-time check) — automated spam gets silently discarded without ever reaching your bookings list or email. If real spam ever becomes a problem anyway, the upgrade path is Cloudflare Turnstile (free) — any developer can wire it in quickly.
 
 ## Emails — how they work
 
 Every email on the site (new-booking alerts to you, accept links, confirmations) goes through **Resend** (resend.com). There is no Formspree anymore.
 
 - **You'll always be notified of new bookings** as long as `RESEND_API_KEY` and `ZACHARY_EMAIL` are set (below). Even without them, the booking still lands in your admin panel — you just won't get the email.
+- **Clients get an instant acknowledgment** when they submit a request ("got it, you'll hear back within 24 hours — nothing confirmed yet"). Replies to it go to your `ZACHARY_EMAIL`.
 - **Emailing clients needs a verified domain.** Resend's default sender can only email *your own* address. To send accept/confirmation emails to *clients*, verify your domain (e.g. `zrphotos.net`) in the Resend dashboard and set `FROM_EMAIL` to an address on it (e.g. `bookings@zrphotos.net`). Until then, client emails may not deliver.
 - **If an accept email fails, the admin now tells you** — you'll get a popup saying the client didn't get their link, so it never fails silently.
 

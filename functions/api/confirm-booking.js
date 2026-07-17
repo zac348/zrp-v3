@@ -24,7 +24,8 @@ export async function onRequestPost(context) {
     return Response.json({ ok: true, emailSent: false });
   }
 
-  const siteUrl = (env.SITE_URL || 'https://zrphotos.net').replace(/\/$/, '');
+  let siteUrl = (env.SITE_URL || 'https://zrphotos.net').replace(/\/$/, '');
+  if (!/^https?:\/\//i.test(siteUrl)) siteUrl = 'https://' + siteUrl; // tolerate SITE_URL without a scheme
   const invoiceUrl = `${siteUrl}/invoice?ztn=${ztn}`;
   const from = env.FROM_EMAIL || 'ZRP <onboarding@resend.dev>';
   const parsedAddons = Array.isArray(addons) ? addons : [];

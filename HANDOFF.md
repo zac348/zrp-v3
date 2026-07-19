@@ -18,6 +18,7 @@ Everything you need to run **zrphotos.net** day to day. No coding required for a
 3. Click the drop zone (or drag files in). Photos are stored in Cloudflare R2.
 4. Scroll down on the same tab to see **all photos**: select several (click photos or checkboxes) to bulk-change category, add to a client gallery, or delete.
 5. If the homepage has zero photos, the whole "Selected work" section hides itself — it reappears automatically once photos exist.
+6. **The homepage shows at most 24 photos** (newest first). Keep "Show on homepage" ticked on only your best 15–25 — ten great photos beat fifty mixed ones. Untick the weaker stuff; it stays in your library.
 
 ## Client galleries (Galleries tab)
 
@@ -104,6 +105,13 @@ These live in the **Cloudflare Pages dashboard** → your project → Settings:
 | `R2_BASE_URL` | Environment variables | Photo URLs |
 
 If emails ever stop arriving, check `RESEND_API_KEY` and `ZACHARY_EMAIL` first — bookings still save without them, but you won't get notified. For client emails specifically, confirm your domain is verified in Resend and `FROM_EMAIL` uses it.
+
+## Getting found (the stuff the website can't do for you)
+
+- **Google Business Profile** — free, and it's how you show up when parents search "photographer near me." Set one up at google.com/business with the same name, phone (229-300-1006), and site link. This is the single biggest thing on this list.
+- **Ask for reviews** — after every happy client, text them your Google review link directly. Reviews compound; five good ones changes how the profile ranks.
+- **Instagram** — keep the handle (@zacharyroutsongphotos) matching the business name, keep the site link in bio, and link back to the site when you post galleries. During season, 2–3 posts a week; short video clips of game highlights tend to do the best numbers.
+- **Phones first** — most parents will open this site from a link in a group chat. It's built to load fast on mobile; keep it that way by curating the homepage photos (see Uploading).
 
 ## Quick troubleshooting
 

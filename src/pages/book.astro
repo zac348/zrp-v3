@@ -223,7 +223,7 @@ import Layout from '../layouts/Layout.astro';
 <div class="page">
   <div class="sec-label anim" style="margin-bottom:6px;--d:.05s">book a session</div>
   <h1 class="anim" style="font-size:24px;font-weight:300;letter-spacing:-.02em;margin-bottom:4px;--d:.12s">Request a session</h1>
-  <p class="anim" style="font-size:13px;color:var(--text-3);margin-bottom:32px;--d:.2s">Pick a package and fill in the basics. You'll finalize location and add-ons after confirmation.</p>
+  <p class="anim" style="font-size:13px;color:var(--text-3);margin-bottom:32px;--d:.2s">Pick a package and fill in the basics. Location and extras get sorted after Zachary accepts.</p>
 
   <!-- PACKAGES -->
   <div class="sec-label">choose a package</div>
@@ -294,7 +294,7 @@ import Layout from '../layouts/Layout.astro';
           <div class="cost-line"><span id="cl-pkg-n"></span><span id="cl-pkg-p"></span></div>
           <div class="cost-line" id="cl-coupon" style="display:none;color:var(--green)"><span id="cl-coupon-n"></span><span id="cl-coupon-v"></span></div>
           <div class="cost-line total"><span>Base total</span><span id="cl-total"></span></div>
-          <div class="cost-line note"><span>Add-ons and location finalized after acceptance.</span></div>
+          <div class="cost-line note"><span>Base price only — extras and travel come later.</span></div>
         </div>
         <div style="display:flex;gap:8px;margin-top:12px">
           <input type="text" id="f-coupon" placeholder="Promo code (optional)" style="text-transform:uppercase;flex:1;min-width:0" oninput="this.value=this.value.toUpperCase()"/>
@@ -326,7 +326,7 @@ import Layout from '../layouts/Layout.astro';
   <div class="success-state" id="success-state">
     <div class="success-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
     <h2 style="font-size:18px;font-weight:400;margin-bottom:8px">Request sent!</h2>
-    <p style="font-size:13px;color:var(--text-3);line-height:1.7;max-width:340px;margin:0 auto">Zachary will review your request and email you within 24 hours with a link to finalize your booking.</p>
+    <p style="font-size:13px;color:var(--text-3);line-height:1.7;max-width:340px;margin:0 auto">Zachary will look it over and email you within 24 hours with a link to finish setting up. Check spam if you don't see it.</p>
   </div>
 </div>
 

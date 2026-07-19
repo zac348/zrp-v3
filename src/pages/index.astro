@@ -281,7 +281,7 @@ import Layout from '../layouts/Layout.astro';
       <span class="indent anim" style="--d:.22s">Routsong</span>
     </h1>
     <div class="hero-foot">
-      <p class="hero-role anim" style="--d:.34s"><em>Portraits, families, events &amp; sports.</em><br/>Every session comes with a private online gallery, quick turnaround, and simple pricing.</p>
+      <p class="hero-role anim" style="--d:.34s"><em>Portraits, families, events &amp; sports.</em><br/>Private gallery, quick turnaround, simple pricing. Sessions from <span id="hero-price">$40</span>.</p>
       <span class="anim" style="--d:.45s"><a href="/book" class="btn">Book a session</a></span>
     </div>
   </div>
@@ -325,7 +325,7 @@ import Layout from '../layouts/Layout.astro';
         <img src="/zachary.jpg" alt="Zachary Routsong" class="about-photo"/>
         <div>
           <p class="about-lede">Based in Valdosta. I shoot a little bit of everything — the goal is photos that <em>look like the moment felt.</em></p>
-          <p class="about-body">Portraits, families, events, and sports. Sharp, well-edited images, delivered through a private gallery within the week. No fluff, no upsells at the door.</p>
+          <p class="about-body">Portraits, families, events, and sports. Sharp, well-edited photos, delivered in a private gallery within the week.</p>
           <ul class="facts">
             <li><span class="f-label">Starting price</span><span class="f-value" id="stat-starting-price">$40</span></li>
             <li><span class="f-label">Turnaround</span><span class="f-value">5–7 days</span></li>
@@ -412,11 +412,13 @@ const sb = createClient(
 let allPhotos = [], activeCat = null;
 
 async function loadPortfolio() {
+  // Cap the homepage at the 24 newest — a tight gallery beats a big mixed one
   const { data, error } = await sb
     .from('portfolio_photos')
     .select('*')
     .eq('show_on_homepage', true)
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .limit(24);
 
   if (error || !data || !data.length) {
     // No photos yet — hide the whole section instead of showing empty boxes
@@ -505,6 +507,8 @@ async function loadStartingPrice() {
     const lowest = Math.min(...data.map(p => (p.on_sale && p.sale_price) ? p.sale_price : p.base_price));
     if (isFinite(lowest)) {
       document.getElementById('stat-starting-price').textContent = '$' + lowest;
+      const hp = document.getElementById('hero-price');
+      if (hp) hp.textContent = '$' + lowest;
     }
   } catch(e) {}
 }

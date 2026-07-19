@@ -87,7 +87,7 @@ function ackEmail(b) {
 <div style="max-width:520px;margin:0 auto;padding:44px 24px">
   <p style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:#999;margin:0 0 36px">Zachary Routsong Photography</p>
   <h1 style="font-size:24px;font-weight:300;letter-spacing:-.02em;color:#1a1918;margin:0 0 10px">Got your request</h1>
-  <p style="font-size:13px;color:#666;line-height:1.8;margin:0 0 24px">Hi ${first}, thanks for reaching out — your session request came through. Zachary will look it over and get back to you within 24 hours. Nothing is confirmed (and nothing is owed) until you hear back.</p>
+  <p style="font-size:13px;color:#666;line-height:1.8;margin:0 0 24px">Hi ${first} — your request came through. Zachary will look it over and get back to you within 24 hours. Nothing is confirmed (and nothing is owed) until you hear back.</p>
   ${rows.length ? `<div style="background:#f7f6f5;border:1px solid #e8e7e6;border-radius:8px;padding:18px;margin-bottom:24px">
     ${rows.map(([k, v]) => `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #e8e7e6;font-size:12px"><span style="color:#999">${k}</span><span style="font-weight:500">${v}</span></div>`).join('')}
   </div>` : ''}

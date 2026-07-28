@@ -412,13 +412,13 @@ const sb = createClient(
 let allPhotos = [], activeCat = null;
 
 async function loadPortfolio() {
-  // Cap the homepage at the 24 newest — a tight gallery beats a big mixed one
+  // Pool of the 48 newest homepage picks — the grid shows 6 at random
   const { data, error } = await sb
     .from('portfolio_photos')
     .select('*')
     .eq('show_on_homepage', true)
     .order('created_at', { ascending: false })
-    .limit(24);
+    .limit(48);
 
   if (error || !data || !data.length) {
     // No photos yet — hide the whole section instead of showing empty boxes
@@ -447,12 +447,30 @@ async function loadPortfolio() {
   filterCat(null);
 }
 
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
 function filterCat(cat) {
   activeCat = cat;
-  const photos = cat ? allPhotos.filter(p => p.sport === cat) : allPhotos;
+  let photos, countText;
+  if (cat) {
+    photos = allPhotos.filter(p => p.sport === cat);
+    countText = photos.length + ' photograph' + (photos.length !== 1 ? 's' : '') + ' — ' + cat;
+  } else {
+    // "All" = 6 at random; clicking it again reshuffles
+    shuffle(allPhotos);
+    photos = allPhotos.slice(0, 6);
+    countText = allPhotos.length > 6
+      ? photos.length + ' of ' + allPhotos.length + ' photographs — shuffled'
+      : photos.length + ' photograph' + (photos.length !== 1 ? 's' : '');
+  }
   renderGrid(photos);
-  document.getElementById('port-count').textContent =
-    photos.length + ' photograph' + (photos.length !== 1 ? 's' : '') + (cat ? ' — ' + cat : '');
+  document.getElementById('port-count').textContent = countText;
   document.querySelectorAll('.cat-tag').forEach(t => {
     const label = t.textContent.trim();
     t.classList.toggle('active', cat ? label.startsWith(cat) : t.id === 'tag-all');
@@ -471,8 +489,10 @@ function renderGrid(photos) {
     const el = document.createElement('div');
     el.className = 'grid-item';
     el.style.setProperty('--d', (Math.min(i, 8) * 0.06) + 's');
-    el.innerHTML = `<img src="${p.url}" alt="${p.sport || ''}" loading="lazy"/>
-      <div class="grid-overlay"><span>${p.sport || ''}</span></div>`;
+    const cap = p.title || p.sport || '';
+    const loc = p.location ? `<span style="display:block;opacity:.65;margin-top:2px">${p.location}</span>` : '';
+    el.innerHTML = `<img src="${p.url}" alt="${cap}" loading="lazy"/>
+      <div class="grid-overlay"><span>${cap}${loc}</span></div>`;
     el.addEventListener('click', () => openLB(p.url));
     g.appendChild(el);
   });

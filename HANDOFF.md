@@ -18,7 +18,14 @@ Everything you need to run **zrphotos.net** day to day. No coding required for a
 3. Click the drop zone (or drag files in). Photos are stored in Cloudflare R2.
 4. Scroll down on the same tab to see **all photos**: select several (click photos or checkboxes) to bulk-change category, add to a client gallery, or delete.
 5. If the homepage has zero photos, the whole "Selected work" section hides itself — it reappears automatically once photos exist.
-6. **The homepage shows at most 24 photos** (newest first). Keep "Show on homepage" ticked on only your best 15–25 — ten great photos beat fifty mixed ones. Untick the weaker stuff; it stays in your library.
+6. **The homepage shows 6 random photos** each visit, drawn from your newest 48 "Show on homepage" picks — it reshuffles on every reload (and when someone clicks "All"). Clicking a category shows everything in that category. Keep "Show on homepage" ticked on only your best stuff — the shuffle is only as good as the pool.
+7. **Titles & locations:** the upload form has optional Title and Location fields (they apply to the whole batch). Fix individual photos anytime with the **Edit** button on a photo card, or select several and use **Set location**. Titles/locations show when visitors hover a photo on the homepage.
+   - ⚠️ One-time setup: these two fields need two database columns. In Supabase → SQL Editor, run this once:
+   ```sql
+   alter table portfolio_photos add column if not exists title text;
+   alter table portfolio_photos add column if not exists location text;
+   ```
+   Until you do, photos still upload fine — they just save without title/location and the admin tells you so.
 
 ## Client galleries (Galleries tab)
 

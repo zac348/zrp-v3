@@ -441,6 +441,11 @@ html,body { height: 100% }
       </select>
     </div>
     <div class="field"><label>Client gallery (optional)</label><select id="up-gallery"><option value="">Portfolio only</option></select></div>
+    <div style="display:flex;gap:8px">
+      <div class="field" style="flex:1"><label>Title (optional)</label><input type="text" id="up-title" placeholder="e.g. Friday night lights"/></div>
+      <div class="field" style="flex:1"><label>Location (optional)</label><input type="text" id="up-location" placeholder="e.g. Bazemore-Hyder Stadium"/></div>
+    </div>
+    <p style="font-size:11px;color:var(--text-3);margin:4px 0 10px">Applies to every file in this upload — edit per photo after with the Edit button.</p>
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
       <input type="checkbox" id="up-hp" style="width:14px;height:14px;accent-color:var(--text)"/>
       <label for="up-hp" style="font-size:12px;color:var(--text-2);cursor:pointer">Show on homepage shuffle</label>
@@ -474,6 +479,7 @@ html,body { height: 100% }
           <select id="bulk-gallery" class="bulk-select"><option value="">Add to gallery…</option></select>
           <button class="btn-sm on-ink" onclick="bulkAddToGallery()">Apply</button>
         </div>
+        <button class="btn-sm on-ink" onclick="bulkSetLocation()">Set location</button>
         <button class="btn-sm red" onclick="bulkDelete()">Delete selected</button>
       </div>
     </div>
@@ -762,10 +768,11 @@ function renderPhotos() {
       <img src="${p.url}" alt="" loading="lazy"
         onclick="photoCardClick('${p.id}')" style="cursor:pointer"/>
       <div class="photo-card-info">
-        <div class="photo-sport">${p.sport || 'No category'}</div>
-        <div class="photo-name">${p.file_name}</div>
+        <div class="photo-sport">${p.sport || 'No category'}${p.location ? ' · ' + p.location : ''}</div>
+        <div class="photo-name">${p.title || p.file_name}</div>
       </div>
       <div class="photo-actions">
+        <button class="btn-sm" onclick="editPhotoMeta('${p.id}')">Edit</button>
         <button class="btn-sm ${p.show_on_homepage ? 'on-ink' : ''}" onclick="togHP('${p.id}',${p.show_on_homepage})">
           ${p.show_on_homepage ? 'On HP' : '+ HP'}
         </button>
@@ -809,6 +816,40 @@ window.togglePhotoSelect = togglePhotoSelect;
 // Clicking the photo itself toggles selection (inline handlers can't see module scope)
 function photoCardClick(id) { togglePhotoSelect(id, !selectedPhotoIds.has(id)); }
 window.photoCardClick = photoCardClick;
+
+// ── TITLE / LOCATION EDITING ──
+function metaColError(error) {
+  return /column/i.test(error?.message || '')
+    ? 'Title/location columns missing — run the SQL in HANDOFF.md first.'
+    : 'Error: ' + (error?.message || 'unknown');
+}
+
+async function editPhotoMeta(id) {
+  const p = allPhotos.find(x => x.id === id);
+  if (!p) return;
+  const title = prompt('Photo title (leave blank for none):', p.title || '');
+  if (title === null) return;
+  const location = prompt('Location (leave blank for none):', p.location || '');
+  if (location === null) return;
+  const { error } = await sb.from('portfolio_photos')
+    .update({ title: title.trim() || null, location: location.trim() || null })
+    .eq('id', id);
+  if (error) { toast(metaColError(error)); return; }
+  await loadPhotos(); toast('Saved');
+}
+window.editPhotoMeta = editPhotoMeta;
+
+async function bulkSetLocation() {
+  if (!selectedPhotoIds.size) return;
+  const loc = prompt('Location for ' + selectedPhotoIds.size + ' photo(s) — blank clears it:', '');
+  if (loc === null) return;
+  const { error } = await sb.from('portfolio_photos')
+    .update({ location: loc.trim() || null })
+    .in('id', [...selectedPhotoIds]);
+  if (error) { toast(metaColError(error)); return; }
+  await loadPhotos(); toast('Location updated');
+}
+window.bulkSetLocation = bulkSetLocation;
 
 function toggleSelectAll(checked) { allPhotos.forEach(p => togglePhotoSelect(p.id, checked)); }
 window.toggleSelectAll = toggleSelectAll;
@@ -929,12 +970,21 @@ async function handleFiles(files) {
       status.textContent = `Upload error: ${e.message}`;
       continue;
     }
-    await sb.from('portfolio_photos').insert({
+    const upTitle = document.getElementById('up-title').value.trim() || null;
+    const upLoc   = document.getElementById('up-location').value.trim() || null;
+    const baseRow = {
       file_name: file.name, storage_path: key,
       url, sport: sport || null,
       gallery_id: galId, show_on_homepage: onHP,
       file_size: file.size,
-    });
+    };
+    let { error: insErr } = await sb.from('portfolio_photos')
+      .insert({ ...baseRow, title: upTitle, location: upLoc });
+    if (insErr && (upTitle || upLoc)) {
+      // title/location columns may not exist yet — save the photo anyway
+      ({ error: insErr } = await sb.from('portfolio_photos').insert(baseRow));
+      if (!insErr) status.textContent = 'Saved without title/location — run the SQL in HANDOFF.md to enable those fields.';
+    }
     done++;
     progBar.style.width = Math.round((done / files.length) * 100) + '%';
   }

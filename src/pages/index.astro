@@ -9,6 +9,7 @@ import Layout from '../layouts/Layout.astro';
   padding: 96px 28px 72px;
   border-bottom: 1px solid var(--border);
 }
+@media (max-width: 700px) { .hero { padding: 56px 18px 48px } }
 .hero-inner { max-width: 1060px; margin: 0 auto }
 .hero-kicker {
   font-family: 'DM Mono', monospace;
@@ -309,13 +310,13 @@ const sb = createClient(
 let allPhotos = [], activeCat = null;
 
 async function loadPortfolio() {
-  // Pool of the 48 newest homepage picks — the grid shows 6 at random
+  // Six at random out of the whole portfolio — nothing to pick by hand.
+  // Only the columns the grid needs, so this stays a few KB of JSON.
   const { data, error } = await sb
     .from('portfolio_photos')
-    .select('*')
-    .eq('show_on_homepage', true)
-    .order('created_at', { ascending: false })
-    .limit(48);
+    .select('url, web_url, thumb_url, width, height, sport, title, location')
+    .eq('on_portfolio', true)
+    .limit(300);
 
   if (error || !data || !data.length) {
     // No photos yet — hide the whole section instead of showing empty boxes
@@ -354,18 +355,13 @@ function shuffle(arr) {
 
 function filterCat(cat) {
   activeCat = cat;
-  let photos, countText;
-  if (cat) {
-    photos = allPhotos.filter(p => p.sport === cat);
-    countText = photos.length + ' photograph' + (photos.length !== 1 ? 's' : '') + ' — ' + cat;
-  } else {
-    // "All" = 6 at random; clicking it again reshuffles
-    shuffle(allPhotos);
-    photos = allPhotos.slice(0, 6);
-    countText = allPhotos.length > 6
-      ? photos.length + ' of ' + allPhotos.length + ' photographs — shuffled'
-      : photos.length + ' photograph' + (photos.length !== 1 ? 's' : '');
-  }
+  // The homepage is a teaser: never more than 6 images, always a fresh draw.
+  // The full archive lives on /portfolio.
+  const pool = cat ? allPhotos.filter(p => p.sport === cat) : allPhotos;
+  const photos = shuffle([...pool]).slice(0, 6);
+  const countText = pool.length > photos.length
+    ? photos.length + ' of ' + pool.length + ' photographs' + (cat ? ' — ' + cat : ' — shuffled')
+    : photos.length + ' photograph' + (photos.length !== 1 ? 's' : '') + (cat ? ' — ' + cat : '');
   renderGrid(photos);
   document.getElementById('port-count').textContent = countText;
   document.querySelectorAll('.cat-tag').forEach(t => {
@@ -388,9 +384,15 @@ function renderGrid(photos) {
     el.style.setProperty('--d', (Math.min(i, 8) * 0.06) + 's');
     const cap = p.title || p.sport || '';
     const loc = p.location ? `<span style="display:block;opacity:.65;margin-top:2px">${p.location}</span>` : '';
-    el.innerHTML = `<img src="${p.url}" alt="${cap}" loading="lazy"/>
+    // Phones get the thumbnail, big screens the web version, originals stay out of it
+    const small = p.thumb_url || p.web_url || p.url;
+    const large = p.web_url || p.url;
+    const srcset = (p.thumb_url && p.web_url)
+      ? ` srcset="${p.thumb_url} 700w, ${p.web_url} 2200w" sizes="(max-width:600px) 100vw, (max-width:1060px) 50vw, 340px"` : '';
+    const dims = (p.width && p.height) ? ` width="${p.width}" height="${p.height}"` : '';
+    el.innerHTML = `<img src="${small}"${srcset}${dims} alt="${cap}" loading="lazy" decoding="async"/>
       <div class="grid-overlay"><span>${cap}${loc}</span></div>`;
-    el.addEventListener('click', () => openLB(p.url));
+    el.addEventListener('click', () => openLB(large));
     g.appendChild(el);
   });
 }

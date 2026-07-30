@@ -447,9 +447,10 @@ html,body { height: 100% }
     </div>
     <p style="font-size:11px;color:var(--text-3);margin:4px 0 10px">Applies to every file in this upload — edit per photo after with the Edit button.</p>
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-      <input type="checkbox" id="up-hp" style="width:14px;height:14px;accent-color:var(--text)"/>
-      <label for="up-hp" style="font-size:12px;color:var(--text-2);cursor:pointer">Show on homepage shuffle</label>
+      <input type="checkbox" id="up-portfolio" style="width:14px;height:14px;accent-color:var(--text)"/>
+      <label for="up-portfolio" style="font-size:12px;color:var(--text-2);cursor:pointer">Add to the public Portfolio page</label>
     </div>
+    <p style="font-size:11px;color:var(--text-3);margin:-4px 0 10px">Photos are automatically resized for the web on upload — the full-size original is kept for client downloads.</p>
     <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
       <input type="file" id="file-input" accept="image/*" multiple/>
       <p class="drop-text">Click to select photos, or drag & drop</p>
@@ -458,6 +459,10 @@ html,body { height: 100% }
     <div class="prog-wrap" id="prog-wrap"><div class="prog-bar" id="prog-bar"></div></div>
     <p class="upload-status" id="up-status"></p>
     <div class="sec-label">all photos</div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+      <button class="btn-sm" id="optimize-btn" onclick="optimizeExisting()">Optimize existing photos</button>
+      <span id="optimize-status" style="font-size:11px;color:var(--text-3)"></span>
+    </div>
     <div class="bulk-bar" id="bulk-bar">
       <div class="bulk-left">
         <label class="bulk-select-all">
@@ -773,7 +778,7 @@ function renderPhotos() {
         <input type="checkbox" class="photo-cb" ${selectedPhotoIds.has(p.id) ? 'checked' : ''}
           onchange="togglePhotoSelect('${p.id}',this.checked)" onclick="event.stopPropagation()"/>
       </div>
-      <img src="${p.url}" alt="" loading="lazy"
+      <img src="${p.thumb_url || p.url}" alt="" loading="lazy" decoding="async"
         onclick="photoCardClick('${p.id}')" style="cursor:pointer"/>
       <div class="photo-card-info">
         <div class="photo-sport">${p.sport || 'No category'}${p.location ? ' · ' + p.location : ''}${p.on_portfolio ? ' · <span style="color:var(--accent)">◆ PORTFOLIO</span>' : ''}</div>
@@ -781,9 +786,6 @@ function renderPhotos() {
       </div>
       <div class="photo-actions">
         <button class="btn-sm" onclick="editPhotoMeta('${p.id}')">Edit</button>
-        <button class="btn-sm ${p.show_on_homepage ? 'on-ink' : ''}" onclick="togHP('${p.id}',${p.show_on_homepage})">
-          ${p.show_on_homepage ? 'On HP' : '+ HP'}
-        </button>
         <button class="btn-sm red" onclick="delPhoto('${p.id}','${p.storage_path}')">Del</button>
       </div>
     </div>`).join('');
@@ -883,11 +885,6 @@ function populateGalDropdowns() {
   });
 }
 
-async function togHP(id, current) {
-  const { error } = await sb.from('portfolio_photos').update({ show_on_homepage: !current }).eq('id', id);
-  if (!error) { await loadPhotos(); toast(!current ? 'Added to homepage' : 'Removed from homepage'); }
-}
-window.togHP = togHP;
 
 // The upload/delete API functions verify this Supabase session token server-side
 async function apiAuthHeader() {
@@ -895,13 +892,21 @@ async function apiAuthHeader() {
   return { Authorization: 'Bearer ' + (data.session?.access_token || '') };
 }
 
+// Every photo can have up to three objects in R2: original, web, thumbnail
+function photoKeys(p) {
+  const fromUrl = u => (u ? String(u).split('/').pop() : null);
+  return [p.storage_path, fromUrl(p.web_url), fromUrl(p.thumb_url)].filter(Boolean);
+}
+
 async function delPhoto(id, storagePath) {
   if (!confirm('Delete this photo? This cannot be undone.')) return;
-  if (storagePath) {
+  const photo = allPhotos.find(p => p.id === id);
+  const keys = photo ? photoKeys(photo) : (storagePath ? [storagePath] : []);
+  if (keys.length) {
     await fetch('/api/delete-photo', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...(await apiAuthHeader()) },
-      body: JSON.stringify({ key: storagePath }),
+      body: JSON.stringify({ keys }),
     });
   }
   await sb.from('portfolio_photos').delete().eq('id', id);
@@ -953,7 +958,7 @@ async function bulkDelete() {
   if (!confirm(`Delete ${selectedPhotoIds.size} photo(s)? This cannot be undone.`)) return;
   const ids = [...selectedPhotoIds];
   const photos = allPhotos.filter(p => ids.includes(p.id));
-  const paths = photos.map(p => p.storage_path).filter(Boolean);
+  const paths = photos.flatMap(photoKeys);
   if (paths.length) {
     await fetch('/api/delete-photo', {
       method: 'POST',
@@ -976,53 +981,155 @@ dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover
 dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
 fileInput.addEventListener('change', e => handleFiles(e.target.files));
 
+// ── IMAGE RESIZING ──
+// Phones and laptops should never download a 14 MB original. On upload we make
+// two smaller versions in the browser and keep the original for client downloads.
+const WEB_EDGE = 2200, WEB_Q = 0.82;   // lightbox / large screens
+const THUMB_EDGE = 700, THUMB_Q = 0.78; // grid thumbnails
+
+async function makeVariant(blob, maxEdge, quality) {
+  const bmp = await createImageBitmap(blob);
+  const scale = Math.min(1, maxEdge / Math.max(bmp.width, bmp.height));
+  const w = Math.max(1, Math.round(bmp.width * scale));
+  const h = Math.max(1, Math.round(bmp.height * scale));
+  const canvas = document.createElement('canvas');
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(bmp, 0, 0, w, h);
+  const natural = { width: bmp.width, height: bmp.height };
+  if (bmp.close) bmp.close();
+  const out = await new Promise(res => canvas.toBlob(res, 'image/jpeg', quality));
+  canvas.width = canvas.height = 0; // let the bitmap memory go
+  return { blob: out, width: w, height: h, natural };
+}
+
+async function uploadBlob(blob, filename) {
+  const fd = new FormData();
+  fd.append('file', new File([blob], filename, { type: blob.type || 'image/jpeg' }));
+  const res = await fetch('/api/upload', { method: 'POST', body: fd, headers: await apiAuthHeader() });
+  const json = await res.json();
+  if (json.error) throw new Error(json.error);
+  return json; // { key, url }
+}
+
 async function handleFiles(files) {
   if (!files?.length) return;
   const sport   = document.getElementById('up-sport').value;
   const galId   = document.getElementById('up-gallery').value || null;
-  const onHP    = document.getElementById('up-hp').checked;
+  const onPort  = document.getElementById('up-portfolio').checked;
   const progWrap = document.getElementById('prog-wrap');
   const progBar  = document.getElementById('prog-bar');
   const status   = document.getElementById('up-status');
   progWrap.style.display = 'block'; let done = 0;
+
   for (const file of files) {
-    status.textContent = `Uploading ${file.name}…`;
-    const fd = new FormData();
-    fd.append('file', file);
-    let key, url;
+    let orig, web = null, thumb = null, dims = null;
     try {
-      const res  = await fetch('/api/upload', { method: 'POST', body: fd, headers: await apiAuthHeader() });
-      const json = await res.json();
-      if (json.error) { status.textContent = `Error: ${json.error}`; continue; }
-      key = json.key; url = json.url;
+      status.textContent = `Uploading ${file.name} (original)…`;
+      orig = await uploadBlob(file, file.name);
+
+      status.textContent = `Resizing ${file.name}…`;
+      const webV   = await makeVariant(file, WEB_EDGE, WEB_Q);
+      const thumbV = await makeVariant(file, THUMB_EDGE, THUMB_Q);
+      dims = webV.natural;
+
+      status.textContent = `Uploading ${file.name} (web versions)…`;
+      web   = await uploadBlob(webV.blob,   'web-'   + file.name.replace(/\.\w+$/, '') + '.jpg');
+      thumb = await uploadBlob(thumbV.blob, 'thumb-' + file.name.replace(/\.\w+$/, '') + '.jpg');
     } catch (e) {
-      status.textContent = `Upload error: ${e.message}`;
-      continue;
+      // Resizing failed (odd format, memory) — still save the original so nothing is lost
+      status.textContent = `${file.name}: ${e.message}`;
+      if (!orig) continue;
     }
+
     const upTitle = document.getElementById('up-title').value.trim() || null;
     const upLoc   = document.getElementById('up-location').value.trim() || null;
-    const baseRow = {
-      file_name: file.name, storage_path: key,
-      url, sport: sport || null,
-      gallery_id: galId, show_on_homepage: onHP,
+    const row = {
+      file_name: file.name, storage_path: orig.key,
+      url: orig.url, sport: sport || null,
+      gallery_id: galId,
       file_size: file.size,
+      title: upTitle, location: upLoc,
+      on_portfolio: onPort,
+      web_url: web?.url || null,
+      thumb_url: thumb?.url || null,
+      width: dims?.width || null,
+      height: dims?.height || null,
     };
-    let { error: insErr } = await sb.from('portfolio_photos')
-      .insert({ ...baseRow, title: upTitle, location: upLoc });
-    if (insErr && (upTitle || upLoc)) {
-      // title/location columns may not exist yet — save the photo anyway
-      ({ error: insErr } = await sb.from('portfolio_photos').insert(baseRow));
-      if (!insErr) status.textContent = 'Saved without title/location — run the SQL in HANDOFF.md to enable those fields.';
+    const { error: insErr } = await sb.from('portfolio_photos').insert(row);
+    if (insErr) {
+      // A newer column is missing — save what the schema does support
+      const { error: fallbackErr } = await sb.from('portfolio_photos').insert({
+        file_name: row.file_name, storage_path: row.storage_path,
+        url: row.url, sport: row.sport, gallery_id: row.gallery_id, file_size: row.file_size,
+      });
+      if (!fallbackErr) status.textContent = 'Saved, but some fields need the SQL in HANDOFF.md: ' + insErr.message;
+      else { status.textContent = 'Error: ' + insErr.message; continue; }
     }
     done++;
     progBar.style.width = Math.round((done / files.length) * 100) + '%';
   }
+
   progWrap.style.display = 'none'; progBar.style.width = '0';
   status.textContent = `✓ ${done} photo(s) uploaded`;
   fileInput.value = '';
   await loadPhotos(); updateStats();
   toast(done + ' photo(s) uploaded');
 }
+
+// ── ONE-TIME OPTIMIZER ──
+// Photos uploaded before resizing existed are still full-size. This walks them,
+// builds web + thumbnail versions in the browser, and stores those alongside the
+// untouched original. Safe to stop and re-run — it skips anything already done.
+async function optimizeExisting() {
+  const todo = allPhotos.filter(p => !p.thumb_url && p.storage_path);
+  const btn = document.getElementById('optimize-btn');
+  const status = document.getElementById('optimize-status');
+
+  if (!todo.length) { toast('Every photo is already optimized'); return; }
+  if (!confirm(`Optimize ${todo.length} photo(s)?\n\nThis downloads each one, makes web + thumbnail versions, and uploads them. Originals are kept. You can leave this running.`)) return;
+
+  btn.disabled = true;
+  let done = 0, failed = 0, savedBytes = 0;
+
+  for (const p of todo) {
+    status.textContent = `Optimizing ${done + failed + 1} of ${todo.length}…`;
+    try {
+      const res = await fetch('/api/photo-bytes?key=' + encodeURIComponent(p.storage_path), {
+        headers: await apiAuthHeader(),
+      });
+      if (!res.ok) throw new Error('fetch failed (' + res.status + ')');
+      const blob = await res.blob();
+
+      const webV   = await makeVariant(blob, WEB_EDGE, WEB_Q);
+      const thumbV = await makeVariant(blob, THUMB_EDGE, THUMB_Q);
+      const base   = (p.file_name || 'photo').replace(/\.\w+$/, '');
+
+      const web   = await uploadBlob(webV.blob,   'web-'   + base + '.jpg');
+      const thumb = await uploadBlob(thumbV.blob, 'thumb-' + base + '.jpg');
+
+      const { error } = await sb.from('portfolio_photos').update({
+        web_url: web.url, thumb_url: thumb.url,
+        width: webV.natural.width, height: webV.natural.height,
+      }).eq('id', p.id);
+      if (error) throw new Error(error.message);
+
+      savedBytes += Math.max(0, (blob.size || 0) - webV.blob.size);
+      done++;
+    } catch (e) {
+      failed++;
+      console.error('optimize failed for', p.file_name, e);
+    }
+  }
+
+  btn.disabled = false;
+  status.textContent = `✓ ${done} optimized` + (failed ? `, ${failed} failed (see console)` : '') +
+    (savedBytes ? ` — ~${(savedBytes / 1e6).toFixed(0)} MB lighter` : '');
+  await loadPhotos(); updateStats();
+  toast(done + ' photo(s) optimized');
+}
+window.optimizeExisting = optimizeExisting;
 
 // ── GALLERIES ──
 async function loadGalleries() {

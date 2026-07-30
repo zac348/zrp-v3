@@ -13,12 +13,12 @@ Everything you need to run **zrphotos.net** day to day. No coding required for a
 
 ## Uploading photos (Upload tab)
 
-1. Pick a **Category** (Portraits, Family, Sports…) — this powers the homepage filter.
-2. Tick **"Show on homepage shuffle"** if the photo should appear in the homepage portfolio grid. Untagged/unticked photos stay off the homepage.
+1. Pick a **Category** (Portraits, Family, Sports…) — this powers the category filters.
+2. Tick **"Add to the public Portfolio page"** if these photos should be public. Leave it off for client work.
 3. Click the drop zone (or drag files in). Photos are stored in Cloudflare R2.
-4. Scroll down on the same tab to see **all photos**: select several (click photos or checkboxes) to bulk-change category, add to a client gallery, or delete.
-5. If the homepage has zero photos, the whole "Selected work" section hides itself — it reappears automatically once photos exist.
-6. **The homepage shows 6 random photos** each visit, drawn from your newest 48 "Show on homepage" picks — it reshuffles on every reload (and when someone clicks "All"). Clicking a category shows everything in that category. Keep "Show on homepage" ticked on only your best stuff — the shuffle is only as good as the pool.
+4. Scroll down on the same tab to see **all photos**: select several (click photos or checkboxes) to bulk-change category, add to a client gallery, add/remove from the Portfolio, or delete.
+5. **Photos are automatically resized on upload.** Each one is saved three ways: your untouched original (what clients download), a ~2200px web version (used when someone opens a photo), and a ~700px thumbnail (used in the grids). Visitors never download the full-size file — that's the difference between a 3 MB page and a 30 MB one.
+6. **You no longer pick what's on the homepage.** It shows 6 photos at random from your Portfolio, reshuffled on every visit. Nothing to manage.
 7. **Titles & locations:** the upload form has optional Title and Location fields (they apply to the whole batch). Fix individual photos anytime with the **Edit** button on a photo card, or select several and use **Set location**. Titles/locations show when visitors hover a photo on the homepage.
    - ⚠️ One-time setup: these two fields need two database columns. In Supabase → SQL Editor, run this once:
    ```sql
@@ -27,26 +27,22 @@ Everything you need to run **zrphotos.net** day to day. No coding required for a
    ```
    Until you do, photos still upload fine — they just save without title/location and the admin tells you so.
 
-## Two public galleries: homepage vs Portfolio page
+## What's public: one Portfolio, one switch
 
-There are two separate public galleries, each with its own toggle:
+There's a single public set of photos — your **Portfolio** — and one way in or out of it:
 
-| | Where it shows | How a photo gets there |
-|---|---|---|
-| **Selected work** | Homepage, section 01 | The **"+ HP"** button on a photo card — short curated highlight reel, 6 shown at random |
-| **Portfolio** | `zrphotos.net/portfolio` | The **"Portfolio page…"** bulk dropdown — the big archive |
+- **The `/portfolio` page** shows all of it, filterable by category, 24 at a time behind a "Load more" button.
+- **The homepage** shows **6 of them at random**, reshuffled every visit. No picking, no toggle, nothing to maintain.
 
-To fill the Portfolio page: in the Upload tab's photo grid, tick the photos you want → in the bulk bar pick **Portfolio page… → Add to Portfolio** → **Apply**. Same dropdown removes them. Photos already on it show a gold **◆ PORTFOLIO** marker on their card.
+**To add or remove photos:** in the Upload tab's photo grid, tick the ones you want → in the bulk bar choose **Portfolio page… → Add to Portfolio** (or Remove) → **Apply**. You can also tick the box on the upload form to add a whole batch as you upload. Photos on the Portfolio show a gold **◆ PORTFOLIO** marker on their card.
 
-The Portfolio page uses the same categories as the homepage and loads 24 photos at a time behind a "Load more" button, so it stays fast even with hundreds of images.
+Client-gallery photos can be in the Portfolio too — delivering a photo to a client doesn't stop you showing it off (just check they're OK with it; the booking form asks).
 
-- ⚠️ One-time setup: this needs one more database column. In Supabase → SQL Editor, run:
-  ```sql
-  alter table portfolio_photos add column if not exists on_portfolio boolean default false;
-  -- optional: start the Portfolio page off with your current homepage picks
-  update portfolio_photos set on_portfolio = true where show_on_homepage = true;
-  ```
-  Until you do, the Portfolio page falls back to showing your homepage picks, and the bulk action will tell you the column is missing.
+## Optimizing older photos (one-time)
+
+Photos uploaded before automatic resizing existed are still full-size — some are 10–20 MB, which is brutal on a phone. In the Upload tab, above the photo grid, click **"Optimize existing photos."**
+
+It walks every photo that doesn't have a web version yet, builds the smaller versions, and saves them. Originals are never touched, it shows progress as it goes, and it's safe to stop and re-run later — it skips anything already done. Do it once, on a laptop, on wifi.
 
 ## Client galleries (Galleries tab)
 

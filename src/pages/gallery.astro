@@ -226,13 +226,16 @@ function renderGallery() {
   galleryPhotos.forEach((p, i) => {
     const el = document.createElement('div');
     el.className = 'gal-item';
+    // Browse on the light versions; Download always hands over the full original
+    const preview = p.thumb_url || p.web_url || p.url;
+    const dims = (p.width && p.height) ? ` width="${p.width}" height="${p.height}"` : '';
     el.innerHTML = `
-      <img src="${p.url}" alt="Photo ${i+1}" loading="lazy"/>
+      <img src="${preview}"${dims} alt="Photo ${i+1}" loading="lazy" decoding="async"/>
       <div class="gal-item-overlay">
         <button class="dl-btn" onclick="event.stopPropagation();downloadPhoto('${p.url}','${p.file_name}')">Download</button>
       </div>
       ${isWatermarked ? '<div class="wm-badge">Copyright – Zachary R.</div>' : ''}`;
-    el.addEventListener('click', () => openLB(p.url, p.file_name));
+    el.addEventListener('click', () => openLB(p.web_url || p.url, p.file_name));
     grid.appendChild(el);
   });
 }

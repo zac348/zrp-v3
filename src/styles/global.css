@@ -608,3 +608,56 @@ footer {
   .nav { padding: 0 18px }
   footer { padding: 16px 18px }
 }
+
+/* ── MOBILE ──
+   Phones get: a usable nav, thumb-sized tap targets (~44px), and a bit more
+   width for photos. Desktop is untouched. */
+@media (max-width: 700px) {
+  /* more room for images */
+  .section { padding: 48px 18px }
+
+  /* filter index becomes real buttons you can actually hit */
+  .work-index { gap: 8px }
+  .cat-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;               /* flex drops the whitespace before the count */
+    min-height: 44px;
+    padding: 0 14px;
+    border: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .cat-tag.active {
+    border-color: var(--accent);
+    color: var(--text);
+    background: var(--surface-dim);
+  }
+
+  /* every button clears the 44px thumb minimum */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 12px 20px;
+  }
+  .foot-links { gap: 14px 20px; flex-wrap: wrap }
+  .foot-links a { min-height: 44px; display: inline-flex; align-items: center }
+}
+
+@media (max-width: 560px) {
+  /* Bring the nav back on phones — Portfolio has to be reachable.
+     Phone number and Instagram still live in the footer. */
+  .nav { padding: 0 14px; gap: 10px; height: 58px }
+  .nav-links { display: flex; gap: 18px }
+  .nav-links a.nav-hide-sm { display: none }
+  .nav-links a {
+    font-size: 12px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+  .nav-links a::after { bottom: 8px }
+  .nav-logo-img { height: 30px }
+  footer .footer-cta { font-size: clamp(30px, 9vw, 44px) }
+}

@@ -23,7 +23,7 @@ import Layout from '../layouts/Layout.astro';
   max-width: 440px;
 }
 .load-more-wrap { display: flex; justify-content: center; margin-top: 36px }
-@media (max-width: 600px) { .port-head { padding: 48px 18px 0 } }
+@media (max-width: 700px) { .port-head { padding: 48px 18px 0 } }
 </style>
 
 <header class="port-head">
@@ -74,24 +74,12 @@ const BATCH = 24;                       // render in chunks so a big archive sta
 let allPhotos = [], filtered = [], shown = 0, activeCat = null;
 
 async function loadPortfolio() {
-  let { data, error } = await sb
+  const { data } = await sb
     .from('portfolio_photos')
-    .select('*')
+    .select('url, web_url, thumb_url, width, height, sport, title, location')
     .eq('on_portfolio', true)
     .order('created_at', { ascending: false })
     .limit(500);
-
-  if (error) {
-    // `on_portfolio` column not added yet — fall back to the homepage picks so the
-    // page still shows work. Goes away once the SQL in HANDOFF.md has been run.
-    console.warn('portfolio: on_portfolio unavailable, falling back to homepage picks.', error.message);
-    ({ data } = await sb
-      .from('portfolio_photos')
-      .select('*')
-      .eq('show_on_homepage', true)
-      .order('created_at', { ascending: false })
-      .limit(500));
-  }
 
   allPhotos = data || [];
 
@@ -156,9 +144,15 @@ function appendBatch() {
     el.style.setProperty('--d', (Math.min(i, 8) * 0.05) + 's');
     const cap = p.title || p.sport || '';
     const loc = p.location ? `<span style="display:block;opacity:.65;margin-top:2px">${p.location}</span>` : '';
-    el.innerHTML = `<img src="${p.url}" alt="${cap}" loading="lazy" decoding="async"/>
+    // Phones get the thumbnail, big screens the web version, originals stay out of it
+    const small = p.thumb_url || p.web_url || p.url;
+    const large = p.web_url || p.url;
+    const srcset = (p.thumb_url && p.web_url)
+      ? ` srcset="${p.thumb_url} 700w, ${p.web_url} 2200w" sizes="(max-width:600px) 100vw, (max-width:1060px) 50vw, 340px"` : '';
+    const dims = (p.width && p.height) ? ` width="${p.width}" height="${p.height}"` : '';
+    el.innerHTML = `<img src="${small}"${srcset}${dims} alt="${cap}" loading="lazy" decoding="async"/>
       <div class="grid-overlay"><span>${cap}${loc}</span></div>`;
-    el.addEventListener('click', () => openLB(p.url));
+    el.addEventListener('click', () => openLB(large));
     g.appendChild(el);
   });
 

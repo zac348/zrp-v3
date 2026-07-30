@@ -44,112 +44,8 @@ import Layout from '../layouts/Layout.astro';
 }
 .hero-role em { font-family: var(--font-serif); font-style: italic; color: var(--text); font-size: 15px }
 
-/* ── SECTION SCAFFOLD ── */
-.section { max-width: 1060px; margin: 0 auto; padding: 72px 28px }
-.sec-head {
-  display: flex;
-  align-items: baseline;
-  gap: 16px;
-  margin-bottom: 36px;
-}
-.sec-num {
-  font-family: 'DM Mono', monospace;
-  font-size: 10px;
-  color: var(--text-3);
-  letter-spacing: .1em;
-}
-.sec-head h2 {
-  font-size: 26px;
-  color: var(--text);
-  margin: 0;
-}
-.sec-head .rule { flex: 1; height: 1px; background: var(--border); align-self: center }
-
-/* ── WORK / FILTER INDEX ── */
-.work-index {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 22px;
-  margin-bottom: 28px;
-}
-.cat-tag {
-  font-family: 'DM Mono', monospace;
-  font-size: 10px;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: var(--text-3);
-  background: none;
-  border: none;
-  padding: 0 0 3px;
-  border-bottom: 1px solid transparent;
-  cursor: pointer;
-  transition: color .2s, border-color .2s;
-  user-select: none;
-}
-.cat-tag:hover { color: var(--text) }
-.cat-tag.active { color: var(--text); border-bottom-color: var(--accent) }
-.cat-tag.disabled { opacity: .45; cursor: default; pointer-events: none }
-
-/* ── MASONRY GRID ── */
-.grid { columns: 3 260px; column-gap: 14px }
-.grid-item {
-  break-inside: avoid;
-  margin-bottom: 14px;
-  position: relative;
-  overflow: hidden;
-  cursor: pointer;
-  background: var(--surface-dim);
-  opacity: 0;
-  animation: scale-in .6s cubic-bezier(.16,1,.3,1) both;
-  animation-delay: var(--d, 0s);
-}
-.grid-item img {
-  width: 100%;
-  height: auto;
-  display: block;
-  transition: transform .6s cubic-bezier(.16,1,.3,1);
-}
-.grid-item:hover img { transform: scale(1.04) }
-.grid-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, rgba(18,16,14,.6), rgba(18,16,14,0) 45%);
-  opacity: 0;
-  transition: opacity .3s;
-  display: flex;
-  align-items: flex-end;
-  padding: 12px;
-}
-.grid-item:hover .grid-overlay { opacity: 1 }
-.grid-overlay span {
-  font-family: 'DM Mono', monospace;
-  font-size: 9px;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  color: rgba(255,253,247,.9);
-}
-.placeholder-cell {
-  break-inside: avoid;
-  margin-bottom: 14px;
-  aspect-ratio: 4/3;
-  background: var(--surface-dim);
-  border: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.placeholder-cell span {
-  font-family: 'DM Mono', monospace;
-  font-size: 9px;
-  color: var(--text-3);
-}
-.port-count {
-  font-family: 'DM Mono', monospace;
-  font-size: 10px;
-  letter-spacing: .08em;
-  color: var(--text-3);
-  margin-top: 18px;
-}
+/* Section scaffold, category filter, and masonry grid now live in global.css
+   (shared with /portfolio). */
 
 /* ── FOLDER TABS ── */
 .folder-tabs {
@@ -303,6 +199,7 @@ import Layout from '../layouts/Layout.astro';
     <div class="placeholder-cell"><span>Loading…</span></div>
   </div>
   <p class="port-count" id="port-count"></p>
+  <div style="margin-top:22px"><a href="/portfolio" class="btn">See the full portfolio</a></div>
 </section>
 
 <!-- ABOUT / GEAR -->

@@ -27,6 +27,27 @@ Everything you need to run **zrphotos.net** day to day. No coding required for a
    ```
    Until you do, photos still upload fine — they just save without title/location and the admin tells you so.
 
+## Two public galleries: homepage vs Portfolio page
+
+There are two separate public galleries, each with its own toggle:
+
+| | Where it shows | How a photo gets there |
+|---|---|---|
+| **Selected work** | Homepage, section 01 | The **"+ HP"** button on a photo card — short curated highlight reel, 6 shown at random |
+| **Portfolio** | `zrphotos.net/portfolio` | The **"Portfolio page…"** bulk dropdown — the big archive |
+
+To fill the Portfolio page: in the Upload tab's photo grid, tick the photos you want → in the bulk bar pick **Portfolio page… → Add to Portfolio** → **Apply**. Same dropdown removes them. Photos already on it show a gold **◆ PORTFOLIO** marker on their card.
+
+The Portfolio page uses the same categories as the homepage and loads 24 photos at a time behind a "Load more" button, so it stays fast even with hundreds of images.
+
+- ⚠️ One-time setup: this needs one more database column. In Supabase → SQL Editor, run:
+  ```sql
+  alter table portfolio_photos add column if not exists on_portfolio boolean default false;
+  -- optional: start the Portfolio page off with your current homepage picks
+  update portfolio_photos set on_portfolio = true where show_on_homepage = true;
+  ```
+  Until you do, the Portfolio page falls back to showing your homepage picks, and the bulk action will tell you the column is missing.
+
 ## Client galleries (Galleries tab)
 
 - Create a gallery, add photos to it (from the Upload tab's bulk actions), and share the link with your client.

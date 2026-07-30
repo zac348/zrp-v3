@@ -1,0 +1,197 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+<Layout
+  title="Portfolio — Zachary Routsong Photography"
+  description="Full portfolio — portraits, families, events, sports, and landscapes. Valdosta, Georgia."
+>
+
+<style is:global>
+/* Page header only — section scaffold, filter index, and masonry grid come from global.css */
+.port-head { max-width: 1060px; margin: 0 auto; padding: 72px 28px 0 }
+.port-title {
+  font-size: clamp(32px, 6vw, 56px);
+  font-weight: 320;
+  letter-spacing: -.025em;
+  line-height: 1.05;
+  margin: 14px 0 12px;
+}
+.port-lede {
+  font-size: 13.5px;
+  color: var(--text-2);
+  line-height: 1.8;
+  max-width: 440px;
+}
+.load-more-wrap { display: flex; justify-content: center; margin-top: 36px }
+@media (max-width: 600px) { .port-head { padding: 48px 18px 0 } }
+</style>
+
+<header class="port-head">
+  <p class="sec-label anim" style="--d:.05s">portfolio</p>
+  <h1 class="port-title anim" style="--d:.12s">Portfolio</h1>
+  <p class="port-lede anim" style="--d:.22s">Everything, by category. Click a photo to open it.</p>
+</header>
+
+<section class="section reveal" id="portfolio" style="padding-top:40px">
+  <div class="sec-head">
+    <span class="sec-num" id="port-total">—</span>
+    <h2>All work</h2>
+    <span class="rule"></span>
+  </div>
+
+  <div class="work-index" id="cat-tags">
+    <button class="cat-tag disabled">Loading…</button>
+  </div>
+
+  <div class="grid" id="portfolio-grid">
+    <div class="placeholder-cell"><span>Loading…</span></div>
+    <div class="placeholder-cell"><span>Loading…</span></div>
+    <div class="placeholder-cell"><span>Loading…</span></div>
+  </div>
+
+  <p class="port-count" id="port-count"></p>
+
+  <div class="load-more-wrap" id="load-more-wrap" style="display:none">
+    <button class="btn" id="load-more" onclick="loadMore()">Load more</button>
+  </div>
+</section>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lb" onclick="closeLB()">
+  <button class="lb-close" onclick="closeLB()">×</button>
+  <img id="lb-img" src="" alt=""/>
+</div>
+
+<script>
+import { createClient } from '@supabase/supabase-js';
+
+const sb = createClient(
+  import.meta.env.PUBLIC_SUPABASE_URL,
+  import.meta.env.PUBLIC_SUPABASE_ANON_KEY
+);
+
+const BATCH = 24;                       // render in chunks so a big archive stays fast
+let allPhotos = [], filtered = [], shown = 0, activeCat = null;
+
+async function loadPortfolio() {
+  let { data, error } = await sb
+    .from('portfolio_photos')
+    .select('*')
+    .eq('on_portfolio', true)
+    .order('created_at', { ascending: false })
+    .limit(500);
+
+  if (error) {
+    // `on_portfolio` column not added yet — fall back to the homepage picks so the
+    // page still shows work. Goes away once the SQL in HANDOFF.md has been run.
+    console.warn('portfolio: on_portfolio unavailable, falling back to homepage picks.', error.message);
+    ({ data } = await sb
+      .from('portfolio_photos')
+      .select('*')
+      .eq('show_on_homepage', true)
+      .order('created_at', { ascending: false })
+      .limit(500));
+  }
+
+  allPhotos = data || [];
+
+  if (!allPhotos.length) {
+    document.getElementById('cat-tags').style.display = 'none';
+    document.getElementById('portfolio-grid').innerHTML =
+      '<div class="placeholder-cell" style="aspect-ratio:auto;padding:56px"><span>No photos here yet</span></div>';
+    document.getElementById('port-total').textContent = '00';
+    return;
+  }
+
+  document.getElementById('port-total').textContent =
+    String(allPhotos.length).padStart(2, '0');
+
+  // Same category source as the homepage — the `sport` column is the category
+  const catCounts = {};
+  allPhotos.forEach(p => { if (p.sport) catCounts[p.sport] = (catCounts[p.sport] || 0) + 1; });
+  const cats = Object.keys(catCounts).sort();
+
+  const tagsEl = document.getElementById('cat-tags');
+  if (!cats.length) {
+    tagsEl.style.display = 'none';
+  } else {
+    tagsEl.innerHTML =
+      `<button class="cat-tag active" id="tag-all" onclick="filterCat(null)">All <span style="opacity:.55">(${allPhotos.length})</span></button>` +
+      cats.map(c =>
+        `<button class="cat-tag" onclick="filterCat('${c}')">${c} <span style="opacity:.55">(${catCounts[c]})</span></button>`
+      ).join('');
+  }
+
+  filterCat(null);
+}
+
+function filterCat(cat) {
+  activeCat = cat;
+  filtered = cat ? allPhotos.filter(p => p.sport === cat) : allPhotos;
+  shown = 0;
+  document.getElementById('portfolio-grid').innerHTML = '';
+
+  if (!filtered.length) {
+    document.getElementById('portfolio-grid').innerHTML =
+      '<div class="placeholder-cell" style="aspect-ratio:auto;padding:48px"><span>No photos in this category yet</span></div>';
+  } else {
+    appendBatch();
+  }
+
+  document.querySelectorAll('.cat-tag').forEach(t => {
+    const label = t.textContent.trim();
+    t.classList.toggle('active', cat ? label.startsWith(cat) : t.id === 'tag-all');
+  });
+  window.scrollTo({ top: document.getElementById('portfolio').offsetTop - 80, behavior: 'smooth' });
+}
+window.filterCat = filterCat;
+
+function appendBatch() {
+  const g = document.getElementById('portfolio-grid');
+  const next = filtered.slice(shown, shown + BATCH);
+
+  next.forEach((p, i) => {
+    const el = document.createElement('div');
+    el.className = 'grid-item';
+    el.style.setProperty('--d', (Math.min(i, 8) * 0.05) + 's');
+    const cap = p.title || p.sport || '';
+    const loc = p.location ? `<span style="display:block;opacity:.65;margin-top:2px">${p.location}</span>` : '';
+    el.innerHTML = `<img src="${p.url}" alt="${cap}" loading="lazy" decoding="async"/>
+      <div class="grid-overlay"><span>${cap}${loc}</span></div>`;
+    el.addEventListener('click', () => openLB(p.url));
+    g.appendChild(el);
+  });
+
+  shown += next.length;
+  updateMeta();
+}
+
+function loadMore() { appendBatch(); }
+window.loadMore = loadMore;
+
+function updateMeta() {
+  const label = activeCat ? ' — ' + activeCat : '';
+  document.getElementById('port-count').textContent =
+    shown < filtered.length
+      ? `Showing ${shown} of ${filtered.length} photographs${label}`
+      : `${filtered.length} photograph${filtered.length !== 1 ? 's' : ''}${label}`;
+  document.getElementById('load-more-wrap').style.display =
+    shown < filtered.length ? 'flex' : 'none';
+}
+
+function openLB(url) {
+  document.getElementById('lb-img').src = url;
+  document.getElementById('lb').classList.add('open');
+}
+window.openLB = openLB;
+
+function closeLB() {
+  document.getElementById('lb').classList.remove('open');
+}
+window.closeLB = closeLB;
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLB(); });
+
+loadPortfolio();
+</script>
+</Layout>

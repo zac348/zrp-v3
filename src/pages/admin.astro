@@ -479,6 +479,14 @@ html,body { height: 100% }
           <select id="bulk-gallery" class="bulk-select"><option value="">Add to gallery…</option></select>
           <button class="btn-sm on-ink" onclick="bulkAddToGallery()">Apply</button>
         </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <select id="bulk-portfolio" class="bulk-select">
+            <option value="">Portfolio page…</option>
+            <option value="add">Add to Portfolio</option>
+            <option value="remove">Remove from Portfolio</option>
+          </select>
+          <button class="btn-sm on-ink" onclick="bulkSetPortfolio()">Apply</button>
+        </div>
         <button class="btn-sm on-ink" onclick="bulkSetLocation()">Set location</button>
         <button class="btn-sm red" onclick="bulkDelete()">Delete selected</button>
       </div>
@@ -768,7 +776,7 @@ function renderPhotos() {
       <img src="${p.url}" alt="" loading="lazy"
         onclick="photoCardClick('${p.id}')" style="cursor:pointer"/>
       <div class="photo-card-info">
-        <div class="photo-sport">${p.sport || 'No category'}${p.location ? ' · ' + p.location : ''}</div>
+        <div class="photo-sport">${p.sport || 'No category'}${p.location ? ' · ' + p.location : ''}${p.on_portfolio ? ' · <span style="color:var(--accent)">◆ PORTFOLIO</span>' : ''}</div>
         <div class="photo-name">${p.title || p.file_name}</div>
       </div>
       <div class="photo-actions">
@@ -918,6 +926,27 @@ async function bulkAddToGallery() {
   await loadPhotos(); toast('Added to gallery');
 }
 window.bulkAddToGallery = bulkAddToGallery;
+
+// Add/remove the selected photos from the public /portfolio page
+async function bulkSetPortfolio() {
+  const mode = document.getElementById('bulk-portfolio').value;
+  if (!mode || !selectedPhotoIds.size) return;
+  const n = selectedPhotoIds.size;
+  const { error } = await sb.from('portfolio_photos')
+    .update({ on_portfolio: mode === 'add' })
+    .in('id', [...selectedPhotoIds]);
+  if (error) {
+    toast('Portfolio column missing — run the SQL in HANDOFF.md');
+    console.error('bulkSetPortfolio:', error.message);
+    return;
+  }
+  document.getElementById('bulk-portfolio').value = '';
+  await loadPhotos();
+  toast(mode === 'add'
+    ? n + ' photo(s) added to Portfolio'
+    : n + ' photo(s) removed from Portfolio');
+}
+window.bulkSetPortfolio = bulkSetPortfolio;
 
 async function bulkDelete() {
   if (!selectedPhotoIds.size) return;

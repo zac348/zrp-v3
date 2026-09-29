@@ -287,8 +287,11 @@ document.getElementById('qbook-form').addEventListener('submit', async function(
     fd.get('Notes') || '',
   ].filter(Boolean).join(' | ') || null;
 
+  // supabase-js reports failures by returning { error }, not by throwing, so the
+  // result has to be checked — otherwise a database outage looks like success.
+  let saved = false, saveError = '';
   try {
-    await sb.from('bookings').insert({
+    const { error } = await sb.from('bookings').insert({
       booking_number:   bookingNum,
       first_name:       fd.get('First Name'),
       last_name:        fd.get('Last Name'),
@@ -304,15 +307,17 @@ document.getElementById('qbook-form').addEventListener('submit', async function(
       notes: combinedNotes,
       status: 'pending',
     });
-  } catch(err) {
-    btn.disabled = false; btn.textContent = 'Send booking request';
-    alert('Something went wrong — please try again.');
-    return;
+    if (error) saveError = error.message; else saved = true;
+  } catch (err) {
+    saveError = (err && err.message) || String(err);
   }
 
-  // Notify the owner by email (fire-and-forget — booking is already saved)
-  fetch('/api/notify-booking', {
+  // Email the owner. keepalive lets the request finish even though we navigate
+  // away right after. If the save failed, this email is the only record — it
+  // gets flagged, and we wait to be sure it went out.
+  const notify = fetch('/api/notify-booking', {
     method: 'POST',
+    keepalive: true,
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       name: [fd.get('First Name'), fd.get('Last Name')].filter(Boolean).join(' '),
@@ -326,8 +331,24 @@ document.getElementById('qbook-form').addEventListener('submit', async function(
       total: '$' + selPkg.price.toFixed(2),
       notes: combinedNotes,
       source: 'Quick book',
+      booking_number: bookingNum,
+      saved,
+      save_error: saveError || null,
     }),
-  }).catch(() => {});
+  });
+
+  if (saved) {
+    notify.catch(() => {});
+  } else {
+    let emailed = false;
+    try { emailed = !!(await (await notify).json()).emailSent; } catch (_) {}
+    if (!emailed) {
+      // Neither saved nor emailed — be honest so they can try again
+      btn.disabled = false; btn.textContent = 'Send booking request';
+      alert("Your request didn't go through. Try again in a minute, or call or text 229-300-1006.");
+      return;
+    }
+  }
 
   sessionStorage.setItem('zrp_booking_num', bookingNum);
   window.location.href = '/thanks';

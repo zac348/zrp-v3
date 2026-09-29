@@ -658,8 +658,11 @@ document.getElementById('book-form').addEventListener('submit', async function(e
     ? 'Portfolio use: approved' : 'Portfolio use: not approved';
   const combinedNotes = [typeAnswers, dateNote, couponNote, portfolioNote, freeNotes].filter(Boolean).join(' | ') || null;
 
+  // supabase-js reports failures by returning { error }, not by throwing, so the
+  // result has to be checked — otherwise a database outage looks like success.
+  let saved = false, saveError = '';
   try {
-    await sb.from('bookings').insert({
+    const { error } = await sb.from('bookings').insert({
       first_name:       first,
       last_name:        last,
       email:            email,
@@ -673,15 +676,16 @@ document.getElementById('book-form').addEventListener('submit', async function(e
       notes:            combinedNotes,
       status:           'pending',
     });
-  } catch(err) {
-    btn.disabled = false; btn.textContent = 'Send booking request';
-    alert('Something went wrong — please try again.');
-    return;
+    if (error) saveError = error.message; else saved = true;
+  } catch (err) {
+    saveError = (err && err.message) || String(err);
   }
 
-  // Notify the owner by email (fire-and-forget — booking is already saved)
-  fetch('/api/notify-booking', {
+  // Email the owner. If the save failed, this email is the only record of the
+  // booking — it gets flagged, and we wait to be sure it actually went out.
+  const notify = fetch('/api/notify-booking', {
     method: 'POST',
+    keepalive: true,
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       name: [first, last].filter(Boolean).join(' '),
@@ -693,8 +697,23 @@ document.getElementById('book-form').addEventListener('submit', async function(e
       total: '$' + finalTotal.toFixed(2),
       notes: combinedNotes,
       source: 'Full booking',
+      saved,
+      save_error: saveError || null,
     }),
-  }).catch(() => {});
+  });
+
+  if (saved) {
+    notify.catch(() => {});
+  } else {
+    let emailed = false;
+    try { emailed = !!(await (await notify).json()).emailSent; } catch (_) {}
+    if (!emailed) {
+      // Neither saved nor emailed — be honest so they can try again
+      btn.disabled = false; btn.textContent = 'Send booking request';
+      alert("Your request didn't go through. Try again in a minute, or call or text 229-300-1006.");
+      return;
+    }
+  }
 
   showSuccessState();
 });

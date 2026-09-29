@@ -137,6 +137,19 @@ If emails ever stop arriving, check `RESEND_API_KEY` and `ZACHARY_EMAIL` first �
 - **Instagram** — keep the handle (@zacharyroutsongphotos) matching the business name, keep the site link in bio, and link back to the site when you post galleries. During season, 2–3 posts a week; short video clips of game highlights tend to do the best numbers.
 - **Phones first** — most parents will open this site from a link in a group chat. It's built to load fast on mobile; keep it that way by curating the homepage photos (see Uploading).
 
+## If the site ever loses its photos (Supabase pausing)
+
+Every photo, booking, price, and the admin login live in **Supabase**. On the free plan, Supabase pauses a project after about a week of inactivity — the site still loads, but it's empty. That happened in September 2026.
+
+**Two guards are in place now:**
+
+- **Daily keepalive.** A GitHub Action (`Keep Supabase awake`, in the repo's Actions tab) runs one tiny database query every day so the project never looks idle. If the database ever fails to answer, the run fails and **GitHub emails the repo owner** — so it's also your early-warning alarm. It uses two repo secrets, `SUPABASE_URL` and `SUPABASE_ANON_KEY` (Settings → Secrets and variables → Actions); if you ever rotate the Supabase keys, update those too.
+- **Bookings can't silently vanish.** If the database is down when someone books, the booking still gets emailed to you with a red **"⚠️ NOT SAVED — add manually"** subject and banner. That email is the only record — add it to admin by hand or reply to the client. If the email *also* fails, the client is told it didn't go through and asked to try again or call.
+
+**If it happens anyway:** your photo files are safe in Cloudflare R2 regardless — only the database pauses. Go to **supabase.com/dashboard**, open the project, click **Restore**, and wait a few minutes. Nothing on the site needs changing. Don't sit on it: Supabase only keeps paused projects restorable for a limited time.
+
+**The permanent fix** is Supabase Pro ($25/month) — it never pauses and includes daily backups.
+
 ## Quick troubleshooting
 
 - **Page looks broken/unstyled right after an update** → mid-deploy hiccup; hard-refresh (Cmd+Shift+R).

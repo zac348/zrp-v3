@@ -54,7 +54,8 @@ export async function onRequestPost(context) {
     from,
     to,
     reply_to: b.email || undefined,
-    subject: `New booking request — ${name}` + (b.session_type ? ` (${b.session_type})` : ''),
+    subject: (b.saved === false ? '⚠️ NOT SAVED — add manually: ' : '') +
+      `New booking request — ${name}` + (b.session_type ? ` (${b.session_type})` : ''),
     html: notifyEmail(b),
   });
 
@@ -96,8 +97,14 @@ function ackEmail(b) {
 </body></html>`;
 }
 
+function esc(v) {
+  return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
 function notifyEmail(b) {
+  const unsaved = b.saved === false;
   const rows = [
+    b.booking_number   && ['Booking #', b.booking_number],
     ['Name',      b.name],
     ['Email',     b.email],
     b.phone            && ['Phone',    b.phone],
@@ -113,12 +120,15 @@ function notifyEmail(b) {
 <body style="margin:0;padding:0;background:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#1a1918">
 <div style="max-width:520px;margin:0 auto;padding:44px 24px">
   <p style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:#999;margin:0 0 28px">ZRP — New booking request${b.source ? ' · ' + b.source : ''}</p>
+  ${unsaved ? `<div style="background:#fdecea;border:1px solid #f5c2bd;border-radius:8px;padding:14px 16px;margin:0 0 20px;font-size:13px;line-height:1.6;color:#8a1c12">
+    <strong>This booking did NOT save to your admin panel.</strong> The database didn't respond when they submitted. This email is the only record — add it by hand or reply to the client directly.${b.save_error ? `<br><span style="font-family:'Courier New',monospace;font-size:11px;color:#b3261e">${esc(b.save_error)}</span>` : ''}
+  </div>` : ''}
   <h1 style="font-size:24px;font-weight:300;letter-spacing:-.02em;color:#1a1918;margin:0 0 20px">${b.name || 'New request'}</h1>
   <div style="background:#f7f6f5;border:1px solid #e8e7e6;border-radius:8px;padding:18px;margin-bottom:24px">
     ${rows.map(([k, v]) => `<div style="display:flex;justify-content:space-between;gap:16px;padding:6px 0;border-bottom:1px solid #e8e7e6;font-size:12px"><span style="color:#999;flex-shrink:0">${k}</span><span style="font-weight:500;text-align:right">${v}</span></div>`).join('')}
   </div>
   <a href="https://zrphotos.net/admin" style="display:inline-block;background:#1a1918;color:#fff;text-decoration:none;font-size:14px;font-weight:500;padding:13px 28px;border-radius:6px">Open admin →</a>
-  <p style="font-size:11px;color:#bbb;line-height:1.7;margin:24px 0 0">Reply to this email to reach the client directly. The request is already saved in your admin panel as “pending.”</p>
+  <p style="font-size:11px;color:#bbb;line-height:1.7;margin:24px 0 0">Reply to this email to reach the client directly.${unsaved ? ' This one is <strong>not</strong> in your admin panel.' : ' The request is saved in your admin panel as “pending.”'}</p>
 </div>
 </body></html>`;
 }

@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { BOOKING_OPEN } from '../config.js';
 ---
 <Layout title="Admin — ZRP" noNav={true} noFooter={true}>
 <style is:global>
@@ -606,6 +607,7 @@ html,body { height: 100% }
   <div class="tab" id="tab-coupons">
     <h1 class="main-title">Coupons</h1>
     <p class="main-sub">Create and manage discount codes for clients.</p>
+    {!BOOKING_OPEN && <p class="main-sub" style="color:var(--amber)">Online booking is turned off right now, so coupon links open the contact section instead of the booking form. Turn booking back on in <code>src/config.js</code>.</p>}
     <div class="coupon-form-card">
       <div class="sec-label" style="margin-bottom:14px">new coupon</div>
       <div class="coupon-form-grid">

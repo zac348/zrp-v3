@@ -10,7 +10,7 @@
  *
  * Cloudflare Pages env vars:
  *   RESEND_API_KEY  — from resend.com (required to send)
- *   ZACHARY_EMAIL   — where the notification goes (required)
+ *   ZACHARY_EMAIL   — where the notification goes (required; comma-separate for several)
  *   FROM_EMAIL      — optional; defaults to Resend's shared test sender.
  *                     Sending to your own ZACHARY_EMAIL works on the test
  *                     sender without domain verification.
@@ -22,8 +22,9 @@ export async function onRequestPost(context) {
   try { b = await request.json(); }
   catch { return Response.json({ error: 'Invalid JSON' }, { status: 400 }); }
 
-  const to = env.ZACHARY_EMAIL;
-  if (!env.RESEND_API_KEY || !to) {
+  // Comma-separate ZACHARY_EMAIL to notify more than one person
+  const to = String(env.ZACHARY_EMAIL || '').split(',').map(s => s.trim()).filter(Boolean);
+  if (!env.RESEND_API_KEY || !to.length) {
     return Response.json({
       ok: true,
       emailSent: false,
@@ -65,7 +66,7 @@ export async function onRequestPost(context) {
     clientAcked = await send({
       from,
       to: b.email,
-      reply_to: to,
+      reply_to: to[0],
       subject: 'Request received — Zachary Routsong Photography',
       html: ackEmail(b),
     });

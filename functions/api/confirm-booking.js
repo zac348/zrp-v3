@@ -9,7 +9,7 @@
  *   RESEND_API_KEY
  *   SITE_URL        — https://zrphotos.net
  *   FROM_EMAIL      — optional
- *   ZACHARY_EMAIL   — optional, for admin notification
+ *   ZACHARY_EMAIL   — optional, for admin notification (comma-separate for several)
  */
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -45,13 +45,14 @@ export async function onRequestPost(context) {
   }
 
   // Zachary notification
-  if (env.ZACHARY_EMAIL) {
+  const owners = String(env.ZACHARY_EMAIL || '').split(',').map(s => s.trim()).filter(Boolean);
+  if (owners.length) {
     await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { 'Authorization': 'Bearer ' + env.RESEND_API_KEY, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         from,
-        to: env.ZACHARY_EMAIL,
+        to: owners,
         subject: `New confirmed booking — ${ztn} — ${name}`,
         html: zachEmail(name, email, booking || {}, ztn, venueAddress, parsedAddons, finalTotal),
       }),

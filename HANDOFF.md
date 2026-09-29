@@ -50,6 +50,23 @@ It walks every photo that doesn't have a web version yet, builds the smaller ver
 - **Privacy model: the link IS the password.** Gallery links are long random URLs — anyone who has one can view and download. Don't post gallery links publicly; send them directly to the client.
 - Galleries created automatically when a booking is confirmed get a random link too.
 
+## Online booking is OFF right now — people reach out instead
+
+Booking is switched off. Every "Book a session" button now says **Get in touch** and goes to the **Contact** section at the bottom of the homepage. Old `/book` links (group chats, Google, coupon links) redirect there too.
+
+**The Contact section** has three big buttons — **Text**, **Email**, **Instagram** — plus a short form: name, phone or email, what they're looking for, and a date if they have one.
+
+- Form messages go straight to your email (`ZACHARY_EMAIL`), subject **"New message — [their name]"**. If they left an email address you can just hit reply; if they left a phone number, text them.
+- If they left an email, they get an automatic **"Got your message"** reply.
+- Nothing is saved to the admin panel — **the email is the record.** Upside: the form keeps working even if Supabase is down.
+- It has the same bot trap as booking, so spam gets dropped quietly.
+
+**Nothing breaks for clients already in progress:** anyone you've already accepted can still finish at their `/confirm` link, and invoices, galleries, and the admin Bookings tab all keep working.
+
+**Coupons** are dormant while booking is off — their links land on the contact section.
+
+**To turn online booking back on:** open `src/config.js`, change `BOOKING_OPEN = false` to `true`, commit, and push. Every button, the footer, and the `/book` page switch back together in about two minutes. (Or just ask Claude to do it.)
+
 ## Bookings (Bookings tab) — the flow
 
 1. Client submits a request on `/book` or `/quick-book` → shows up as **pending**, **you get a "New booking request" email**, and **the client instantly gets a "got your request" acknowledgment**.
@@ -122,13 +139,13 @@ These live in the **Cloudflare Pages dashboard** → your project → Settings:
 | `PUBLIC_SUPABASE_URL` | Environment variables | The whole site's data |
 | `PUBLIC_SUPABASE_ANON_KEY` | Environment variables | The whole site's data |
 | `RESEND_API_KEY` | Environment variables | **All emails** (new-booking alerts, accept links, confirmations) |
-| `ZACHARY_EMAIL` | Environment variables | Your new-booking + confirmation notices |
+| `ZACHARY_EMAIL` | Environment variables | Where new-booking, contact-form, and confirmation notices go. Comma-separate to notify more than one person, e.g. `zac@zrphotos.net, someone@gmail.com` |
 | `SITE_URL` (`https://zrphotos.net`) | Environment variables | Links inside emails |
 | `FROM_EMAIL` (verified domain) | Environment variables | Emails **to clients** (needs Resend domain verification) |
 | `PHOTOS` → your R2 bucket | Functions → R2 bucket bindings | Photo upload/delete |
 | `R2_BASE_URL` | Environment variables | Photo URLs |
 
-If emails ever stop arriving, check `RESEND_API_KEY` and `ZACHARY_EMAIL` first — bookings still save without them, but you won't get notified. For client emails specifically, confirm your domain is verified in Resend and `FROM_EMAIL` uses it.
+If an email seems missing, check in this order: **(1)** it went to the address in `ZACHARY_EMAIL`, not whoever tested; **(2)** the spam folder; **(3)** the **Emails** page in the Resend dashboard, which shows every message and whether it was *Delivered*, *Bounced*, or never sent. After that, check `RESEND_API_KEY` and `ZACHARY_EMAIL` — bookings still save without them, but you won't get notified. For client emails specifically, confirm your domain is verified in Resend and `FROM_EMAIL` uses it.
 
 ## Getting found (the stuff the website can't do for you)
 

@@ -1,7 +1,8 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { BOOKING_OPEN } from '../config.js';
 ---
-<Layout title="Book a Session — ZRP">
+<Layout title="Book a Session — ZRP" redirectTo={BOOKING_OPEN ? undefined : '/#contact'}>
 <style is:global>
 .page { max-width: 560px; margin: 0 auto; padding: 48px 24px 80px }
 @media (max-width: 480px) { .page { padding: 32px 16px 64px } }

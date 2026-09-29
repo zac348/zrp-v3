@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { PRIMARY_CTA } from '../config.js';
 ---
 <Layout title="Zachary Routsong Photography">
 
@@ -167,6 +168,24 @@ import Layout from '../layouts/Layout.astro';
   font-size: 17px;
   color: var(--text);
 }
+/* ── CONTACT ── */
+#contact { scroll-margin-top: 64px }
+.contact-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  gap: 64px;
+  align-items: start;
+}
+@media (max-width: 860px) { .contact-grid { grid-template-columns: 1fr; gap: 36px } }
+.contact-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 10px }
+.contact-form { display: flex; flex-direction: column; gap: 14px; max-width: 520px }
+.contact-form .btn { align-self: flex-start; margin-top: 4px }
+.contact-status { font-size: 13px; color: var(--text-2); line-height: 1.6; min-height: 1.6em }
+.contact-status.err { color: var(--red) }
+.hp-field { position: absolute; left: -5000px; top: auto; height: 0; overflow: hidden }
+@media (max-width: 700px) {
+  .contact-actions .btn, .contact-form .btn { align-self: stretch; width: 100% }
+}
 </style>
 
 <!-- HERO -->
@@ -179,7 +198,7 @@ import Layout from '../layouts/Layout.astro';
     </h1>
     <div class="hero-foot">
       <p class="hero-role anim" style="--d:.34s"><em>Portraits, families, events &amp; sports.</em><br/>Private gallery, quick turnaround, simple pricing. Sessions from <span id="hero-price">$40</span>.</p>
-      <span class="anim" style="--d:.45s"><a href="/book" class="btn">Book a session</a></span>
+      <span class="anim" style="--d:.45s"><a href={PRIMARY_CTA.href} class="btn">{PRIMARY_CTA.label}</a></span>
     </div>
   </div>
 </header>
@@ -230,7 +249,7 @@ import Layout from '../layouts/Layout.astro';
             <li><span class="f-label">Edited photos</span><span class="f-value">25+ per session</span></li>
             <li><span class="f-label">Coverage</span><span class="f-value">Valdosta &amp; nearby</span></li>
           </ul>
-          <a href="/book" class="btn">Book a session</a>
+          <a href={PRIMARY_CTA.href} class="btn">{PRIMARY_CTA.label}</a>
         </div>
       </div>
     </div>
@@ -290,6 +309,47 @@ import Layout from '../layouts/Layout.astro';
 
       </div>
     </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="section reveal" id="contact" style="border-top:1px solid var(--border)">
+  <div class="sec-head">
+    <span class="sec-num">03</span>
+    <h2>Contact</h2>
+    <span class="rule"></span>
+  </div>
+
+  <div class="contact-grid">
+    <div>
+      <p class="about-lede">Text is fastest. Or send a message and I'll get back to you.</p>
+      <div class="contact-actions">
+        <a href="sms:+12293001006" class="btn">Text 229-300-1006</a>
+        <a href="mailto:zac@zrphotos.net" class="btn">Email</a>
+        <a href="https://ig.me/m/zacharyroutsongphotos" target="_blank" rel="noopener" class="btn">Instagram</a>
+      </div>
+    </div>
+
+    <form id="contact-form" class="contact-form">
+      <!-- invisible to people, irresistible to bots -->
+      <div class="hp-field" aria-hidden="true">
+        <input type="text" id="c-website" name="website" tabindex="-1" autocomplete="off"/>
+      </div>
+      <div class="field"><label for="c-name">Name</label>
+        <input type="text" id="c-name" autocomplete="name" required maxlength="100"/></div>
+      <div class="field"><label for="c-contact">Phone or email</label>
+        <input type="text" id="c-contact" required maxlength="200"/></div>
+      <div class="field"><label for="c-message">What are you looking for?</label>
+        <textarea id="c-message" rows="4" required maxlength="3000" placeholder="Senior pics, a game, family photos…"></textarea></div>
+      <div class="field"><label for="c-date">Date, if you have one</label>
+        <input type="text" id="c-date" maxlength="100" placeholder="e.g. mid October"/></div>
+      <div class="agree-row">
+        <input type="checkbox" id="c-agree" required/>
+        <label for="c-agree">I agree to the <a href="/privacy" target="_blank">Privacy Policy</a> and I'm 13 or older (or a parent or guardian).</label>
+      </div>
+      <button type="submit" class="btn" id="c-submit">Send</button>
+      <p class="contact-status" id="c-status" role="status" aria-live="polite"></p>
+    </form>
   </div>
 </section>
 
@@ -432,7 +492,52 @@ async function loadStartingPrice() {
   } catch(e) {}
 }
 
-loadPortfolio();
+// Anchors like /#contact are resolved before the photo grid loads. Once it
+// renders the page grows and the anchor ends up off-screen, so jump back to it.
+loadPortfolio().finally(() => {
+  const target = location.hash.length > 1 && document.getElementById(location.hash.slice(1));
+  if (target) requestAnimationFrame(() => target.scrollIntoView());
+});
 loadStartingPrice();
+
+// ── CONTACT FORM ──
+const CONTACT_LOADED = Date.now();
+const contactForm = document.getElementById('contact-form');
+contactForm?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('c-submit');
+  const status = document.getElementById('c-status');
+  const val = id => document.getElementById(id).value.trim();
+
+  btn.disabled = true; btn.textContent = 'Sending…';
+  status.className = 'contact-status'; status.textContent = '';
+
+  let ok = false;
+  try {
+    const res = await fetch('/api/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: val('c-name'),
+        contact: val('c-contact'),
+        message: val('c-message'),
+        date: val('c-date'),
+        website: document.getElementById('c-website').value,
+        elapsed: Date.now() - CONTACT_LOADED,
+      }),
+    });
+    ok = !!(await res.json()).ok;
+  } catch (_) {}
+
+  if (ok) {
+    contactForm.reset();
+    status.textContent = "Got it. I'll get back to you soon.";
+    btn.textContent = 'Sent';
+  } else {
+    status.classList.add('err');
+    status.textContent = "That didn't go through. Text me at 229-300-1006 instead.";
+    btn.disabled = false; btn.textContent = 'Send';
+  }
+});
 </script>
 </Layout>

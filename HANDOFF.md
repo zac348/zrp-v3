@@ -54,7 +54,7 @@ It walks every photo that doesn't have a web version yet, builds the smaller ver
 
 Booking is switched off. Every "Book a session" button now says **Get in touch** and goes to the **Contact** section at the bottom of the homepage. Old `/book` links (group chats, Google, coupon links) redirect there too.
 
-**The Contact section** has three big buttons — **Text**, **Email**, **Instagram** — plus a short form: name, phone or email, what they're looking for, and a date if they have one.
+**The Contact section** has three big buttons — **Text**, **Email**, **Instagram** — plus a short form: name, phone or email, what they're looking for, and a date if they have one. Before sending, they have to tick **"I understand Zachary only shoots locally — Valdosta and nearby"**, so nobody reaches out expecting you to drive across the country.
 
 - Form messages go straight to your email (`ZACHARY_EMAIL`), subject **"New message — [their name]"**. If they left an email address you can just hit reply; if they left a phone number, text them.
 - If they left an email, they get an automatic **"Got your message"** reply.

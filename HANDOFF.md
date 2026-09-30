@@ -11,7 +11,7 @@ Everything you need to run **zrphotos.net** day to day. No coding required for a
 - To change your email/password or add another admin: **supabase.com/dashboard** → your project → **Authentication → Users**. Anyone in that list can access the admin panel, so only add people you trust.
 - One-time setup check: in Supabase → **Authentication → URL Configuration → Redirect URLs**, make sure `https://zrphotos.net/reset` is listed — the password-reset email needs it.
 
-## Uploading photos (Upload tab)
+## Uploading photos (Photos tab)
 
 1. Pick a **Category** (Portraits, Family, Sports…) — this powers the category filters.
 2. Tick **"Add to the public Portfolio page"** if these photos should be public. Leave it off for client work.
@@ -19,7 +19,7 @@ Everything you need to run **zrphotos.net** day to day. No coding required for a
 4. Scroll down on the same tab to see **all photos**: select several (click photos or checkboxes) to bulk-change category, add to a client gallery, add/remove from the Portfolio, or delete.
 5. **Photos are automatically resized on upload.** Each one is saved three ways: your untouched original (what clients download), a ~2200px web version (used when someone opens a photo), and a ~700px thumbnail (used in the grids). Visitors never download the full-size file — that's the difference between a 3 MB page and a 30 MB one.
 6. **You no longer pick what's on the homepage.** It shows 6 photos at random from your Portfolio, reshuffled on every visit. Nothing to manage.
-7. **Titles & locations:** the upload form has optional Title and Location fields (they apply to the whole batch). Fix individual photos anytime with the **Edit** button on a photo card, or select several and use **Set location**. Titles/locations show when visitors hover a photo on the homepage.
+7. **Titles & locations:** the upload form has optional Title and Location fields (they apply to the whole batch). Fix individual photos anytime with the **Edit** button on a photo card, or select several and use **Set location**. Titles/locations show when visitors hover (or tab to) a photo, and they double as the photo's description for screen readers and Google. With no title, the category + location is used (e.g. "Soccer, Valwood School") — so filling in locations is worth it.
    - ⚠️ One-time setup: these two fields need two database columns. In Supabase → SQL Editor, run this once:
    ```sql
    alter table portfolio_photos add column if not exists title text;
@@ -34,19 +34,19 @@ There's a single public set of photos — your **Portfolio** — and one way in 
 - **The `/portfolio` page** shows all of it, filterable by category, 24 at a time behind a "Load more" button.
 - **The homepage** shows **6 of them at random**, reshuffled every visit. No picking, no toggle, nothing to maintain.
 
-**To add or remove photos:** in the Upload tab's photo grid, tick the ones you want → in the bulk bar choose **Portfolio page… → Add to Portfolio** (or Remove) → **Apply**. You can also tick the box on the upload form to add a whole batch as you upload. Photos on the Portfolio show a gold **◆ PORTFOLIO** marker on their card.
+**To add or remove photos:** in the Photos tab's photo grid, tick the ones you want → in the bulk bar choose **Portfolio page… → Add to Portfolio** (or Remove) → **Apply**. You can also tick the box on the upload form to add a whole batch as you upload. Photos on the Portfolio show a gold **◆ Portfolio** marker on their card.
 
 Client-gallery photos can be in the Portfolio too — delivering a photo to a client doesn't stop you showing it off (just check they're OK with it; the booking form asks).
 
 ## Optimizing older photos (one-time)
 
-Photos uploaded before automatic resizing existed are still full-size — some are 10–20 MB, which is brutal on a phone. In the Upload tab, above the photo grid, click **"Optimize existing photos."**
+Photos uploaded before automatic resizing existed are still full-size — some are 10–20 MB, which is brutal on a phone. In the Photos tab, above the photo grid, click **"Optimize existing photos."** (The button only appears while there are photos that still need it — once everything's done, it disappears.)
 
 It walks every photo that doesn't have a web version yet, builds the smaller versions, and saves them. Originals are never touched, it shows progress as it goes, and it's safe to stop and re-run later — it skips anything already done. Do it once, on a laptop, on wifi.
 
 ## Client galleries (Galleries tab)
 
-- Create a gallery, add photos to it (from the Upload tab's bulk actions), and share the link with your client.
+- Create a gallery, add photos to it (from the Photos tab's bulk actions), and share the link with your client.
 - **Privacy model: the link IS the password.** Gallery links are long random URLs — anyone who has one can view and download. Don't post gallery links publicly; send them directly to the client.
 - Galleries created automatically when a booking is confirmed get a random link too.
 
@@ -73,6 +73,7 @@ Booking is switched off. Every "Book a session" button now says **Get in touch**
 2. You click **Accept** → the client gets an email with a private link to finalize (location, add-ons, travel check), and **the session date is automatically blocked** on the availability calendar so nobody else can book it. (Cancelling a booking does *not* auto-unblock — remove the block in the Availability tab if the date frees up.)
 3. Client finishes → status becomes **confirmed**, a gallery is auto-created, and both of you get confirmation emails with the invoice link.
 4. After you deliver the photos, click **Mark delivered**.
+5. **Deleting old bookings:** finished bookings (delivered, cancelled, or the session date has passed) get a red **Delete** button. The **Past** filter shows just those. Clicking Delete asks you to **type the client's name** before the button unlocks — so it can't happen by a stray click. Upcoming bookings never show a Delete button; cancel them first if you really want them gone. Deleting removes the booking record for good (their gallery and photos stay, but their invoice link stops working).
 
 Booking notes contain everything the client entered: session-type answers (e.g. "Sport & team: …"), coupon used, **whether they approved portfolio use of their photos**, and their free-text notes.
 
@@ -96,6 +97,8 @@ Every email on the site (new-booking alerts to you, accept links, confirmations)
 
 ## Availability (Availability tab)
 
+*Hidden from the admin while online booking is off — it comes back automatically when you flip the switch.*
+
 Whatever you mark here is what clients see on the `/book` calendar:
 
 - **Unavailable (full day)** → the date is struck out and unclickable for clients.
@@ -110,6 +113,8 @@ Whatever you mark here is what clients see on the `/book` calendar:
 - **Add-ons:** these appear on the client's booking-confirmation page automatically when marked Available. Use **"Add starter pack"** to load 8 standard ones (rush delivery, extra hour, second photographer, video reel, social crops, unedited photos, album, canvas). Add your own with the name + price form; delete ones you don't offer.
 
 ## Coupons (Coupons tab)
+
+*Hidden from the admin while online booking is off — it comes back automatically when you flip the switch.*
 
 - Create a code (percent off, fixed $ off, or travel-fee waiver), optionally with an expiry date or max uses.
 - Share it directly or via the **copy link** button — links look like `zrphotos.net/book?coupon=CODE` and pre-fill the code for the client.
@@ -167,9 +172,22 @@ Every photo, booking, price, and the admin login live in **Supabase**. On the fr
 
 **The permanent fix** is Supabase Pro ($25/month) — it never pauses and includes daily backups.
 
+## How the site looks (so future changes stay consistent)
+
+- **Two fonts only:** Fraunces for headings and the name, DM Sans for everything else. No all-caps labels, nothing smaller than 12px.
+- **Photos are shown at their real shape** — nothing is cropped in the grids or the lightbox. The first few photos load right away; the rest load as you scroll.
+- **No decorative motion.** No fade-ins or zooms; hover just shows the photo's title/location. Everything works with a keyboard (Tab to a photo, Enter to open, Esc to close).
+- Plain wording in Zachary's voice. If a claim isn't true yet (e.g. a type of shoot with no photos to back it up), leave it out.
+
 ## Quick troubleshooting
 
 - **Page looks broken/unstyled right after an update** → mid-deploy hiccup; hard-refresh (Cmd+Shift+R).
 - **Can't log in** → reset the password via "Forgot password?", or directly in Supabase → Authentication → Users.
 - **A date clients shouldn't book is selectable** → mark it Unavailable in the Availability tab.
 - **Coupon says invalid** → see the SQL note in the Coupons section above.
+- **"The database blocked the delete" when deleting a booking** → the bookings table needs permission for signed-in admins to delete. In Supabase → SQL Editor, run once:
+  ```sql
+  create policy "admin can delete bookings"
+  on bookings for delete to authenticated using (true);
+  ```
+- **Admin on your phone** → the tabs run across the top; swipe that strip sideways to reach them all.

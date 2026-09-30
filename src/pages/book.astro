@@ -36,10 +36,9 @@ import { BOOKING_OPEN } from '../config.js';
 }
 .pkg-card.unavail { opacity: .4; cursor: not-allowed; pointer-events: none }
 .pkg-badge {
-  font-family: 'DM Mono', monospace;
-  font-size: 8px;
-  letter-spacing: .1em;
-  text-transform: uppercase;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  letter-spacing: .01em;
   background: var(--text);
   color: var(--bg);
   padding: 2px 7px;
@@ -48,10 +47,9 @@ import { BOOKING_OPEN } from '../config.js';
   transform: translateY(-50%);
 }
 .pkg-sale-badge {
-  font-family: 'DM Mono', monospace;
-  font-size: 8px;
-  letter-spacing: .08em;
-  text-transform: uppercase;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  letter-spacing: .01em;
   color: var(--red);
   background: var(--red-bg);
   border: 1px solid var(--red-border);
@@ -60,20 +58,19 @@ import { BOOKING_OPEN } from '../config.js';
   margin-bottom: 4px;
 }
 .pkg-name {
-  font-family: 'DM Mono', monospace;
-  font-size: 9px;
-  letter-spacing: .12em;
-  text-transform: uppercase;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  letter-spacing: .01em;
   color: var(--text-3);
   margin-bottom: 6px;
 }
-.pkg-orig { font-size: 11px; color: var(--text-3); text-decoration: line-through; line-height: 1; margin-bottom: 1px }
+.pkg-orig { font-size: 12px; color: var(--text-3); text-decoration: line-through; line-height: 1; margin-bottom: 1px }
 .pkg-price { font-size: 26px; font-weight: 300; letter-spacing: -.02em; margin-bottom: 10px }
 .pkg-price small { font-size: 12px; color: var(--text-3); font-weight: 400 }
 .pkg-price.sale { color: var(--green) }
 .pkg-features { list-style: none; display: flex; flex-direction: column; gap: 5px }
-.pkg-features li { font-size: 11px; color: var(--text-2); display: flex; align-items: center; gap: 6px }
-.pkg-features li::before { content: '—'; color: var(--text-3); font-size: 9px; flex-shrink: 0 }
+.pkg-features li { font-size: 12px; color: var(--text-2); display: flex; align-items: center; gap: 6px }
+.pkg-features li::before { content: '—'; color: var(--text-3); font-size: 12px; flex-shrink: 0 }
 
 /* FORM */
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px }
@@ -84,10 +81,9 @@ import { BOOKING_OPEN } from '../config.js';
 .cal { border: 1px solid var(--border); padding: 14px; background: var(--surface) }
 .cal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px }
 .cal-title {
-  font-family: 'DM Mono', monospace;
-  font-size: 10px;
-  letter-spacing: .14em;
-  text-transform: uppercase;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  letter-spacing: .01em;
   color: var(--text);
 }
 .cal-nav {
@@ -104,10 +100,9 @@ import { BOOKING_OPEN } from '../config.js';
 .cal-nav:disabled { opacity: .3; cursor: default }
 .cal-dow, .cal-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px }
 .cal-dow span {
-  font-family: 'DM Mono', monospace;
-  font-size: 8px;
-  letter-spacing: .08em;
-  text-transform: uppercase;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  letter-spacing: .01em;
   color: var(--text-3);
   text-align: center;
   padding: 3px 0 6px;
@@ -117,8 +112,8 @@ import { BOOKING_OPEN } from '../config.js';
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'DM Mono', monospace;
-  font-size: 11px;
+  font-family: var(--font-sans);
+  font-size: 12px;
   color: var(--text-2);
   background: none;
   border: 1px solid transparent;
@@ -145,19 +140,18 @@ import { BOOKING_OPEN } from '../config.js';
   margin-top: 12px;
   padding-top: 10px;
   border-top: 1px solid var(--border);
-  font-family: 'DM Mono', monospace;
-  font-size: 9px;
-  letter-spacing: .08em;
-  text-transform: uppercase;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  letter-spacing: .01em;
   color: var(--text-3);
 }
 .cal-legend span { display: flex; align-items: center; gap: 5px }
 .cal-legend i { width: 4px; height: 4px; border-radius: 50%; display: inline-block }
 .lg-strike { text-decoration: line-through }
 .cal-picked {
-  font-family: 'DM Mono', monospace;
-  font-size: 10px;
-  letter-spacing: .08em;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  letter-spacing: .01em;
   color: var(--text-2);
   margin-top: 8px;
   min-height: 15px;
@@ -173,25 +167,23 @@ import { BOOKING_OPEN } from '../config.js';
   padding: 16px;
 }
 .cost-label {
-  font-family: 'DM Mono', monospace;
-  font-size: 9px;
-  letter-spacing: .1em;
-  text-transform: uppercase;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  letter-spacing: .01em;
   color: var(--text-3);
   margin-bottom: 10px;
 }
 .cost-line { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-2); padding: 2px 0 }
 .cost-line.total { border-top: 1px solid var(--border); margin-top: 8px; padding-top: 9px; font-size: 13px; font-weight: 500; color: var(--text) }
-.cost-line.note { font-size: 11px; color: var(--text-3); padding-top: 6px; font-style: italic }
+.cost-line.note { font-size: 12px; color: var(--text-3); padding-top: 6px; font-style: italic }
 .cost-empty { font-size: 12px; color: var(--text-3); font-style: italic }
 
 /* SUBMIT */
 .submit-btn {
   width: 100%; background: none; color: var(--text);
   border: 1px solid var(--text); padding: 14px;
-  font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500;
-  letter-spacing: .14em; text-transform: uppercase;
-  cursor: pointer; transition: background .2s, color .2s; grid-column: 1/-1; margin-top: 4px;
+  font-family: var(--font-sans); font-size: 12px; font-weight: 500;
+  letter-spacing: .01em; cursor: pointer; transition: background .2s, color .2s; grid-column: 1/-1; margin-top: 4px;
 }
 .submit-btn:hover:not(:disabled) { background: var(--text); color: var(--bg) }
 .submit-btn:disabled { opacity: .45; cursor: not-allowed }
@@ -222,9 +214,9 @@ import { BOOKING_OPEN } from '../config.js';
 </style>
 
 <div class="page">
-  <div class="sec-label anim" style="margin-bottom:6px;--d:.05s">book a session</div>
-  <h1 class="anim" style="font-size:24px;font-weight:300;letter-spacing:-.02em;margin-bottom:4px;--d:.12s">Request a session</h1>
-  <p class="anim" style="font-size:13px;color:var(--text-3);margin-bottom:32px;--d:.2s">Pick a package and fill in the basics. Location and extras get sorted after Zachary accepts.</p>
+  <div class="sec-label" style="margin-bottom:6px">book a session</div>
+  <h1  style="font-size:24px;font-weight:300;letter-spacing:-.02em;margin-bottom:4px">Request a session</h1>
+  <p  style="font-size:13px;color:var(--text-3);margin-bottom:32px">Pick a package and fill in the basics. Location and extras get sorted after Zachary accepts.</p>
 
   <!-- PACKAGES -->
   <div class="sec-label">choose a package</div>
@@ -298,10 +290,10 @@ import { BOOKING_OPEN } from '../config.js';
           <div class="cost-line note"><span>Base price only — extras and travel come later.</span></div>
         </div>
         <div style="display:flex;gap:8px;margin-top:12px">
-          <input type="text" id="f-coupon" placeholder="Promo code (optional)" style="text-transform:uppercase;flex:1;min-width:0" oninput="this.value=this.value.toUpperCase()"/>
+          <input type="text" id="f-coupon" placeholder="Promo code (optional)" style="flex:1;min-width:0" oninput="this.value=this.value.toUpperCase()"/>
           <button type="button" class="btn" id="coupon-btn" onclick="applyCoupon()" style="flex-shrink:0">Apply</button>
         </div>
-        <div id="coupon-status" style="font-size:11px;margin-top:6px;min-height:14px;color:var(--text-3)"></div>
+        <div id="coupon-status" style="font-size: 12px;margin-top:6px;min-height:14px;color:var(--text-3)"></div>
       </div>
 
       <hr class="divider" style="grid-column:1/-1"/>
@@ -364,7 +356,7 @@ async function loadPackages() {
 function renderPackages(pkgs) {
   const grid = document.getElementById('pkg-grid');
   grid.innerHTML = pkgs.map((p, i) => `
-    <div class="pkg-card" id="pkg-${i}" style="--d:${i * 0.08}s" onclick="selectPkg(${i},${JSON.stringify(p).replace(/"/g,'&quot;')})">
+    <div class="pkg-card" id="pkg-${i}" onclick="selectPkg(${i},${JSON.stringify(p).replace(/"/g,'&quot;')})">
       ${p.popular ? '<span class="pkg-badge">Popular</span>' : ''}
       <div class="pkg-name">${p.name}</div>
       ${p.on_sale ? `<span class="pkg-sale-badge">Sale</span>` : ''}

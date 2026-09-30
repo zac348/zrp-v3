@@ -13,7 +13,7 @@ nav.nav { display: flex; align-items: center; justify-content: space-between; pa
 .controls { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; position: sticky; top: 76px }
 .ctrl-field { margin-bottom: 12px }
 
-.preview-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: .14em; text-transform: uppercase; color: var(--text-3); margin-bottom: 12px; display: flex; align-items: center; gap: 8px }
+.preview-label { font-family: var(--font-sans); font-size: 12px; letter-spacing: .01em; color: var(--text-3); margin-bottom: 12px; display: flex; align-items: center; gap: 8px }
 .preview-label::after { content: ''; flex: 1; height: 1px; background: var(--border) }
 
 .canvas-wrap { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; aspect-ratio: 6/4; position: relative }
@@ -21,7 +21,7 @@ nav.nav { display: flex; align-items: center; justify-content: space-between; pa
 </style>
 
 <nav class="nav">
-  <a href="/" class="nav-logo" style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text);text-decoration:none">ZRP</a>
+  <a href="/" class="nav-logo" style="font-size: 12px;font-weight:600;letter-spacing: .01em;color:var(--text);text-decoration:none">ZRP</a>
   <a href="/admin" class="nav-back">← Back to admin</a>
 </nav>
 
@@ -36,7 +36,7 @@ nav.nav { display: flex; align-items: center; justify-content: space-between; pa
     </div>
     <div class="ctrl-field field">
       <label>Coupon code</label>
-      <input type="text" id="env-code" placeholder="e.g. SUMMER25" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase();render()"/>
+      <input type="text" id="env-code" placeholder="e.g. SUMMER25" style="" oninput="this.value=this.value.toUpperCase();render()"/>
     </div>
     <div class="ctrl-field field">
       <label>Discount label</label>
@@ -59,12 +59,12 @@ nav.nav { display: flex; align-items: center; justify-content: space-between; pa
     </div>
 
     <button class="btn" style="width:100%;margin-top:6px" onclick="download()">Download PNG</button>
-    <p style="font-size:10px;color:var(--text-3);text-align:center;margin-top:8px">Print at 6×4 inches</p>
+    <p style="font-size: 12px;color:var(--text-3);text-align:center;margin-top:8px">Print at 6×4 inches</p>
   </div>
 
   <!-- PREVIEW -->
   <div>
-    <div class="preview-label">preview <span style="font-size:9px;opacity:.55;letter-spacing:0;text-transform:none;font-family:'DM Sans',sans-serif;margin-left:4px">(scaled)</span></div>
+    <div class="preview-label">preview <span style="font-size: 12px;opacity:.55;letter-spacing:0;text-transform:none;font-family:'DM Sans',sans-serif;margin-left:4px">(scaled)</span></div>
     <div class="canvas-wrap">
       <canvas id="card-canvas"></canvas>
     </div>
@@ -111,7 +111,7 @@ function render() {
 
   // LOGO
   ctx.fillStyle = text3;
-  ctx.font = '500 28px "DM Mono", monospace';
+  ctx.font = '500 28px "DM Sans", sans-serif';
   ctx.letterSpacing = '6px';
   ctx.fillText('ZRP', 60, 80);
   ctx.letterSpacing = '0px';
@@ -134,13 +134,13 @@ function render() {
 
   // Code
   ctx.fillStyle = text2;
-  ctx.font = '500 44px "DM Mono", monospace';
+  ctx.font = '500 44px "DM Sans", sans-serif';
   ctx.letterSpacing = '4px';
   ctx.fillText('Use code:', 60, client ? 520 : 500);
   ctx.letterSpacing = '0px';
 
   ctx.fillStyle = text1;
-  ctx.font = '700 80px "DM Mono", monospace';
+  ctx.font = '700 80px "DM Sans", sans-serif';
   ctx.letterSpacing = '6px';
   ctx.fillText(code, 60, client ? 630 : 610);
   ctx.letterSpacing = '0px';
@@ -158,7 +158,7 @@ function render() {
 
   // Bottom row
   ctx.fillStyle = text3;
-  ctx.font = '400 26px "DM Mono", monospace';
+  ctx.font = '400 26px "DM Sans", sans-serif';
   ctx.letterSpacing = '1px';
   ctx.fillText('zacharyroutsongphotography.com', 60, 1150);
   ctx.letterSpacing = '0px';

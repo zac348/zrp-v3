@@ -1,4 +1,5 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0 }
+button, input, select, textarea { font-family: inherit }
 
 :root {
   /* Palette — warm paper, light mode */
@@ -9,10 +10,11 @@
   --border-2:     #C4BDAC;
   --text:         #191713;
   --text-2:       #5F5A4F;
-  --text-3:       #A39C8B;
+  --text-3:       #716C60;   /* 4.6:1 on --bg */
   --ink:          #191713;
   --ink-hover:    #2E2B24;
 
+  --font-sans: 'DM Sans', system-ui, -apple-system, sans-serif;
   --font-serif: 'Fraunces', Georgia, 'Times New Roman', serif;
 
   /* Status — kept vivid for UX clarity */
@@ -34,7 +36,7 @@
   --radius-lg: 0px;
 
   /* Accent — muted gold, interactive states only */
-  --accent: #A8721F;
+  --accent: #91631D;          /* 4.6:1 on --bg */
 }
 
 /* ── DARK MODE ── */
@@ -46,7 +48,7 @@ html.dark {
   --border-2:    #413C34;
   --text:        #EDEAE2;
   --text-2:      #9C968A;
-  --text-3:      #625D52;
+  --text-3:      #827D73;   /* 4.6:1 on --bg */
   --ink:         #EDEAE2;
   --ink-hover:   #FFFDF7;
 
@@ -78,7 +80,6 @@ body {
   font-size: 14px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
-  animation: page-in .4s ease both;
 }
 
 /* Headlines are set in serif everywhere */
@@ -110,30 +111,22 @@ h1, h2 {
   to   { stroke-dashoffset: 0 }
 }
 
-/* Entrance animation applied on load — stagger with --d */
-.anim {
-  opacity: 0;
-  animation: rise-in .7s cubic-bezier(.16,1,.3,1) both;
-  animation-delay: var(--d, 0s);
-}
-
-/* Scroll reveal — elements start hidden, .in is added by observer */
-.reveal {
-  opacity: 0;
-  transform: translateY(22px);
-  transition: opacity .7s cubic-bezier(.16,1,.3,1), transform .7s cubic-bezier(.16,1,.3,1);
-  transition-delay: var(--d, 0s);
-}
-.reveal.in { opacity: 1; transform: none }
-
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: .01ms !important;
     animation-delay: 0ms !important;
     transition-duration: .01ms !important;
   }
-  .reveal { opacity: 1; transform: none }
   html { scroll-behavior: auto }
+}
+
+/* ── KEYBOARD FOCUS ──
+   Always visible when navigating by keyboard; mouse clicks don't show it. */
+a:focus-visible,
+button:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
 }
 
 /* ── NAVIGATION ── */
@@ -191,7 +184,6 @@ html.dark .nav-logo-img {
   bottom: -4px;
   height: 1px;
   background: var(--text);
-  transition: right .25s cubic-bezier(.16,1,.3,1);
 }
 
 .nav-links a:hover { color: var(--text) }
@@ -207,11 +199,10 @@ html.dark .nav-logo-img {
   padding: 11px 22px;
   border: 1px solid var(--text);
   border-radius: 0;
-  font-family: 'DM Mono', monospace;
-  font-size: 10px;
+  font-family: var(--font-sans);
+  font-size: 14px;
   font-weight: 500;
-  letter-spacing: .14em;
-  text-transform: uppercase;
+  letter-spacing: .01em;
   text-decoration: none;
   cursor: pointer;
   transition: background .2s, color .2s;
@@ -224,10 +215,9 @@ html.dark .nav-logo-img {
 .btn:disabled { opacity: .4; cursor: not-allowed; background: none; color: var(--text) }
 
 .btn-sm {
-  font-family: 'DM Mono', monospace;
-  font-size: 9px;
-  letter-spacing: .08em;
-  text-transform: uppercase;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  letter-spacing: .01em;
   border: 1px solid var(--border-2);
   background: none;
   color: var(--text-3);
@@ -248,10 +238,9 @@ html.dark .nav-logo-img {
 
 /* ── SECTION LABELS ── */
 .sec-label {
-  font-family: 'DM Mono', monospace;
-  font-size: 9px;
-  letter-spacing: .15em;
-  text-transform: uppercase;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  letter-spacing: .01em;
   color: var(--text-3);
   margin-bottom: 20px;
   display: flex;
@@ -271,10 +260,9 @@ html.dark .nav-logo-img {
 
 .field label,
 label.form-label {
-  font-family: 'DM Mono', monospace;
-  font-size: 9px;
-  letter-spacing: .1em;
-  text-transform: uppercase;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  letter-spacing: .01em;
   color: var(--text-3);
 }
 
@@ -294,7 +282,7 @@ textarea {
   border-radius: var(--radius);
   padding: 9px 12px;
   outline: none;
-  transition: border-color .15s, box-shadow .15s;
+  transition: border-color .15s;
   width: 100%;
   appearance: none;
   -webkit-appearance: none;
@@ -305,8 +293,9 @@ input::placeholder { color: var(--text-3) }
 input:focus,
 select:focus,
 textarea:focus {
-  border-color: var(--border-2);
-  box-shadow: 0 0 0 3px rgba(26,25,24,.06);
+  border-color: var(--text-2);
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
 }
 
 textarea { resize: vertical; min-height: 80px }
@@ -335,18 +324,17 @@ footer {
   padding: 56px 28px;
   font-family: var(--font-serif);
   font-weight: 320;
-  font-size: clamp(34px, 7vw, 72px);
+  font-size: clamp(28px, 5vw, 52px);
   letter-spacing: -.02em;
   line-height: 1.05;
   color: var(--text);
   text-decoration: none;
   border-bottom: 1px solid var(--border);
-  transition: color .2s, padding-left .3s cubic-bezier(.16,1,.3,1);
+  transition: color .2s;
 }
 .footer-cta em { font-style: italic }
-.footer-cta span { display: inline-block; transition: transform .3s cubic-bezier(.16,1,.3,1); margin-left: .3em }
-.footer-cta:hover { padding-left: 44px }
-.footer-cta:hover span { transform: translateX(10px) }
+.footer-cta span { display: inline-block; margin-left: .3em }
+.footer-cta:hover { color: var(--accent) }
 
 .footer-meta {
   padding: 20px 28px;
@@ -367,7 +355,7 @@ footer {
   transition: color .15s;
 }
 .foot-links a:hover { color: var(--text) }
-@media (max-width: 600px) { .footer-cta { padding: 40px 18px } .footer-cta:hover { padding-left: 30px } }
+@media (max-width: 600px) { .footer-cta { padding: 40px 18px } }
 
 /* ── TOAST ── */
 .toast {
@@ -389,33 +377,28 @@ footer {
 
 /* ── LIGHTBOX ── */
 .lightbox {
-  display: flex;
+  display: none;
   position: fixed;
   inset: 0;
   background: rgba(26,25,24,.94);
   z-index: 999;
   align-items: center;
   justify-content: center;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity .3s ease, visibility .3s;
 }
-.lightbox.open { opacity: 1; visibility: visible }
+.lightbox.open { display: flex }
 .lightbox img {
   max-width: 90vw;
   max-height: 88vh;
   object-fit: contain;
-  border-radius: var(--radius);
-  transform: scale(.94);
-  transition: transform .35s cubic-bezier(.16,1,.3,1);
 }
-.lightbox.open img { transform: scale(1) }
 .lb-close {
   position: absolute;
-  top: 20px;
-  right: 24px;
-  font-size: 22px;
-  color: rgba(255,255,255,.5);
+  top: 10px;
+  right: 12px;
+  min-width: 44px;
+  min-height: 44px;
+  font-size: 26px;
+  color: rgba(255,255,255,.7);
   cursor: pointer;
   background: none;
   border: none;
@@ -451,10 +434,9 @@ footer {
   border: none;
   border-radius: var(--radius-sm);
   padding: 6px 14px;
-  font-size: 10px;
-  font-family: 'DM Mono', monospace;
-  letter-spacing: .08em;
-  text-transform: uppercase;
+  font-size: 12px;
+  font-family: var(--font-sans);
+  letter-spacing: .01em;
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
@@ -502,10 +484,10 @@ footer {
   margin-bottom: 36px;
 }
 .sec-num {
-  font-family: 'DM Mono', monospace;
-  font-size: 10px;
+  font-family: var(--font-sans);
+  font-size: 12px;
   color: var(--text-3);
-  letter-spacing: .1em;
+  letter-spacing: .01em;
 }
 .sec-head h2 {
   font-size: 26px;
@@ -522,10 +504,9 @@ footer {
   margin-bottom: 28px;
 }
 .cat-tag {
-  font-family: 'DM Mono', monospace;
-  font-size: 10px;
-  letter-spacing: .12em;
-  text-transform: uppercase;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  letter-spacing: .01em;
   color: var(--text-3);
   background: none;
   border: none;
@@ -542,23 +523,25 @@ footer {
 /* ── MASONRY PHOTO GRID ── */
 .grid { columns: 3 260px; column-gap: 14px }
 .grid-item {
+  display: block;
+  width: 100%;
   break-inside: avoid;
-  margin-bottom: 14px;
+  margin: 0 0 14px;
+  padding: 0;
+  border: 0;
   position: relative;
   overflow: hidden;
-  cursor: pointer;
+  cursor: zoom-in;
   background: var(--surface-dim);
-  opacity: 0;
-  animation: scale-in .6s cubic-bezier(.16,1,.3,1) both;
-  animation-delay: var(--d, 0s);
+  color: inherit;
+  font: inherit;
+  text-align: left;
 }
 .grid-item img {
   width: 100%;
   height: auto;
   display: block;
-  transition: transform .6s cubic-bezier(.16,1,.3,1);
 }
-.grid-item:hover img { transform: scale(1.04) }
 .grid-overlay {
   position: absolute;
   inset: 0;
@@ -569,14 +552,15 @@ footer {
   align-items: flex-end;
   padding: 12px;
 }
-.grid-item:hover .grid-overlay { opacity: 1 }
-.grid-overlay span {
-  font-family: 'DM Mono', monospace;
-  font-size: 9px;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  color: rgba(255,253,247,.9);
+.grid-item:hover .grid-overlay,
+.grid-item:focus-visible .grid-overlay { opacity: 1 }
+.grid-overlay > span {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  letter-spacing: .01em;
+  color: rgba(255,253,247,.95);
 }
+.grid-loc { display: block; margin-top: 2px; opacity: .75 }
 .placeholder-cell {
   break-inside: avoid;
   margin-bottom: 14px;
@@ -588,14 +572,14 @@ footer {
   justify-content: center;
 }
 .placeholder-cell span {
-  font-family: 'DM Mono', monospace;
-  font-size: 9px;
+  font-family: var(--font-sans);
+  font-size: 12px;
   color: var(--text-3);
 }
 .port-count {
-  font-family: 'DM Mono', monospace;
-  font-size: 10px;
-  letter-spacing: .08em;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  letter-spacing: .01em;
   color: var(--text-3);
   margin-top: 18px;
 }

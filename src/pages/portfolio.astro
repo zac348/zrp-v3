@@ -14,7 +14,7 @@ import Layout from '../layouts/Layout.astro';
   font-weight: 320;
   letter-spacing: -.025em;
   line-height: 1.05;
-  margin: 14px 0 12px;
+  margin: 0 0 12px;
 }
 .port-lede {
   font-size: 13.5px;
@@ -27,12 +27,11 @@ import Layout from '../layouts/Layout.astro';
 </style>
 
 <header class="port-head">
-  <p class="sec-label anim" style="--d:.05s">portfolio</p>
-  <h1 class="port-title anim" style="--d:.12s">Portfolio</h1>
-  <p class="port-lede anim" style="--d:.22s">Everything, by category. Click a photo to open it.</p>
+  <h1 class="port-title">Portfolio</h1>
+  <p class="port-lede">Everything, by category. Click a photo to open it.</p>
 </header>
 
-<section class="section reveal" id="portfolio" style="padding-top:40px">
+<section class="section" id="portfolio" style="padding-top:40px">
   <div class="sec-head">
     <span class="sec-num" id="port-total">—</span>
     <h2>All work</h2>
@@ -57,13 +56,14 @@ import Layout from '../layouts/Layout.astro';
 </section>
 
 <!-- LIGHTBOX -->
-<div class="lightbox" id="lb" onclick="closeLB()">
-  <button class="lb-close" onclick="closeLB()">×</button>
+<div class="lightbox" id="lb" role="dialog" aria-modal="true" aria-label="Photo">
+  <button class="lb-close" type="button" aria-label="Close">×</button>
   <img id="lb-img" src="" alt=""/>
 </div>
 
 <script>
 import { createClient } from '@supabase/supabase-js';
+import { makeTile, bindLightbox } from '../lib/gallery.js';
 
 const sb = createClient(
   import.meta.env.PUBLIC_SUPABASE_URL,
@@ -104,16 +104,17 @@ async function loadPortfolio() {
     tagsEl.style.display = 'none';
   } else {
     tagsEl.innerHTML =
-      `<button class="cat-tag active" id="tag-all" onclick="filterCat(null)">All <span style="opacity:.55">(${allPhotos.length})</span></button>` +
+      `<button class="cat-tag active" id="tag-all" onclick="filterCat(null, true)">All <span style="opacity:.55">(${allPhotos.length})</span></button>` +
       cats.map(c =>
-        `<button class="cat-tag" onclick="filterCat('${c}')">${c} <span style="opacity:.55">(${catCounts[c]})</span></button>`
+        `<button class="cat-tag" onclick="filterCat('${c}', true)">${c} <span style="opacity:.55">(${catCounts[c]})</span></button>`
       ).join('');
   }
 
-  filterCat(null);
+  const wanted = new URLSearchParams(location.search).get('cat');
+  filterCat(cats.includes(wanted) ? wanted : null);
 }
 
-function filterCat(cat) {
+function filterCat(cat, fromUser = false) {
   activeCat = cat;
   filtered = cat ? allPhotos.filter(p => p.sport === cat) : allPhotos;
   shown = 0;
@@ -130,7 +131,8 @@ function filterCat(cat) {
     const label = t.textContent.trim();
     t.classList.toggle('active', cat ? label.startsWith(cat) : t.id === 'tag-all');
   });
-  window.scrollTo({ top: document.getElementById('portfolio').offsetTop - 80, behavior: 'smooth' });
+  // Only move the page when someone picked a filter — never on first load
+  if (fromUser) window.scrollTo({ top: document.getElementById('portfolio').offsetTop - 80, behavior: 'smooth' });
 }
 window.filterCat = filterCat;
 
@@ -138,23 +140,7 @@ function appendBatch() {
   const g = document.getElementById('portfolio-grid');
   const next = filtered.slice(shown, shown + BATCH);
 
-  next.forEach((p, i) => {
-    const el = document.createElement('div');
-    el.className = 'grid-item';
-    el.style.setProperty('--d', (Math.min(i, 8) * 0.05) + 's');
-    const cap = p.title || p.sport || '';
-    const loc = p.location ? `<span style="display:block;opacity:.65;margin-top:2px">${p.location}</span>` : '';
-    // Phones get the thumbnail, big screens the web version, originals stay out of it
-    const small = p.thumb_url || p.web_url || p.url;
-    const large = p.web_url || p.url;
-    const srcset = (p.thumb_url && p.web_url)
-      ? ` srcset="${p.thumb_url} 700w, ${p.web_url} 2200w" sizes="(max-width:600px) 100vw, (max-width:1060px) 50vw, 340px"` : '';
-    const dims = (p.width && p.height) ? ` width="${p.width}" height="${p.height}"` : '';
-    el.innerHTML = `<img src="${small}"${srcset}${dims} alt="${cap}" loading="lazy" decoding="async"/>
-      <div class="grid-overlay"><span>${cap}${loc}</span></div>`;
-    el.addEventListener('click', () => openLB(large));
-    g.appendChild(el);
-  });
+  g.append(...next.map((p, i) => makeTile(p, shown + i, 3)));
 
   shown += next.length;
   updateMeta();
@@ -173,18 +159,7 @@ function updateMeta() {
     shown < filtered.length ? 'flex' : 'none';
 }
 
-function openLB(url) {
-  document.getElementById('lb-img').src = url;
-  document.getElementById('lb').classList.add('open');
-}
-window.openLB = openLB;
-
-function closeLB() {
-  document.getElementById('lb').classList.remove('open');
-}
-window.closeLB = closeLB;
-
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLB(); });
+bindLightbox();
 
 loadPortfolio();
 </script>

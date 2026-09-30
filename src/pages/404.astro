@@ -12,10 +12,9 @@ import Layout from '../layouts/Layout.astro';
 }
 .nf-inner { max-width: 560px; text-align: center }
 .nf-code {
-  font-family: 'DM Mono', monospace;
-  font-size: 10px;
-  letter-spacing: .2em;
-  text-transform: uppercase;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  letter-spacing: .01em;
   color: var(--text-3);
   margin-bottom: 20px;
 }
@@ -32,10 +31,10 @@ import Layout from '../layouts/Layout.astro';
 
 <div class="nf">
   <div class="nf-inner">
-    <p class="nf-code anim" style="--d:.05s">404 — Not found</p>
-    <h1 class="anim" style="--d:.15s">Lost the <em>shot.</em></h1>
-    <p class="anim" style="--d:.25s">This page doesn't exist — it may have moved, or the link has a typo.</p>
-    <span class="anim" style="--d:.35s;display:inline-block"><a href="/" class="btn">Back to home</a></span>
+    <p class="nf-code">404 — Not found</p>
+    <h1>Lost the <em>shot.</em></h1>
+    <p>This page doesn't exist — it may have moved, or the link has a typo.</p>
+    <span><a href="/" class="btn">Back to home</a></span>
   </div>
 </div>
 </Layout>

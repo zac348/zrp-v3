@@ -8,7 +8,6 @@ html,body { height: 100% }
 
 /* LAYOUT */
 .layout { display: grid; grid-template-columns: 210px 1fr; min-height: 100vh }
-@media (max-width: 700px) { .layout { grid-template-columns: 1fr } .sidebar { display: none } }
 
 .sidebar {
   background: var(--surface);
@@ -20,10 +19,9 @@ html,body { height: 100% }
   overflow-y: auto;
 }
 .sidebar-logo {
-  font-family: 'DM Mono', monospace;
-  font-size: 9px;
-  letter-spacing: .14em;
-  text-transform: uppercase;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  letter-spacing: .01em;
   color: var(--text-3);
   padding: 0 20px;
   margin-bottom: 24px;
@@ -43,12 +41,29 @@ html,body { height: 100% }
 .sb-link svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 1.5; flex-shrink: 0 }
 .sidebar-footer { padding: 14px 20px; border-top: 1px solid var(--border) }
 .logout-btn {
-  font-size: 11px; color: var(--text-3);
+  font-size: 12px; color: var(--text-3);
   background: none; border: none; cursor: pointer;
   font-family: 'DM Sans', sans-serif;
   transition: color .15s;
 }
 .logout-btn:hover { color: var(--red) }
+
+/* Phones: the sidebar becomes a scrollable tab strip across the top */
+@media (max-width: 700px) {
+  .layout { grid-template-columns: 1fr }
+  .sidebar {
+    flex-direction: row; align-items: center;
+    height: auto; padding: 0; z-index: 50;
+    border-right: none; border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  .sidebar-logo { display: none }
+  .sidebar-nav { flex: none; flex-direction: row; gap: 0 }
+  .sb-link { width: auto; min-height: 44px; padding: 0 14px }
+  .sb-link svg { display: none }
+  .sidebar-footer { flex-shrink: 0; border-top: none; padding: 0 14px }
+  .logout-btn { min-height: 44px }
+}
 
 .main { padding: 36px; overflow-y: auto }
 @media (max-width: 700px) { .main { padding: 20px 16px } }
@@ -59,30 +74,16 @@ html,body { height: 100% }
 
 /* STATS */
 .stats-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-  gap: 1px;
-  background: var(--border);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px 40px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
   margin-bottom: 32px;
 }
-.stat { background: var(--surface); padding: 16px }
 .stat-n { font-size: 22px; font-weight: 300; color: var(--text); letter-spacing: -.03em }
-.stat-l { font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: .1em; text-transform: uppercase; color: var(--text-3); margin-top: 3px }
+.stat-l { font-family: var(--font-sans); font-size: 12px; letter-spacing: .01em; color: var(--text-3); margin-top: 3px }
 
-/* STORAGE BAR */
-.storage-bar-card {
-  display: none;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 14px 16px;
-  margin-bottom: 28px;
-}
-.storage-track { height: 5px; background: var(--surface-dim); border-radius: 3px; overflow: hidden; margin-top: 8px }
-.storage-fill { height: 100%; border-radius: 3px; background: var(--text); width: 0; transition: width .5s }
 
 /* FORMS */
 .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px }
@@ -100,11 +101,11 @@ html,body { height: 100% }
 .drop-zone:hover, .drop-zone.dragover { border-color: var(--text); background: var(--surface-dim) }
 .drop-zone input { display: none }
 .drop-text { font-size: 13px; color: var(--text-2); margin-bottom: 4px }
-.drop-sub { font-size: 11px; color: var(--text-3) }
+.drop-sub { font-size: 12px; color: var(--text-3) }
 
 .prog-wrap { height: 2px; background: var(--border); border-radius: 2px; margin-bottom: 8px; display: none }
 .prog-bar { height: 100%; background: var(--text); border-radius: 2px; transition: width .3s; width: 0 }
-.upload-status { font-size: 11px; color: var(--text-2); min-height: 16px; margin-bottom: 16px }
+.upload-status { font-size: 12px; color: var(--text-2); min-height: 16px; margin-bottom: 16px }
 
 /* PHOTOS GRID */
 .photos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px }
@@ -121,8 +122,8 @@ html,body { height: 100% }
 .photo-cb { width: 15px; height: 15px; cursor: pointer; accent-color: var(--text) }
 .photo-card img { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block }
 .photo-card-info { padding: 5px 7px 3px }
-.photo-sport { font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: .08em; text-transform: uppercase; color: var(--text-3) }
-.photo-name { font-size: 10px; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px }
+.photo-sport { font-family: var(--font-sans); font-size: 12px; letter-spacing: .01em; color: var(--text-3) }
+.photo-name { font-size: 12px; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px }
 .photo-actions { display: flex; gap: 4px; padding: 4px 7px 7px }
 
 .bulk-bar {
@@ -136,7 +137,7 @@ html,body { height: 100% }
 .bulk-select-all input { width: 14px; height: 14px; accent-color: var(--text); cursor: pointer; flex-shrink: 0 }
 .bulk-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap }
 .bulk-select {
-  font-family: 'DM Sans', sans-serif; font-size: 11px; color: var(--text);
+  font-family: 'DM Sans', sans-serif; font-size: 12px; color: var(--text);
   background: var(--surface-dim); border: 1px solid var(--border);
   border-radius: var(--radius); padding: 5px 26px 5px 8px; height: 30px;
   outline: none; cursor: pointer; appearance: none;
@@ -155,7 +156,7 @@ html,body { height: 100% }
   display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap;
 }
 .gal-info h3 { font-size: 13px; font-weight: 500; margin-bottom: 3px }
-.gal-info p { font-size: 10px; color: var(--text-3); font-family: 'DM Mono', monospace }
+.gal-info p { font-size: 12px; color: var(--text-3); font-family: var(--font-sans) }
 .gal-actions { display: flex; gap: 6px; flex-wrap: wrap; flex-shrink: 0 }
 
 /* BOOKINGS */
@@ -163,12 +164,12 @@ html,body { height: 100% }
 .booking-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px }
 .booking-head { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 8px; margin-bottom: 12px }
 .booking-name { font-size: 14px; font-weight: 500 }
-.booking-num { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: .08em; color: var(--text-3) }
+.booking-num { font-family: var(--font-sans); font-size: 12px; letter-spacing: .01em; color: var(--text-3) }
 .booking-badges { display: flex; gap: 6px; flex-wrap: wrap }
 
 .badge {
-  font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: .09em;
-  text-transform: uppercase; padding: 2px 8px; border-radius: 3px; border: 1px solid;
+  font-family: var(--font-sans); font-size: 12px; letter-spacing: .01em;
+  padding: 2px 8px; border-radius: 3px; border: 1px solid;
   white-space: nowrap;
 }
 .badge.pending   { color: var(--amber);  border-color: var(--amber-border);  background: var(--amber-bg) }
@@ -180,8 +181,8 @@ html,body { height: 100% }
 .badge.pkg { color: var(--text-2); border-color: var(--border); background: var(--surface-dim) }
 
 .booking-details { display: grid; grid-template-columns: repeat(auto-fit,minmax(130px,1fr)); gap: 8px; margin-bottom: 12px }
-.booking-detail { font-size: 11px; color: var(--text-2) }
-.booking-detail strong { display: block; font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: .09em; text-transform: uppercase; color: var(--text-3); font-weight: 400; margin-bottom: 1px }
+.booking-detail { font-size: 12px; color: var(--text-2) }
+.booking-detail strong { display: block; font-family: var(--font-sans); font-size: 12px; letter-spacing: .01em; color: var(--text-3); font-weight: 400; margin-bottom: 1px }
 .booking-actions { display: flex; gap: 6px; flex-wrap: wrap; padding-top: 10px; border-top: 1px solid var(--border) }
 
 /* AVAILABILITY CALENDAR */
@@ -199,8 +200,8 @@ html,body { height: 100% }
 .cal-nav-btn svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2 }
 .cal-grid { display: grid; grid-template-columns: repeat(7,1fr) }
 .cal-dow {
-  font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: .08em;
-  text-transform: uppercase; color: var(--text-3); text-align: center;
+  font-family: var(--font-sans); font-size: 12px; letter-spacing: .01em;
+  color: var(--text-3); text-align: center;
   padding: 10px 0; border-bottom: 1px solid var(--border);
 }
 .cal-day {
@@ -230,10 +231,10 @@ html,body { height: 100% }
   margin-bottom: 16px;
 }
 .cal-bulk-bar.visible { display: flex }
-.bulk-bar-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--text-3); margin-right: 4px }
+.bulk-bar-label { font-family: var(--font-sans); font-size: 12px; letter-spacing: .01em; color: var(--text-3); margin-right: 4px }
 .cal-dot { width: 4px; height: 4px; border-radius: 50% }
 .cal-legend { display: flex; gap: 14px; padding: 12px 18px; border-top: 1px solid var(--border); flex-wrap: wrap }
-.cal-legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-3) }
+.cal-legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-3) }
 .legend-dot { width: 7px; height: 7px; border-radius: 50% }
 
 .day-editor {
@@ -244,8 +245,8 @@ html,body { height: 100% }
 .day-editor-title { font-size: 13px; font-weight: 500; margin-bottom: 14px }
 .block-type-row { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 14px }
 .btype-btn {
-  font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: .08em;
-  text-transform: uppercase; border: 1px solid var(--border); background: none;
+  font-family: var(--font-sans); font-size: 12px; letter-spacing: .01em;
+  border: 1px solid var(--border); background: none;
   border-radius: var(--radius-sm); padding: 6px 12px; cursor: pointer; color: var(--text-3);
   transition: all .15s;
 }
@@ -266,8 +267,8 @@ html,body { height: 100% }
 .block-row-left { font-size: 12px; color: var(--text-2) }
 .block-row-left strong { color: var(--text); margin-right: 6px }
 .block-status-badge {
-  font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: .08em;
-  text-transform: uppercase; padding: 2px 7px; border-radius: 3px; border: 1px solid;
+  font-family: var(--font-sans); font-size: 12px; letter-spacing: .01em;
+  padding: 2px 7px; border-radius: 3px; border: 1px solid;
 }
 .block-status-badge.unavailable { color: var(--red);   border-color: var(--red-border);   background: var(--red-bg) }
 .block-status-badge.partial     { color: var(--amber); border-color: var(--amber-border); background: var(--amber-bg) }
@@ -282,15 +283,15 @@ html,body { height: 100% }
 .pricing-card.on-sale { border-color: var(--green-border) }
 .pricing-card.unavailable { opacity: .6 }
 .pricing-pkg-name { font-size: 15px; font-weight: 500; margin-bottom: 3px }
-.pricing-pkg-sub  { font-size: 11px; color: var(--text-3) }
+.pricing-pkg-sub  { font-size: 12px; color: var(--text-3) }
 .pricing-right { display: flex; flex-direction: column; gap: 10px; min-width: 260px }
 .pricing-row { display: flex; align-items: center; gap: 8px }
 .pricing-row label {
-  font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: .1em;
-  text-transform: uppercase; color: var(--text-3); width: 80px; flex-shrink: 0;
+  font-family: var(--font-sans); font-size: 12px; letter-spacing: .01em;
+  color: var(--text-3); width: 80px; flex-shrink: 0;
 }
 .pricing-row input[type="number"] {
-  font-family: 'DM Mono', monospace; font-size: 13px; color: var(--text);
+  font-family: var(--font-sans); font-size: 13px; color: var(--text);
   background: var(--surface-dim); border: 1px solid var(--border);
   border-radius: var(--radius); padding: 6px 10px; outline: none; width: 90px;
   transition: border-color .15s;
@@ -301,8 +302,8 @@ html,body { height: 100% }
 .pricing-toggle input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--green); cursor: pointer }
 .pricing-toggle-label { font-size: 12px; color: var(--text-2) }
 .save-price-btn {
-  font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: .08em;
-  text-transform: uppercase; border: 1px solid var(--border-2); background: none;
+  font-family: var(--font-sans); font-size: 12px; letter-spacing: .01em;
+  border: 1px solid var(--border-2); background: none;
   color: var(--text-3); border-radius: var(--radius-sm); padding: 5px 12px;
   cursor: pointer; transition: all .15s; white-space: nowrap; align-self: flex-end;
 }
@@ -315,7 +316,7 @@ html,body { height: 100% }
 }
 .addon-card.unavailable { opacity: .5 }
 .addon-name  { font-size: 13px; font-weight: 500 }
-.addon-price { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-3) }
+.addon-price { font-family: var(--font-sans); font-size: 12px; color: var(--text-3) }
 .avail-toggle { display: flex; align-items: center; gap: 7px; cursor: pointer; user-select: none; font-size: 12px; color: var(--text-2) }
 .avail-toggle input { width: 14px; height: 14px; accent-color: var(--red); cursor: pointer }
 
@@ -331,12 +332,12 @@ html,body { height: 100% }
   border-radius: var(--radius); padding: 12px 14px; gap: 12px; flex-wrap: wrap;
 }
 .coupon-row.inactive { opacity: .45 }
-.coupon-code { font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 500; color: var(--text); letter-spacing: .06em }
+.coupon-code { font-family: var(--font-sans); font-size: 14px; font-weight: 500; color: var(--text); letter-spacing: .01em }
 .coupon-info { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; margin-bottom: 2px }
-.coupon-meta { font-size: 11px; color: var(--text-3) }
+.coupon-meta { font-size: 12px; color: var(--text-3) }
 .coupon-badge {
-  font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: .08em;
-  text-transform: uppercase; padding: 2px 7px; border-radius: 3px; border: 1px solid;
+  font-family: var(--font-sans); font-size: 12px; letter-spacing: .01em;
+  padding: 2px 7px; border-radius: 3px; border: 1px solid;
 }
 .coupon-badge.percent { color: var(--purple); border-color: rgba(124,58,237,.25); background: var(--purple-bg) }
 .coupon-badge.fixed   { color: var(--green);  border-color: var(--green-border); background: var(--green-bg) }
@@ -350,6 +351,16 @@ html,body { height: 100% }
 .env-controls { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; display: flex; flex-direction: column; gap: 12px; position: sticky; top: 60px }
 .canvas-wrap { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; aspect-ratio: 6/4 }
 .canvas-wrap canvas { width: 100%; height: 100%; display: block }
+.del-modal { position: fixed; inset: 0; z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; background: rgba(0,0,0,.6) }
+.del-modal.open { display: flex }
+.del-box { width: 100%; max-width: 440px; background: var(--surface); border: 1px solid var(--border); padding: 24px }
+.del-box h2 { font-size: 20px; margin: 0 0 8px }
+.del-summary { font-size: 13px; color: var(--text); margin-bottom: 12px }
+.del-warn { font-size: 13px; color: var(--text-2); line-height: 1.6; margin-bottom: 16px }
+.del-box label { display: block; font-size: 13px; color: var(--text-2); margin-bottom: 6px }
+.del-box input { width: 100% }
+.del-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px }
+.booking-actions { flex-wrap: wrap }
 </style>
 
 <div class="layout">
@@ -362,7 +373,7 @@ html,body { height: 100% }
       <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Overview
     </button>
     <button class="sb-link" onclick="switchTab('upload',this)">
-      <svg viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/></svg>Upload
+      <svg viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/></svg>Photos
     </button>
     <button class="sb-link" onclick="switchTab('galleries',this)">
       <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Galleries
@@ -370,15 +381,19 @@ html,body { height: 100% }
     <button class="sb-link" onclick="switchTab('bookings',this)">
       <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Bookings
     </button>
+    {BOOKING_OPEN && (
     <button class="sb-link" onclick="switchTab('calendar',this)">
       <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg>Availability
     </button>
+    )}
     <button class="sb-link" onclick="switchTab('pricing',this)">
       <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Pricing
     </button>
+    {BOOKING_OPEN && (
     <button class="sb-link" onclick="switchTab('coupons',this)">
       <svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Coupons
     </button>
+    )}
     <button class="sb-link" onclick="switchTab('envelope',this)">
       <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Envelopes
     </button>
@@ -402,28 +417,7 @@ html,body { height: 100% }
       <div class="stat"><div class="stat-n" id="st-galleries">—</div><div class="stat-l">Galleries</div></div>
       <div class="stat"><div class="stat-n" id="st-bookings">—</div><div class="stat-l">Bookings</div></div>
       <div class="stat"><div class="stat-n" id="st-pending">—</div><div class="stat-l">Pending</div></div>
-      <div class="stat"><div class="stat-n" id="st-storage">—</div><div class="stat-l">Storage</div></div>
-    </div>
-    <div class="storage-bar-card" id="storage-bar-card" style="display:none">
-      <!-- R2 bar -->
-      <div style="margin-bottom:14px">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <span style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-3)">Cloudflare R2</span>
-          <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-3)" id="r2-detail">—</span>
-        </div>
-        <div class="storage-track"><div class="storage-fill" id="r2-fill"></div></div>
-        <p style="font-size:10px;color:var(--text-3);margin-top:4px">of 5 TB</p>
-      </div>
-      <!-- Supabase bar -->
-      <div>
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <span style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-3)">Supabase storage</span>
-          <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text-3)" id="sb-detail">—</span>
-        </div>
-        <div class="storage-track"><div class="storage-fill" id="sb-fill"></div></div>
-        <p style="font-size:10px;color:var(--text-3);margin-top:4px">of 1 GB free</p>
-        <p id="storage-warn" style="display:none;font-size:11px;color:var(--amber);margin-top:6px">⚠ Supabase almost full — new uploads are going to R2.</p>
-      </div>
+      <div class="stat"><div class="stat-n" id="st-portfolio">—</div><div class="stat-l">On Portfolio</div></div>
     </div>
     <div class="sec-label">recent bookings</div>
     <div class="booking-list" id="ov-bookings"><p class="no-data">No bookings yet.</p></div>
@@ -431,7 +425,7 @@ html,body { height: 100% }
 
   <!-- UPLOAD -->
   <div class="tab" id="tab-upload">
-    <h1 class="main-title">Upload photos</h1>
+    <h1 class="main-title">Photos</h1>
     <p class="main-sub">Add photos to your portfolio or a client gallery.</p>
     <div class="field"><label>Category</label>
       <select id="up-sport">
@@ -446,12 +440,12 @@ html,body { height: 100% }
       <div class="field" style="flex:1"><label>Title (optional)</label><input type="text" id="up-title" placeholder="e.g. Friday night lights"/></div>
       <div class="field" style="flex:1"><label>Location (optional)</label><input type="text" id="up-location" placeholder="e.g. Bazemore-Hyder Stadium"/></div>
     </div>
-    <p style="font-size:11px;color:var(--text-3);margin:4px 0 10px">Applies to every file in this upload — edit per photo after with the Edit button.</p>
+    <p style="font-size: 12px;color:var(--text-3);margin:4px 0 10px">Applies to every file in this upload — edit per photo after with the Edit button.</p>
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
       <input type="checkbox" id="up-portfolio" style="width:14px;height:14px;accent-color:var(--text)"/>
       <label for="up-portfolio" style="font-size:12px;color:var(--text-2);cursor:pointer">Add to the public Portfolio page</label>
     </div>
-    <p style="font-size:11px;color:var(--text-3);margin:-4px 0 10px">Photos are automatically resized for the web on upload — the full-size original is kept for client downloads.</p>
+    <p style="font-size: 12px;color:var(--text-3);margin:-4px 0 10px">Photos are automatically resized for the web on upload — the full-size original is kept for client downloads.</p>
     <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
       <input type="file" id="file-input" accept="image/*" multiple/>
       <p class="drop-text">Click to select photos, or drag & drop</p>
@@ -460,9 +454,9 @@ html,body { height: 100% }
     <div class="prog-wrap" id="prog-wrap"><div class="prog-bar" id="prog-bar"></div></div>
     <p class="upload-status" id="up-status"></p>
     <div class="sec-label">all photos</div>
-    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+    <div id="optimize-row" style="display:none;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">
       <button class="btn-sm" id="optimize-btn" onclick="optimizeExisting()">Optimize existing photos</button>
-      <span id="optimize-status" style="font-size:11px;color:var(--text-3)"></span>
+      <span id="optimize-status" style="font-size: 12px;color:var(--text-3)"></span>
     </div>
     <div class="bulk-bar" id="bulk-bar">
       <div class="bulk-left">
@@ -515,7 +509,7 @@ html,body { height: 100% }
   <!-- BOOKINGS -->
   <div class="tab" id="tab-bookings">
     <h1 class="main-title">Bookings</h1>
-    <p class="main-sub">Manage incoming booking requests.</p>
+    <p class="main-sub">Manage booking requests. Finished bookings can be deleted from here — you'll be asked to type the client's name first.</p>
     <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">
       <button class="btn-sm on-ink" onclick="filterBookings('all',this)" id="bfilt-all">All</button>
       <button class="btn-sm" onclick="filterBookings('pending',this)"    id="bfilt-pending">Pending</button>
@@ -523,6 +517,7 @@ html,body { height: 100% }
       <button class="btn-sm" onclick="filterBookings('confirmed',this)"  id="bfilt-confirmed">Confirmed</button>
       <button class="btn-sm" onclick="filterBookings('delivered',this)"  id="bfilt-delivered">Delivered</button>
       <button class="btn-sm" onclick="filterBookings('cancelled',this)"  id="bfilt-cancelled">Cancelled</button>
+      <button class="btn-sm" onclick="filterBookings('past',this)"       id="bfilt-past">Past</button>
     </div>
     <div class="booking-list" id="all-bookings"><p class="no-data">No bookings yet.</p></div>
   </div>
@@ -600,7 +595,7 @@ html,body { height: 100% }
       <button class="btn-sm on-ink" onclick="addAddon()">Add</button>
       <button class="btn-sm" onclick="seedAddons()">Add starter pack</button>
     </div>
-    <p style="font-size:11px;color:var(--text-3);margin-top:8px">Available add-ons show up on the client's booking confirmation page automatically.</p>
+    <p style="font-size: 12px;color:var(--text-3);margin-top:8px">Available add-ons show up on the client's booking confirmation page automatically.</p>
   </div>
 
   <!-- COUPONS -->
@@ -611,7 +606,7 @@ html,body { height: 100% }
     <div class="coupon-form-card">
       <div class="sec-label" style="margin-bottom:14px">new coupon</div>
       <div class="coupon-form-grid">
-        <div class="field" style="margin:0"><label>Code</label><input type="text" id="cp-code" placeholder="e.g. SUMMER25" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()"/></div>
+        <div class="field" style="margin:0"><label>Code</label><input type="text" id="cp-code" placeholder="e.g. SUMMER25" style="" oninput="this.value=this.value.toUpperCase()"/></div>
         <div class="field" style="margin:0"><label>Type</label>
           <select id="cp-type" onchange="onCouponTypeChange()">
             <option value="percent">Percentage off</option>
@@ -648,8 +643,8 @@ html,body { height: 100% }
         </div>
         <div class="field" style="margin:0"><label>Message</label><input type="text" id="env-msg" placeholder="Thank you for your order!" maxlength="60" oninput="renderEnv()"/></div>
         <button class="btn" style="width:100%;margin-top:4px" onclick="downloadEnv()">Download PNG</button>
-        <p style="font-size:10px;color:var(--text-3);text-align:center;margin-top:8px">Print at 6×4 inches</p>
-        <a href="/coupon-card" target="_blank" style="font-size:11px;color:var(--text-3);text-align:center;display:block;margin-top:6px;text-decoration:none">Open coupon card generator →</a>
+        <p style="font-size: 12px;color:var(--text-3);text-align:center;margin-top:8px">Print at 6×4 inches</p>
+        <a href="/coupon-card" target="_blank" style="font-size: 12px;color:var(--text-3);text-align:center;display:block;margin-top:6px;text-decoration:none">Open coupon card generator →</a>
       </div>
       <div>
         <div class="sec-label" style="margin-bottom:12px">preview</div>
@@ -659,6 +654,21 @@ html,body { height: 100% }
   </div>
 
 </main>
+</div>
+
+<!-- DELETE BOOKING CONFIRMATION -->
+<div class="del-modal" id="del-modal" role="dialog" aria-modal="true" aria-labelledby="del-title">
+  <div class="del-box">
+    <h2 id="del-title">Delete this booking?</h2>
+    <p class="del-summary" id="del-summary"></p>
+    <p class="del-warn">This permanently removes the booking record. Their gallery and photos aren't touched, but their invoice link will stop working. This can't be undone.</p>
+    <label for="del-input">To confirm, type <strong id="del-phrase"></strong></label>
+    <input type="text" id="del-input" autocomplete="off" spellcheck="false"/>
+    <div class="del-actions">
+      <button class="btn-sm" onclick="closeDeleteModal()">Cancel</button>
+      <button class="btn-sm red" id="del-confirm" onclick="confirmDeleteBooking()" disabled>Delete booking</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -707,7 +717,8 @@ function updateStats() {
   document.getElementById('st-galleries').textContent = allGalleries.length;
   document.getElementById('st-bookings').textContent  = allBookings.length;
   document.getElementById('st-pending').textContent   = allBookings.filter(b => b.status === 'pending').length;
-  loadStorageUsage();
+  document.getElementById('st-portfolio').textContent = allPhotos.filter(p => p.on_portfolio).length;
+  syncOptimizeButton();
 }
 
 function fmtBytes(bytes) {
@@ -715,45 +726,6 @@ function fmtBytes(bytes) {
   if (bytes < 1024*1024)      return (bytes/1024).toFixed(1) + ' KB';
   if (bytes < 1024*1024*1024) return (bytes/(1024*1024)).toFixed(1) + ' MB';
   return (bytes/(1024*1024*1024)).toFixed(2) + ' GB';
-}
-
-async function loadStorageUsage() {
-  try {
-    // Pull file_size for all photos from the database
-    const { data: photos } = await sb.from('portfolio_photos').select('url, file_size');
-    if (!photos) return;
-
-    const sbUrl = import.meta.env.PUBLIC_SUPABASE_URL;
-
-    let r2Bytes = 0, sbBytes = 0;
-    for (const p of photos) {
-      const size = p.file_size || 0;
-      if (p.url && p.url.startsWith(sbUrl)) {
-        sbBytes += size;
-      } else {
-        r2Bytes += size;
-      }
-    }
-
-    // R2 bar (5 TB cap)
-    const r2Cap = 5 * 1024 * 1024 * 1024 * 1024;
-    const r2Pct = Math.min((r2Bytes / r2Cap) * 100, 100);
-    document.getElementById('r2-detail').textContent = fmtBytes(r2Bytes);
-    document.getElementById('r2-fill').style.width = r2Pct.toFixed(2) + '%';
-
-    // Supabase bar (1 GB cap)
-    const sbCap = 1024 * 1024 * 1024;
-    const sbPct = Math.min((sbBytes / sbCap) * 100, 100);
-    document.getElementById('sb-detail').textContent = fmtBytes(sbBytes);
-    document.getElementById('sb-fill').style.width = sbPct.toFixed(1) + '%';
-    document.getElementById('storage-warn').style.display = sbPct > 70 ? 'block' : 'none';
-
-    // Total for the stat tile
-    document.getElementById('st-storage').textContent = fmtBytes(r2Bytes + sbBytes);
-    document.getElementById('storage-bar-card').style.display = 'block';
-  } catch(e) {
-    document.getElementById('st-storage').textContent = '—';
-  }
 }
 
 // ── PHOTOS ──
@@ -783,7 +755,7 @@ function renderPhotos() {
       <img src="${p.thumb_url || p.url}" alt="" loading="lazy" decoding="async"
         onclick="photoCardClick('${p.id}')" style="cursor:pointer"/>
       <div class="photo-card-info">
-        <div class="photo-sport">${p.sport || 'No category'}${p.location ? ' · ' + p.location : ''}${p.on_portfolio ? ' · <span style="color:var(--accent)">◆ PORTFOLIO</span>' : ''}</div>
+        <div class="photo-sport">${esc(p.sport || 'No category')}${p.location ? ' · ' + esc(p.location) : ''}${p.on_portfolio ? ' · <span style="color:var(--accent)">◆ Portfolio</span>' : ''}</div>
         <div class="photo-name">${p.title || p.file_name}</div>
       </div>
       <div class="photo-actions">
@@ -806,7 +778,7 @@ function renderPhotoPager() {
   }
   if (totalPages <= 1) { pager.innerHTML = ''; return; }
   pager.innerHTML = `
-    <span style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.08em;color:var(--text-3)">
+    <span style="font-family:var(--font-sans);font-size: 12px;letter-spacing: .01em;color:var(--text-3)">
       ${photoPage*PHOTOS_PER_PAGE+1}–${Math.min((photoPage+1)*PHOTOS_PER_PAGE, allPhotos.length)} of ${allPhotos.length}
     </span>
     <div style="display:flex;gap:6px">
@@ -1080,6 +1052,11 @@ async function handleFiles(files) {
   toast(done + ' photo(s) uploaded');
 }
 
+function syncOptimizeButton() {
+  const row = document.getElementById('optimize-row');
+  if (row) row.style.display = allPhotos.some(p => !p.thumb_url && p.storage_path) ? 'flex' : 'none';
+}
+
 // ── ONE-TIME OPTIMIZER ──
 // Photos uploaded before resizing existed are still full-size. This walks them,
 // builds web + thumbnail versions in the browser, and stores those alongside the
@@ -1138,6 +1115,7 @@ async function loadGalleries() {
   const { data } = await sb.from('client_galleries').select('*').order('created_at', { ascending: false });
   allGalleries = data || [];
   renderGalleries();
+  if (allBookings.length) { renderBookings(); renderOvBookings(); }
 }
 
 function renderGalleries() {
@@ -1195,6 +1173,23 @@ async function copyLink(link) {
 }
 window.copyLink = copyLink;
 
+// Escape anything a visitor typed before it goes into innerHTML
+function esc(v) {
+  return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function todayStr() {
+  const n = new Date();
+  return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;
+}
+
+// "Past" = finished (delivered/cancelled) or the session date has gone by.
+// Only these can be deleted; an upcoming booking has to be cancelled first.
+function isPastBooking(b) {
+  if (b.status === 'delivered' || b.status === 'cancelled') return true;
+  return !!b.event_date && b.event_date < todayStr();
+}
+
 // ── BOOKINGS ──
 let bookingFilter = 'all';
 
@@ -1216,7 +1211,8 @@ window.filterBookings = filterBookings;
 function renderBookings() {
   const list = document.getElementById('all-bookings');
   let bookings = allBookings;
-  if (bookingFilter !== 'all') bookings = bookings.filter(b => b.status === bookingFilter);
+  if (bookingFilter === 'past') bookings = bookings.filter(isPastBooking);
+  else if (bookingFilter !== 'all') bookings = bookings.filter(b => b.status === bookingFilter);
   if (!bookings.length) { list.innerHTML = `<p class="no-data">No ${bookingFilter === 'all' ? '' : bookingFilter + ' '}bookings.</p>`; return; }
   list.innerHTML = bookings.map(b => bookingCard(b)).join('');
 }
@@ -1229,48 +1225,118 @@ function renderOvBookings() {
 }
 
 function bookingCard(b) {
+  // Everything below came from a public form — escape it before it touches the page
   const name   = [b.first_name, b.last_name].filter(Boolean).join(' ') || 'Unknown';
   const status = b.status || 'pending';
   const numDisplay = b.ztn_number || b.booking_number || b.id?.slice(-8).toUpperCase() || '—';
   const venue = b.venue_address || b.event_location || '—';
+  const gal = b.gallery_id ? allGalleries.find(g => g.id === b.gallery_id) : null;
+  const id = esc(b.id);
 
   return `<div class="booking-card">
     <div class="booking-head">
       <div>
-        <div class="booking-name">${name}</div>
-        <div class="booking-num">${numDisplay}</div>
+        <div class="booking-name">${esc(name)}</div>
+        <div class="booking-num">${esc(numDisplay)}</div>
       </div>
       <div class="booking-badges">
-        <span class="badge ${status}">${status}</span>
-        ${b.package_selected ? `<span class="badge pkg">${b.package_selected.split('—')[0].trim()}</span>` : ''}
+        <span class="badge ${esc(status)}">${esc(status)}</span>
+        ${b.package_selected ? `<span class="badge pkg">${esc(b.package_selected.split('—')[0].trim())}</span>` : ''}
       </div>
     </div>
     <div class="booking-details">
-      <div class="booking-detail"><strong>Date</strong>${b.event_date || '—'}</div>
-      <div class="booking-detail"><strong>Time</strong>${b.event_time || '—'}</div>
-      <div class="booking-detail"><strong>Session</strong>${b.sport_type || '—'}</div>
-      <div class="booking-detail"><strong>Venue</strong>${venue}</div>
-      <div class="booking-detail"><strong>Total</strong>${b.total || '—'}</div>
-      <div class="booking-detail"><strong>Deposit</strong>${b.deposit || '—'}</div>
-      <div class="booking-detail"><strong>Email</strong>${b.email || '—'}</div>
-      <div class="booking-detail"><strong>Phone</strong>${b.phone || '—'}</div>
-      ${b.addons_selected ? `<div class="booking-detail" style="grid-column:1/-1"><strong>Add-ons</strong>${b.addons_selected}</div>` : ''}
-      ${b.notes ? `<div class="booking-detail" style="grid-column:1/-1"><strong>Notes</strong>${b.notes}</div>` : ''}
-      ${b.gallery_id ? `<div class="booking-detail" style="grid-column:1/-1"><strong>Gallery</strong><a href="/gallery?g=${b.ztn_number ? b.ztn_number.toLowerCase() : ''}" target="_blank" style="color:var(--text-2);text-decoration:underline">${b.ztn_number ? b.ztn_number.toLowerCase() : 'view gallery'}</a></div>` : ''}
+      <div class="booking-detail"><strong>Date</strong>${esc(b.event_date || '—')}</div>
+      <div class="booking-detail"><strong>Time</strong>${esc(b.event_time || '—')}</div>
+      <div class="booking-detail"><strong>Session</strong>${esc(b.sport_type || '—')}</div>
+      <div class="booking-detail"><strong>Venue</strong>${esc(venue)}</div>
+      <div class="booking-detail"><strong>Total</strong>${esc(b.total || '—')}</div>
+      <div class="booking-detail"><strong>Deposit</strong>${esc(b.deposit || '—')}</div>
+      <div class="booking-detail"><strong>Email</strong>${esc(b.email || '—')}</div>
+      <div class="booking-detail"><strong>Phone</strong>${esc(b.phone || '—')}</div>
+      ${b.addons_selected ? `<div class="booking-detail" style="grid-column:1/-1"><strong>Add-ons</strong>${esc(b.addons_selected)}</div>` : ''}
+      ${b.notes ? `<div class="booking-detail" style="grid-column:1/-1"><strong>Notes</strong>${esc(b.notes)}</div>` : ''}
+      ${b.gallery_id ? `<div class="booking-detail" style="grid-column:1/-1"><strong>Gallery</strong>${gal
+        ? `<a href="/gallery?g=${encodeURIComponent(gal.slug)}" target="_blank" style="color:var(--text-2);text-decoration:underline">${esc(gal.name || gal.slug)}</a>`
+        : 'Created — see the Galleries tab'}</div>` : ''}
     </div>
     <div class="booking-actions">
-      ${status === 'pending'   ? `<button class="btn-sm green"  onclick="acceptBooking('${b.id}','${name.replace(/'/g,'\\\'')}')" title="Accept and email client with confirm link">Accept</button>` : ''}
-      ${status === 'accepted'  ? `<button class="btn-sm on-ink" onclick="setStatus('${b.id}','confirmed')">Mark confirmed</button>` : ''}
-      ${status === 'confirmed' ? `<button class="btn-sm on-ink" onclick="setStatus('${b.id}','delivered')">Mark delivered</button>` : ''}
-      ${status !== 'cancelled' ? `<button class="btn-sm red"    onclick="setStatus('${b.id}','cancelled')">Cancel</button>` : ''}
-      ${status !== 'pending'   ? `<button class="btn-sm"        onclick="setStatus('${b.id}','pending')">Reset</button>` : ''}
-      ${b.ztn_number ? `<a class="btn-sm" href="/invoice?ztn=${b.ztn_number}" target="_blank">Invoice</a>` : ''}
-      <button class="btn-sm" onclick="mailTo('${b.email}','${name.replace(/'/g,'\\\'')}')" title="Open email client">Email</button>
+      ${status === 'pending'   ? `<button class="btn-sm green"  onclick="acceptBooking('${id}')" title="Accept and email client with confirm link">Accept</button>` : ''}
+      ${status === 'accepted'  ? `<button class="btn-sm on-ink" onclick="setStatus('${id}','confirmed')">Mark confirmed</button>` : ''}
+      ${status === 'confirmed' ? `<button class="btn-sm on-ink" onclick="setStatus('${id}','delivered')">Mark delivered</button>` : ''}
+      ${status !== 'cancelled' ? `<button class="btn-sm red"    onclick="setStatus('${id}','cancelled')">Cancel</button>` : ''}
+      ${status !== 'pending'   ? `<button class="btn-sm"        onclick="setStatus('${id}','pending')">Reset</button>` : ''}
+      ${b.ztn_number ? `<a class="btn-sm" href="/invoice?ztn=${encodeURIComponent(b.ztn_number)}" target="_blank">Invoice</a>` : ''}
+      ${b.email ? `<button class="btn-sm" onclick="mailTo('${id}')" title="Open email client">Email</button>` : ''}
+      ${isPastBooking(b) ? `<button class="btn-sm red" style="margin-left:auto" onclick="openDeleteModal('${id}')">Delete</button>` : ''}
     </div>
   </div>`;
 }
 
-async function acceptBooking(id, name) {
+// ── DELETE PAST BOOKINGS ──
+let pendingDelete = null, deleteTrigger = null;
+
+function openDeleteModal(id) {
+  const b = allBookings.find(x => x.id === id);
+  if (!b || !isPastBooking(b)) return;               // never offered for active bookings
+  const name = [b.first_name, b.last_name].filter(Boolean).join(' ').trim();
+  pendingDelete = { id, phrase: name || 'DELETE' };
+  deleteTrigger = document.activeElement;
+  const num = b.ztn_number || b.booking_number || '';
+  document.getElementById('del-summary').textContent =
+    [name || 'Unnamed booking', num, b.event_date, b.status].filter(Boolean).join(' · ');
+  document.getElementById('del-phrase').textContent = pendingDelete.phrase;
+  const input = document.getElementById('del-input');
+  input.value = '';
+  const btn = document.getElementById('del-confirm');
+  btn.disabled = true; btn.textContent = 'Delete booking';
+  document.getElementById('del-modal').classList.add('open');
+  input.focus();
+}
+window.openDeleteModal = openDeleteModal;
+
+function closeDeleteModal() {
+  document.getElementById('del-modal').classList.remove('open');
+  pendingDelete = null;
+  if (deleteTrigger && deleteTrigger.focus) deleteTrigger.focus();
+}
+window.closeDeleteModal = closeDeleteModal;
+
+function deletePhraseMatches() {
+  const typed = document.getElementById('del-input').value.trim().toLowerCase();
+  return !!pendingDelete && typed === pendingDelete.phrase.toLowerCase();
+}
+
+document.getElementById('del-input').addEventListener('input', () => {
+  document.getElementById('del-confirm').disabled = !deletePhraseMatches();
+});
+document.getElementById('del-modal').addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeDeleteModal();
+  if (e.key === 'Enter' && deletePhraseMatches()) confirmDeleteBooking();
+});
+
+async function confirmDeleteBooking() {
+  if (!deletePhraseMatches()) return;
+  const btn = document.getElementById('del-confirm');
+  btn.disabled = true; btn.textContent = 'Deleting…';
+  // .select() returns the rows actually removed — an empty result means the
+  // database refused (no delete permission), which would otherwise look like success
+  const { data, error } = await sb.from('bookings').delete().eq('id', pendingDelete.id).select('id');
+  if (error || !data || !data.length) {
+    btn.disabled = false; btn.textContent = 'Delete booking';
+    toast(error ? 'Could not delete: ' + error.message
+                : 'The database blocked the delete — see "Deleting bookings" in HANDOFF.md');
+    return;
+  }
+  closeDeleteModal();
+  await loadBookings();
+  updateStats();
+  toast('Booking deleted');
+}
+window.confirmDeleteBooking = confirmDeleteBooking;
+
+async function acceptBooking(id) {
+  const known = allBookings.find(x => x.id === id) || {};
+  const name = [known.first_name, known.last_name].filter(Boolean).join(' ') || 'this client';
   if (!confirm('Accept booking for ' + name + '?\n\nThis will update their status and email them a link to complete their booking.')) return;
 
   // Step 1: read booking
@@ -1346,7 +1412,11 @@ async function setStatus(id, status) {
 }
 window.setStatus = setStatus;
 
-function mailTo(email, name) { window.open('mailto:' + email + '?subject=Your booking — ZRP&body=Hi ' + name + ','); }
+function mailTo(id) {
+  const b = allBookings.find(x => x.id === id); if (!b || !b.email) return;
+  const first = b.first_name || '';
+  window.open('mailto:' + encodeURIComponent(b.email) + '?subject=' + encodeURIComponent('Your booking — ZRP') + '&body=' + encodeURIComponent('Hi ' + first + ','));
+}
 window.mailTo = mailTo;
 
 // ── AVAILABILITY CALENDAR ──

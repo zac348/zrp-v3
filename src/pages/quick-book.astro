@@ -21,18 +21,18 @@ import { BOOKING_OPEN } from '../config.js';
   border-radius: var(--radius-lg);
   padding: 16px;
   cursor: pointer;
-  transition: border-color .2s, background .2s, transform .25s cubic-bezier(.16,1,.3,1), box-shadow .25s;
+  transition: border-color .2s, background .2s;
   position: relative;
   opacity: 0;
   animation: rise-in .6s cubic-bezier(.16,1,.3,1) both;
   animation-delay: var(--d, 0s);
 }
-.pkg-card:hover { border-color: var(--border-2); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(26,25,24,.08) }
+.pkg-card:hover { border-color: var(--border-2);   }
 .pkg-card.sel {
   border-color: var(--text);
   background: var(--surface-dim);
-  transform: translateY(-3px);
-  box-shadow: 0 8px 24px rgba(26,25,24,.1);
+
+
 }
 .pkg-badge {
   font-family: var(--font-sans);
@@ -229,7 +229,7 @@ async function loadPackages() {
 function renderPackages(pkgs) {
   const grid = document.getElementById('pkg-grid');
   grid.innerHTML = pkgs.map((p, i) => `
-    <div class="pkg-card" id="pkg-${i}" onclick="selectPkg(${i},${JSON.stringify(p).replace(/"/g, '&quot;')})">
+    <div class="pkg-card" role="button" tabindex="0" aria-pressed="false" id="pkg-${i}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}" onclick="selectPkg(${i},${JSON.stringify(p).replace(/"/g, '&quot;')})">
       ${p.popular ? '<span class="pkg-badge">Popular</span>' : ''}
       <div class="pkg-name">${p.name}</div>
       <div class="pkg-price">$${p.price}<small>/session</small></div>
@@ -239,7 +239,7 @@ function renderPackages(pkgs) {
 
 function selectPkg(i, pkg) {
   selPkg = pkg;
-  document.querySelectorAll('.pkg-card').forEach((c, j) => c.classList.toggle('sel', j === i));
+  document.querySelectorAll('.pkg-card').forEach((c, j) => { c.classList.toggle('sel', j === i); c.setAttribute('aria-pressed', String(j === i)); });
   document.getElementById('h-pkg').value   = pkg.name + ' — $' + pkg.price;
   document.getElementById('cl-pkg-n').textContent = pkg.name;
   document.getElementById('cl-pkg-p').textContent = '$' + pkg.price;

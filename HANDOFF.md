@@ -18,8 +18,8 @@ Everything you need to run **zrphotos.net** day to day. No coding required for a
 3. Click the drop zone (or drag files in). Photos are stored in Cloudflare R2.
 4. Scroll down on the same tab to see **all photos**: select several (click photos or checkboxes) to bulk-change category, add to a client gallery, add/remove from the Portfolio, or delete.
 5. **Photos are automatically resized on upload.** Each one is saved three ways: your untouched original (what clients download), a ~2200px web version (used when someone opens a photo), and a ~700px thumbnail (used in the grids). Visitors never download the full-size file — that's the difference between a 3 MB page and a 30 MB one.
-6. **You no longer pick what's on the homepage.** It shows 6 photos at random from your Portfolio, reshuffled on every visit. Nothing to manage.
-7. **Titles & locations:** the upload form has optional Title and Location fields (they apply to the whole batch). Fix individual photos anytime with the **Edit** button on a photo card, or select several and use **Set location**. Titles/locations show when visitors hover (or tab to) a photo, and they double as the photo's description for screen readers and Google. With no title, the category + location is used (e.g. "Soccer, Valwood School") — so filling in locations is worth it.
+6. **You no longer pick what's on the homepage.** It shows up to 6 photos from your Portfolio, alternating categories for a balanced selection. Newer photos appear first within each category. Nothing to manage.
+7. **Titles & locations:** the upload form has optional Title and Location fields (they apply to the whole batch). Fix individual photos anytime with the **Edit** button on a photo card, or select several and use **Set location**. Titles/locations appear below each photograph, and they double as the photo's description for screen readers and Google. With no title, the category + location is used (e.g. "Soccer, Valwood School") — so filling in locations is worth it.
    - ⚠️ One-time setup: these two fields need two database columns. In Supabase → SQL Editor, run this once:
    ```sql
    alter table portfolio_photos add column if not exists title text;
@@ -32,9 +32,11 @@ Everything you need to run **zrphotos.net** day to day. No coding required for a
 There's a single public set of photos — your **Portfolio** — and one way in or out of it:
 
 - **The `/portfolio` page** shows all of it, filterable by category, 24 at a time behind a "Load more" button.
-- **The homepage** shows **6 of them at random**, reshuffled every visit. No picking, no toggle, nothing to maintain.
+- **The homepage** shows **up to 6 photographs**, alternating categories, with newer photographs first within each category. No picking, no toggle, nothing to maintain.
 
 **To add or remove photos:** in the Photos tab's photo grid, tick the ones you want → in the bulk bar choose **Portfolio page… → Add to Portfolio** (or Remove) → **Apply**. You can also tick the box on the upload form to add a whole batch as you upload. Photos on the Portfolio show a gold **◆ Portfolio** marker on their card.
+
+The redesigned homepage selects up to four landscape photographs from the public Portfolio for its opening feature. Visitors can browse them with the arrow controls. No additional uploads or admin steps are needed.
 
 Client-gallery photos can be in the Portfolio too — delivering a photo to a client doesn't stop you showing it off (just check they're OK with it; the booking form asks).
 
@@ -54,7 +56,7 @@ It walks every photo that doesn't have a web version yet, builds the smaller ver
 
 Booking is switched off. Every "Book a session" button now says **Get in touch** and goes to the **Contact** section at the bottom of the homepage. Old `/book` links (group chats, Google, coupon links) redirect there too.
 
-**The Contact section** has three big buttons — **Text**, **Email**, **Instagram** — plus a short form: name, phone or email, what they're looking for, and a date if they have one. Before sending, they have to tick **"I understand Zachary only shoots locally — Valdosta and nearby"**, so nobody reaches out expecting you to drive across the country.
+**The Contact section** has direct links for **Text**, **Email**, and **Instagram** — plus a short form: name, phone or email, what they're looking for, and a date if they have one. Before sending, they have to tick **"I understand Zachary only shoots locally — Valdosta and nearby"**, so nobody reaches out expecting you to drive across the country.
 
 - Form messages go straight to your email (`ZACHARY_EMAIL`), subject **"New message — [their name]"**. If they left an email address you can just hit reply; if they left a phone number, text them.
 - If they left an email, they get an automatic **"Got your message"** reply.
@@ -174,10 +176,12 @@ Every photo, booking, price, and the admin login live in **Supabase**. On the fr
 
 ## How the site looks (so future changes stay consistent)
 
-- **Two fonts only:** Fraunces for headings and the name, DM Sans for everything else. No all-caps labels, nothing smaller than 12px.
-- **Photos are shown at their real shape** — nothing is cropped in the grids or the lightbox. The first few photos load right away; the rest load as you scroll.
-- **No decorative motion.** No fade-ins or zooms; hover just shows the photo's title/location. Everything works with a keyboard (Tab to a photo, Enter to open, Esc to close).
+- **Two fonts:** Bodoni Moda for headings and the name, Public Sans for body text and controls. Fonts are served locally.
+- **Photo layouts:** the homepage uses cropped previews in a staggered grid; the archive and opened viewer preserve the full photograph. The first few photos load right away; the rest load as you scroll.
+- **No decorative motion.** No decorative glows or zooms; captions remain visible below the photographs. Everything works with a keyboard (Tab to a photo, Enter to open, Esc to close).
 - Plain wording in Zachary's voice. If a claim isn't true yet (e.g. a type of shoot with no photos to back it up), leave it out.
+
+The header appearance icon offers **System**, **Light**, and **Dark**. System follows the device setting automatically; manual choices are saved.
 
 ## Quick troubleshooting
 

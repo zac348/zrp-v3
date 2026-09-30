@@ -90,11 +90,11 @@ import Layout from '../layouts/Layout.astro';
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: Arial, sans-serif;
+  font-family: "Public Sans", sans-serif;
   font-size: 12px;
   font-weight: bold;
   color: rgba(255,255,255,.5);
-  text-shadow: 0 1px 3px rgba(0,0,0,.7);
+
   pointer-events: none;
   user-select: none;
   transform: rotate(-25deg);
@@ -149,18 +149,19 @@ import Layout from '../layouts/Layout.astro';
       </button>
     </div>
 
+    <p id="gallery-status" role="status" aria-live="polite"></p>
     <div class="gallery-grid" id="gallery-grid"></div>
   </div>
 </div>
 
-<div class="lightbox" id="lb" onclick="closeLB(event)">
-  <button class="lb-close" onclick="closeLB()">×</button>
+<dialog class="lightbox" id="lb" aria-label="Client photograph viewer" onclick="closeLB(event)">
+  <button type="button" class="lb-close" aria-label="Close photograph viewer" onclick="closeLB()">×</button>
   <div style="position:relative;display:inline-block;max-width:90vw;max-height:80vh">
-    <img id="lb-img" src="" alt="" style="max-width:90vw;max-height:80vh;object-fit:contain;border-radius:var(--radius);display:block"/>
+    <img id="lb-img" alt="" style="max-width:90vw;max-height:80vh;object-fit:contain;border-radius:var(--radius);display:block"/>
     <div id="lb-wm" style="display:none;position:absolute;inset:0;pointer-events:none;user-select:none;overflow:hidden"></div>
   </div>
-  <button class="lb-dl" id="lb-dl">Download photo</button>
-</div>
+  <button type="button" class="lb-dl" id="lb-dl">Download original</button>
+</dialog>
 
 <script>
 import { createClient } from '@supabase/supabase-js';
@@ -170,6 +171,8 @@ const sb = createClient(
 );
 
 let galleryPhotos = [], isWatermarked = false;
+let activeIndex = 0, lastTrigger = null, previousOverflow = '';
+const gallerySlug = new URLSearchParams(location.search).get('g');
 
 async function loadGallery() {
   const slug = new URLSearchParams(window.location.search).get('g');
@@ -186,12 +189,17 @@ async function loadGallery() {
   document.getElementById('gallery-title').textContent = gallery.name;
   document.title = gallery.name + ' — ZRP';
 
-  const { data: photos } = await sb
+  const { data: photos, error: photoError } = await sb
     .from('portfolio_photos')
     .select('*')
     .eq('gallery_id', gallery.id)
     .order('created_at', { ascending: true });
 
+  if (photoError) {
+    document.getElementById('not-found').querySelector('h2').textContent = 'Photographs are unavailable';
+    document.getElementById('not-found').querySelector('p').textContent = 'Please try again in a moment, or contact Zachary.';
+    showNotFound(); return;
+  }
   galleryPhotos = photos || [];
 
   document.getElementById('gallery-meta').innerHTML =
@@ -220,26 +228,31 @@ function renderGallery() {
   }
   grid.innerHTML = '';
   galleryPhotos.forEach((p, i) => {
-    const el = document.createElement('div');
-    el.className = 'gal-item';
-    // Browse on the light versions; Download always hands over the full original
-    const preview = p.thumb_url || p.web_url || p.url;
-    const dims = (p.width && p.height) ? ` width="${p.width}" height="${p.height}"` : '';
-    el.innerHTML = `
-      <img src="${preview}"${dims} alt="Photo ${i+1}" loading="lazy" decoding="async"/>
-      <div class="gal-item-overlay">
-        <button class="dl-btn" onclick="event.stopPropagation();downloadPhoto('${p.url}','${p.file_name}')">Download</button>
-      </div>
-      ${isWatermarked ? '<div class="wm-badge">Copyright – Zachary R.</div>' : ''}`;
-    el.addEventListener('click', () => openLB(p.web_url || p.url, p.file_name));
-    grid.appendChild(el);
+    const el = document.createElement('div'); el.className = 'gal-item';
+    const button = document.createElement('button'); button.type = 'button'; button.className = 'gal-open';
+    button.setAttribute('aria-label', 'View ' + (p.title || p.file_name || 'photograph ' + (i + 1)));
+    const img = document.createElement('img'); img.src = p.thumb_url || p.web_url || p.url; img.alt = p.title || ('Photograph ' + (i + 1)); img.loading = i < 3 ? 'eager' : 'lazy'; img.decoding = 'async';
+    if (p.width && p.height) { img.width = p.width; img.height = p.height; }
+    button.append(img); button.addEventListener('click', () => openLB(i, button));
+    const overlay = document.createElement('div'); overlay.className = 'gal-item-overlay';
+    const download = document.createElement('button'); download.type = 'button'; download.className = 'dl-btn'; download.textContent = isWatermarked ? 'Download preview' : 'Download original';
+    download.addEventListener('click', () => downloadPhoto(p.url, p.file_name)); overlay.append(download);
+    el.append(button, overlay);
+    if (isWatermarked) { const mark = document.createElement('div'); mark.className = 'wm-badge'; mark.textContent = 'Copyright – Zachary R.'; el.append(mark); }
+    grid.append(el);
   });
 }
 
-function openLB(url, filename) {
-  document.getElementById('lb-img').src = url;
-  document.getElementById('lb-dl').onclick = function() { downloadPhoto(url, filename); };
-
+function openLB(index, trigger) {
+  activeIndex = (index + galleryPhotos.length) % galleryPhotos.length;
+  const photo = galleryPhotos[activeIndex];
+  const viewer = document.getElementById('lb');
+  const image = document.getElementById('lb-img');
+  image.src = photo.web_url || photo.url;
+  image.alt = photo.title || ('Photograph ' + (activeIndex + 1));
+  document.getElementById('lb-dl').textContent = isWatermarked ? 'Download preview' : 'Download original';
+  document.getElementById('lb-dl').onclick = function() { downloadPhoto(photo.url, photo.file_name); };
+  if (!viewer.open) { lastTrigger = trigger || document.activeElement; previousOverflow = document.body.style.overflow; document.body.style.overflow = 'hidden'; }
   const wmDiv = document.getElementById('lb-wm');
   if (isWatermarked) {
     // Build tiled watermark grid matching the canvas pattern
@@ -253,11 +266,10 @@ function openLB(url, filename) {
         span.textContent = 'Copyright – Zachary R.';
         span.style.cssText = [
           'position:absolute',
-          'font-family:Arial,sans-serif',
+          'font-family:"Public Sans",sans-serif',
           'font-size:clamp(10px,1.2vw,14px)',
           'font-weight:bold',
           'color:rgba(255,255,255,0.42)',
-          'text-shadow:0 1px 3px rgba(0,0,0,0.75)',
           'white-space:nowrap',
           'transform:rotate(-25deg)',
           'left:' + (c * 26 + offsetX) + '%',
@@ -271,17 +283,28 @@ function openLB(url, filename) {
     wmDiv.style.display = 'none';
   }
 
-  document.getElementById('lb').classList.add('open');
+  viewer.classList.add('open');
+  if (!viewer.open) viewer.showModal();
+  viewer.querySelector('.lb-close').focus();
 }
 window.openLB = openLB;
 
 function closeLB(e) {
   if (e && e.target !== document.getElementById('lb') && e.target !== document.querySelector('.lb-close')) return;
-  document.getElementById('lb').classList.remove('open');
+  document.body.style.overflow = previousOverflow;
+  document.getElementById('lb').close();
 }
 window.closeLB = closeLB;
 
-document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeLB(); });
+document.getElementById('lb').addEventListener('cancel', e => { e.preventDefault(); closeLB(); });
+document.getElementById('lb').addEventListener('close', () => {
+  document.getElementById('lb').classList.remove('open');
+  document.body.style.overflow = previousOverflow;
+  lastTrigger?.focus({ preventScroll: true });
+});
+document.getElementById('lb').addEventListener('keydown', e => {
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { e.preventDefault(); openLB(activeIndex + (e.key === 'ArrowLeft' ? -1 : 1)); }
+});
 
 const WM_TEXT = 'Copyright – Zachary R.';
 
@@ -300,7 +323,7 @@ function watermarkCanvas(img) {
   const angle   = -25 * Math.PI / 180;    // diagonal tilt
 
   ctx.save();
-  ctx.font        = 'bold ' + sz + 'px Arial, sans-serif';
+  ctx.font        = 'bold ' + sz + 'px "Public Sans", sans-serif';
   ctx.lineWidth   = Math.max(2, sz * 0.16);
   ctx.lineJoin    = 'round';
   ctx.strokeStyle = 'rgba(0,0,0,0.55)';
@@ -326,60 +349,55 @@ function watermarkCanvas(img) {
   return canvas;
 }
 
+function saveBlob(blob, filename) {
+  const objectURL = URL.createObjectURL(blob);
+  const link = document.createElement('a'); link.href = objectURL; link.download = filename || 'photograph.jpg';
+  document.body.append(link); link.click(); link.remove();
+  setTimeout(() => URL.revokeObjectURL(objectURL), 10000);
+}
 async function downloadPhoto(url, filename) {
-  if (!isWatermarked) {
-    // Clean download — no canvas needed
-    const a = document.createElement('a');
-    a.href = url; a.download = filename || 'photo.jpg';
-    a.style.display = 'none';
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    return;
-  }
-
-  // Watermarked download via canvas
-  // crossOrigin='anonymous' works because R2 public buckets send Access-Control-Allow-Origin: *
-  const img = new Image();
-  img.crossOrigin = 'anonymous';
-
-  img.onload = function() {
-    try {
-      const canvas = watermarkCanvas(img);
-      canvas.toBlob(function(blob) {
-        if (!blob) { window.open(url, '_blank'); return; }
-        const objUrl = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = objUrl; a.download = filename || 'photo.jpg';
-        a.style.display = 'none';
-        document.body.appendChild(a); a.click(); document.body.removeChild(a);
-        setTimeout(function() { URL.revokeObjectURL(objUrl); }, 10000);
-      }, 'image/jpeg', 0.93);
-    } catch(e) {
-      console.error('canvas error:', e);
-      window.open(url, '_blank');
+  const photo = galleryPhotos.find(p => p.url === url);
+  const status = document.getElementById('gallery-status');
+  if (!photo) return false;
+  status.textContent = 'Preparing your photograph…';
+  try {
+    // The same-origin endpoint verifies membership in this shared gallery and
+    // streams the original from R2, avoiding cross-origin download restrictions.
+    const endpoint = '/api/gallery-file?' + new URLSearchParams({ g: gallerySlug, photo: photo.id });
+    const response = await fetch(endpoint, { signal: AbortSignal.timeout(60000) });
+    if (!response.ok) throw new Error('Download unavailable');
+    let blob = await response.blob();
+    if (isWatermarked) {
+      const objectURL = URL.createObjectURL(blob);
+      try {
+        const img = new Image(); img.src = objectURL; await img.decode();
+        await document.fonts.load('600 16px "Public Sans"');
+        const canvas = watermarkCanvas(img);
+        blob = await new Promise((resolve, reject) => canvas.toBlob(b => b ? resolve(b) : reject(new Error('Could not create preview')), 'image/jpeg', .93));
+      } finally { URL.revokeObjectURL(objectURL); }
     }
-  };
-
-  img.onerror = function() {
-    console.error('img load failed for watermark');
-    window.open(url, '_blank');
-  };
-
-  img.src = url;
+    saveBlob(blob, filename); status.textContent = 'Your photograph is ready.'; return true;
+  } catch (_) {
+    status.textContent = 'The download didn’t complete. Please try again, or contact Zachary.';
+    return false;
+  }
 }
 window.downloadPhoto = downloadPhoto;
 
 async function downloadAll() {
-  const btn = document.getElementById('dl-all-btn');
-  btn.disabled = true; btn.textContent = 'Preparing…';
-  for (const p of galleryPhotos) {
-    await downloadPhoto(p.url, p.file_name);
-    await new Promise(r => setTimeout(r, 400));
-  }
-  btn.disabled = false;
-  btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><polyline points="8 17 12 21 16 17"/><line x1="12" y1="3" x2="12" y2="21"/></svg> Download all';
+  const btn = document.getElementById('dl-all-btn'); if (btn.disabled) return;
+  btn.disabled = true; let count = 0;
+  try {
+    for (const photo of galleryPhotos) {
+      btn.textContent = `Preparing ${count + 1} of ${galleryPhotos.length}…`;
+      if (!(await downloadPhoto(photo.url, photo.file_name))) break;
+      count++;
+    }
+    if (count === galleryPhotos.length) document.getElementById('gallery-status').textContent = `${count} photographs prepared. Your browser may ask to allow multiple downloads.`;
+  } finally { btn.disabled = false; btn.textContent = 'Download all'; }
 }
 window.downloadAll = downloadAll;
 
-loadGallery();
+loadGallery().catch(() => { showNotFound(); document.querySelector('#not-found p').textContent = 'The gallery could not load. Please try again in a moment.'; });
 </script>
 </Layout>

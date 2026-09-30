@@ -1,153 +1,134 @@
 ---
+import '../styles/fonts.css';
 import '../styles/global.css';
-import { BOOKING_OPEN, PRIMARY_CTA } from '../config.js';
-
+import '../styles/site.css';
+import { PRIMARY_CTA } from '../config.js';
 interface Props {
   title: string;
   description?: string;
   noNav?: boolean;
   noFooter?: boolean;
-  /** Send visitors straight to another URL (used to park /book while booking is off) */
   redirectTo?: string;
+  editorial?: boolean;
 }
-const {
-  title,
-  description = 'Photography based in Valdosta, GA. Portraits, families, events, and sports.',
-  noNav = false,
-  noFooter = false,
-  redirectTo,
-} = Astro.props;
+const { title, description = 'Zachary Routsong is a photographer in Valdosta, Georgia. Portraits, families, events, sports, and landscapes.', noNav = false, noFooter = false, redirectTo } = Astro.props;
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+const publicPage = path === '/' || path === '/portfolio';
+const authPage = path === '/login' || path === '/reset';
 ---
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8"/>
-  {redirectTo && <meta http-equiv="refresh" content={`0; url=${redirectTo}`}/>}
-  {redirectTo && <meta name="robots" content="noindex"/>}
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>{title}</title>
-  <meta name="description" content={description}/>
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png"/>
-  <meta name="theme-color" content="#12100E"/>
-  <meta property="og:type" content="website"/>
-  <meta property="og:site_name" content="Zachary Routsong Photography"/>
-  <meta property="og:title" content={title}/>
-  <meta property="og:description" content={description}/>
-  <meta property="og:url" content="https://zrphotos.net"/>
-  <meta property="og:image" content="https://zrphotos.net/og.png"/>
-  <meta property="og:image:width" content="1200"/>
-  <meta property="og:image:height" content="630"/>
-  <meta name="twitter:card" content="summary_large_image"/>
-  <meta name="twitter:image" content="https://zrphotos.net/og.png"/>
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
-  <!-- Theme: run before paint to avoid flash -->
-  <script is:inline>
-    (function() {
-      // Dark is the default vibe — only go light if the visitor explicitly chose it
-      var stored = localStorage.getItem('zrp-theme');
-      if (stored !== 'light') {
-        document.documentElement.classList.add('dark');
-      }
-    })();
-  </script>
-</head>
-<body>
-
-{!noNav && (
-  <nav class="nav">
-    <a href="/" class="nav-logo" aria-label="Zachary Routsong Photography">
-      <img src="/zr-logo.svg" alt="ZR" class="nav-logo-img"/>
-    </a>
-    <div class="nav-links">
-      <a href="/#portfolio" class="nav-hide-sm">Work</a>
-      <a href="/portfolio">Portfolio</a>
-      <a href="/#about">About</a>
-      <a href="tel:2293001006" class="nav-hide-sm">229-300-1006</a>
-      <a href="https://instagram.com/zacharyroutsongphotos" target="_blank" rel="noopener" class="nav-hide-sm">Instagram</a>
-    </div>
-    <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
-      <button id="theme-toggle" aria-label="Toggle dark mode" style="background:none;border:1px solid var(--border);border-radius:var(--radius-sm);width:32px;height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-3);transition:all .15s;flex-shrink:0" onmouseover="this.style.borderColor='var(--border-2)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-3)'">
-        <svg id="icon-moon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-        <svg id="icon-sun" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-      </button>
-      <a href={PRIMARY_CTA.href} class="btn" style="font-size:12px;padding:7px 16px;">{PRIMARY_CTA.label}</a>
-    </div>
-  </nav>
-)}
-
-<slot/>
-
-{!noFooter && (
-  <footer>
-    <a href={PRIMARY_CTA.href} class="footer-cta">{BOOKING_OPEN
-      ? <Fragment>Book a <em>session</em></Fragment>
-      : <Fragment>Get in <em>touch</em></Fragment>}<span>→</span></a>
-    <div class="footer-meta">
-      <span>© 2026 Zachary Routsong Photography</span>
-      <div class="foot-links">
-        <a href="/portfolio">Portfolio</a>
-        <a href="tel:2293001006">229-300-1006</a>
-        <a href="https://instagram.com/zacharyroutsongphotos" target="_blank" rel="noopener">@zacharyroutsongphotos</a>
-        <a href={PRIMARY_CTA.href}>{BOOKING_OPEN ? 'Book now' : 'Contact'}</a>
-        <a href="/terms">Terms</a>
-        <a href="/privacy">Privacy</a>
-      </div>
-    </div>
-  </footer>
-)}
-
-<div class="toast" id="toast"></div>
-
-<div class="consent-bar" id="consent-bar">
-  <span>We collect booking info to complete your session. See our <a href="/privacy">Privacy Policy</a>. By booking, you confirm you're 13 or older (or a parent/guardian).</span>
-  <button onclick="dismissConsent()">Got it</button>
-</div>
-
-<script is:inline>
-  (function() {
-    if (!localStorage.getItem('zrp-consent')) {
-      document.getElementById('consent-bar').classList.add('show');
-    }
-  })();
-  function dismissConsent() {
-    localStorage.setItem('zrp-consent', '1');
-    document.getElementById('consent-bar').classList.remove('show');
-  }
-</script>
-
-<script is:inline>
-  (function() {
-    var btn      = document.getElementById('theme-toggle');
-    var iconMoon = document.getElementById('icon-moon');
-    var iconSun  = document.getElementById('icon-sun');
-
-    function applyTheme(dark) {
-      if (dark) {
-        document.documentElement.classList.add('dark');
-        if (iconMoon) iconMoon.style.display = 'none';
-        if (iconSun)  iconSun.style.display  = 'block';
-      } else {
-        document.documentElement.classList.remove('dark');
-        if (iconMoon) iconMoon.style.display = 'block';
-        if (iconSun)  iconSun.style.display  = 'none';
-      }
-    }
-
-    // Sync icon with current state on load
-    applyTheme(document.documentElement.classList.contains('dark'));
-
-    if (btn) {
-      btn.addEventListener('click', function() {
-        var isDark = document.documentElement.classList.contains('dark');
-        applyTheme(!isDark);
-        localStorage.setItem('zrp-theme', isDark ? 'light' : 'dark');
-      });
-    }
-  })();
-</script>
-
-</body>
+<!doctype html>
+<html lang="en" class="zr-site" data-page={path.slice(1) || 'home'}>
+  <head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    {redirectTo && <meta http-equiv="refresh" content={`0; url=${redirectTo}`}/>}
+    {(redirectTo || ['/admin','/login','/reset','/confirm','/invoice','/gallery','/coupon-card'].includes(path)) && <meta name="robots" content="noindex"/>}
+    <title>{title}</title>
+    <meta name="description" content={description}/>
+    <meta name="theme-color" content="#eeeae3"/>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png"/>
+    <link rel="preload" href="/fonts/bodoni-moda-400-normal.ttf" as="font" type="font/ttf" crossorigin/>
+    <link rel="preload" href="/fonts/public-sans-400-normal.ttf" as="font" type="font/ttf" crossorigin/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="Zachary Routsong Photography"/>
+    <meta property="og:title" content={title}/>
+    <meta property="og:description" content={description}/>
+    <meta property="og:url" content={`https://zrphotos.net${path === '/' ? '' : path}`}/>
+    <meta property="og:image" content="https://zrphotos.net/og.png"/>
+    <meta name="twitter:card" content="summary_large_image"/>
+    <script is:inline>
+      (() => {
+        const root = document.documentElement;
+        const system = window.matchMedia('(prefers-color-scheme: dark)');
+        const normalize = value => value === 'light' || value === 'dark' ? value : 'system';
+        let preference = 'system';
+        try { preference = normalize(localStorage.getItem('zrp-theme')); } catch (_) {}
+        const apply = () => {
+          const dark = preference === 'dark' || (preference === 'system' && system.matches);
+          root.classList.toggle('dark', dark);
+          root.dataset.themePreference = preference;
+          root.style.colorScheme = dark ? 'dark' : 'light';
+          document.querySelector('meta[name="theme-color"]').content = dark ? '#191a18' : '#eeeae3';
+          window.dispatchEvent(new Event('zrp-theme-change'));
+        };
+        window.zrpTheme = {
+          set(value) {
+            preference = normalize(value);
+            try { localStorage.setItem('zrp-theme', preference); } catch (_) {}
+            apply();
+          }
+        };
+        system.addEventListener('change', apply);
+        window.addEventListener('storage', event => {
+          if (event.key === 'zrp-theme' || event.key === null) {
+            try { preference = normalize(localStorage.getItem('zrp-theme')); } catch (_) {}
+            apply();
+          }
+        });
+        apply();
+      })();
+    </script>
+  </head>
+  <body class:list={{ 'public-page': publicPage, 'auth-page': authPage }}>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    {!noNav && <header class="site-header">
+      <a class="wordmark" href="/" aria-label="Zachary Routsong — home"><span class="monogram">zr.</span><span>Photography<br/>by Zachary Routsong</span></a>
+      <span class="header-place">Valdosta, Georgia<br/><span>Portraits / Sport / Places</span></span>
+      <nav class="site-nav" aria-label="Main navigation">
+        <a href="/portfolio" aria-current={path === '/portfolio' ? 'page' : undefined}>Work</a>
+        <a href="/#about">About</a>
+        <a href={PRIMARY_CTA.href}>{PRIMARY_CTA.label === 'Get in touch' ? 'Contact' : PRIMARY_CTA.label}</a>
+        <details class="theme-picker" id="theme-picker">
+          <summary id="theme-toggle" aria-label="Appearance: System" title="Appearance: System"><svg width="17" height="17" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="7" stroke="currentColor"/><path d="M10 3a7 7 0 0 1 0 14Z" fill="currentColor"/></svg></summary>
+          <fieldset class="theme-options">
+            <legend>Appearance</legend>
+            <label><input type="radio" name="theme" value="system" checked/>System</label>
+            <label><input type="radio" name="theme" value="light"/>Light</label>
+            <label><input type="radio" name="theme" value="dark"/>Dark</label>
+          </fieldset>
+        </details>
+      </nav>
+    </header>}
+    <main id="main-content" tabindex="-1"><slot/></main>
+    {!noFooter && <footer class="site-footer">
+      <div class="footer-top"><a href="/" class="footer-name">Zachary<br/><em>Routsong.</em></a><div class="footer-contact"><p>Valdosta, Georgia &amp; nearby</p><a href="mailto:zac@zrphotos.net">zac@zrphotos.net</a><a href="tel:+12293001006">229–300–1006</a></div><div class="footer-directory"><a href="/portfolio">Photographs</a><a href="/#about">About Zachary</a><a href={PRIMARY_CTA.href}>{PRIMARY_CTA.label}</a><a href="https://instagram.com/zacharyroutsongphotos" target="_blank" rel="noopener">Instagram <span aria-hidden="true">↗</span></a></div></div>
+      <div class="footer-bottom"><span>© {new Date().getFullYear()} Zachary Routsong</span><span>All photographs by Zachary.</span><div><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/login">Studio login</a></div></div>
+    </footer>}
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <div class="consent-bar" id="consent-bar"><span>We use your booking details to arrange your session. Read our <a href="/privacy">Privacy Policy</a>. You must be 13 or older, or a parent or guardian.</span><button type="button" id="dismiss-consent">Got it</button></div>
+    <script is:inline>
+      (() => {
+        const root = document.documentElement;
+        const toggle = document.getElementById('theme-toggle');
+        const picker = document.getElementById('theme-picker');
+        const choices = picker?.querySelectorAll('input[name="theme"]') || [];
+        const syncTheme = () => {
+          const preference = root.dataset.themePreference;
+          const label = `Appearance: ${preference[0].toUpperCase()}${preference.slice(1)}`;
+          toggle?.setAttribute('aria-label', label);
+          toggle?.setAttribute('title', label);
+          choices.forEach(choice => { choice.checked = choice.value === preference; });
+        };
+        syncTheme();
+        window.addEventListener('zrp-theme-change', syncTheme);
+        choices.forEach(choice => choice.addEventListener('change', () => window.zrpTheme.set(choice.value)));
+        document.addEventListener('click', event => {
+          if (picker?.open && !picker.contains(event.target)) picker.open = false;
+        });
+        picker?.addEventListener('keydown', event => {
+          if (event.key === 'Escape') { picker.open = false; toggle.focus(); event.preventDefault(); }
+        });
+        picker?.addEventListener('focusout', event => {
+          if (!picker.contains(event.relatedTarget)) picker.open = false;
+        });
+        const bar = document.getElementById('consent-bar');
+        let accepted; try { accepted = localStorage.getItem('zrp-consent'); } catch (_) {}
+        if (!accepted && /^\/(book|quick-book|confirm)\/?$/.test(location.pathname)) bar.classList.add('show');
+        const dismiss = () => { bar.classList.remove('show'); try { localStorage.setItem('zrp-consent', '1'); } catch (_) {} };
+        document.getElementById('dismiss-consent').addEventListener('click', dismiss);
+        window.dismissConsent = dismiss;
+      })();
+    </script>
+  </body>
 </html>

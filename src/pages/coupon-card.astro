@@ -64,7 +64,7 @@ nav.nav { display: flex; align-items: center; justify-content: space-between; pa
 
   <!-- PREVIEW -->
   <div>
-    <div class="preview-label">preview <span style="font-size: 12px;opacity:.55;letter-spacing:0;text-transform:none;font-family:'DM Sans',sans-serif;margin-left:4px">(scaled)</span></div>
+    <div class="preview-label">preview <span style="font-size: 12px;opacity:.55;letter-spacing:0;text-transform:none;font-family:'Public Sans',sans-serif;margin-left:4px">(scaled)</span></div>
     <div class="canvas-wrap">
       <canvas id="card-canvas"></canvas>
     </div>
@@ -111,7 +111,7 @@ function render() {
 
   // LOGO
   ctx.fillStyle = text3;
-  ctx.font = '500 28px "DM Sans", sans-serif';
+  ctx.font = '500 28px "Public Sans", sans-serif';
   ctx.letterSpacing = '6px';
   ctx.fillText('ZRP', 60, 80);
   ctx.letterSpacing = '0px';
@@ -123,24 +123,24 @@ function render() {
   // Client name
   if (client) {
     ctx.fillStyle = text2;
-    ctx.font = '300 32px "DM Sans", sans-serif';
+    ctx.font = '300 32px "Public Sans", sans-serif';
     ctx.fillText('For: ' + client, 60, 180);
   }
 
   // Discount
   ctx.fillStyle = text1;
-  ctx.font = '300 160px "DM Sans", sans-serif';
+  ctx.font = '400 160px "Bodoni Moda", sans-serif';
   ctx.fillText(discount, 60, client ? 400 : 380);
 
   // Code
   ctx.fillStyle = text2;
-  ctx.font = '500 44px "DM Sans", sans-serif';
+  ctx.font = '500 44px "Public Sans", sans-serif';
   ctx.letterSpacing = '4px';
   ctx.fillText('Use code:', 60, client ? 520 : 500);
   ctx.letterSpacing = '0px';
 
   ctx.fillStyle = text1;
-  ctx.font = '700 80px "DM Sans", sans-serif';
+  ctx.font = '700 80px "Public Sans", sans-serif';
   ctx.letterSpacing = '6px';
   ctx.fillText(code, 60, client ? 630 : 610);
   ctx.letterSpacing = '0px';
@@ -152,15 +152,15 @@ function render() {
   // Message
   if (msg) {
     ctx.fillStyle = text2;
-    ctx.font = '400 30px "DM Sans", sans-serif';
+    ctx.font = '400 30px "Public Sans", sans-serif';
     ctx.fillText(msg, 60, client ? 740 : 720);
   }
 
   // Bottom row
   ctx.fillStyle = text3;
-  ctx.font = '400 26px "DM Sans", sans-serif';
+  ctx.font = '400 26px "Public Sans", sans-serif';
   ctx.letterSpacing = '1px';
-  ctx.fillText('zacharyroutsongphotography.com', 60, 1150);
+  ctx.fillText('zrphotos.net', 60, 1150);
   ctx.letterSpacing = '0px';
 
   if (expiry) {
@@ -170,7 +170,8 @@ function render() {
   }
 }
 
-function download() {
+async function download() {
+  await document.fonts.ready;
   render();
   const a = document.createElement('a');
   a.download = 'coupon-card.png';
@@ -179,6 +180,6 @@ function download() {
 }
 window.download = download;
 
-render();
+document.fonts.ready.then(render);
 </script>
 </Layout>

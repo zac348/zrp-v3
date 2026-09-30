@@ -1,87 +1,54 @@
-// Shared by the homepage "Selected work" grid and the /portfolio page.
-//
-// Tiles are real <button>s, so every photo can be reached by keyboard and
-// touch. Text is set with textContent (never innerHTML), and the lightbox
-// takes focus when it opens and hands it back when it closes.
-
-// There are no written descriptions per photo yet, so describe what we know.
-export function photoAlt(p) {
-  const what = p.title || p.sport || 'Photograph';
-  return p.location ? `${what}, ${p.location}` : what;
-}
-
-// `eagerCount`: how many tiles are on screen at load. Those are fetched right
-// away (the first with high priority); everything further down loads lazily.
-export function makeTile(p, index, eagerCount = 0) {
-  const alt = photoAlt(p);
-  const btn = document.createElement('button');
-  btn.type = 'button';
-  btn.className = 'grid-item';
-  btn.setAttribute('aria-label', 'Open photo: ' + alt);
-
-  const img = document.createElement('img');
-  // Order matters: loading/sizes/srcset before src, or the browser may start
-  // fetching the full image before it knows it should wait.
-  img.loading = index < eagerCount ? 'eager' : 'lazy';
-  if (index === 0 && eagerCount > 0) img.setAttribute('fetchpriority', 'high');
-  img.decoding = 'async';
-  if (p.thumb_url && p.web_url) {
-    img.sizes = '(max-width:600px) 100vw, (max-width:1060px) 50vw, 340px';
-    img.srcset = `${p.thumb_url} 700w, ${p.web_url} 2200w`;
-  }
-  if (p.width && p.height) { img.width = p.width; img.height = p.height; }  // reserves space, no layout jump
-  img.alt = alt;
-  img.src = p.thumb_url || p.web_url || p.url;
-  btn.appendChild(img);
-
-  const caption = p.title || p.sport || '';
-  if (caption || p.location) {
-    const overlay = document.createElement('span');
-    overlay.className = 'grid-overlay';
-    overlay.setAttribute('aria-hidden', 'true');          // already in the button's label
-    const text = document.createElement('span');
-    text.textContent = caption;
-    if (p.location) {
-      const loc = document.createElement('span');
-      loc.className = 'grid-loc';
-      loc.textContent = p.location;
-      text.appendChild(loc);
-    }
-    overlay.appendChild(text);
-    btn.appendChild(overlay);
-  }
-
-  btn.addEventListener('click', () => openLightbox(p.web_url || p.url, alt, btn));
-  return btn;
-}
-
-let lastTrigger = null;
-
-export function openLightbox(url, alt, trigger) {
-  const lb = document.getElementById('lb');
-  const img = document.getElementById('lb-img');
-  img.alt = alt || '';
-  img.src = url;
-  lastTrigger = trigger || document.activeElement;
-  lb.classList.add('open');
-  lb.querySelector('.lb-close').focus();
-}
-
-export function closeLightbox() {
-  const lb = document.getElementById('lb');
-  if (!lb.classList.contains('open')) return;
-  lb.classList.remove('open');
-  if (lastTrigger && lastTrigger.focus) lastTrigger.focus();
-}
-
-// Click anywhere or press Escape to close. The close button is the only
-// control inside, so Tab stays on it instead of wandering behind the overlay.
+export function photoAlt(photo) { return [photo.title || photo.sport || 'Photograph', photo.location].filter(Boolean).join(', '); }
+let viewer;
+let collection = [];
+let position = 0;
+let trigger;
+let oldOverflow = '';
 export function bindLightbox() {
-  const lb = document.getElementById('lb');
-  lb.addEventListener('click', closeLightbox);
-  document.addEventListener('keydown', e => {
-    if (!lb.classList.contains('open')) return;
-    if (e.key === 'Escape') closeLightbox();
-    if (e.key === 'Tab') { e.preventDefault(); lb.querySelector('.lb-close').focus(); }
+  viewer = document.getElementById('photo-viewer');
+  viewer.querySelector('.viewer-close').addEventListener('click',closeLightbox);
+  document.getElementById('viewer-prev').addEventListener('click',()=>step(-1));
+  document.getElementById('viewer-next').addEventListener('click',()=>step(1));
+  viewer.addEventListener('click',event=>{if(event.target===viewer)closeLightbox();});
+  viewer.addEventListener('cancel',event=>{event.preventDefault();closeLightbox();});
+  viewer.addEventListener('close',()=>{document.body.style.overflow=oldOverflow;trigger?.focus({preventScroll:true});});
+  viewer.addEventListener('keydown',event=>{
+    if(event.key==='ArrowLeft'){event.preventDefault();step(-1);}
+    if(event.key==='ArrowRight'){event.preventDefault();step(1);}
   });
+}
+function showPhoto() {
+  const photo=collection[position];
+  const image=document.getElementById('viewer-image');
+  const status=document.getElementById('viewer-status'); status.hidden=true; image.hidden=false;
+  image.onload=()=>{status.hidden=true;image.hidden=false;};
+  image.onerror=()=>{image.hidden=true;status.hidden=false;status.textContent='This photograph couldn’t load. Try another photograph, or close the viewer.';};
+  image.alt=photoAlt(photo);image.src=photo.web_url||photo.url||photo.thumb_url;
+  document.getElementById('viewer-count').textContent=`${String(position+1).padStart(2,'0')} / ${String(collection.length).padStart(2,'0')}`;
+  document.getElementById('viewer-caption').textContent=photoAlt(photo);
+  document.getElementById('viewer-prev').disabled=collection.length<2;
+  document.getElementById('viewer-next').disabled=collection.length<2;
+}
+function step(direction){position=(position+direction+collection.length)%collection.length;showPhoto();}
+export function openPhoto(photos,index,element) {
+  if(!photos.length)return;
+  collection=photos;position=index;trigger=element||document.activeElement;showPhoto();
+  if(!viewer.open){oldOverflow=document.body.style.overflow;document.body.style.overflow='hidden';viewer.showModal();}
+  viewer.querySelector('.viewer-close').focus();
+}
+export function closeLightbox(){document.body.style.overflow=oldOverflow;viewer.close();}
+export function makeTile(photo,index,photos,eagerCount=0) {
+  const figure=document.createElement('figure');figure.className='photo-entry';
+  const button=document.createElement('button');button.type='button';button.className='photo-button';button.setAttribute('aria-label','View '+photoAlt(photo));
+  const image=document.createElement('img');image.loading=index<eagerCount?'eager':'lazy';image.decoding='async';image.alt=photoAlt(photo);
+  if(photo.width&&photo.height){image.width=photo.width;image.height=photo.height;}
+  if(photo.thumb_url&&photo.web_url){image.sizes='(max-width:600px) 100vw, (max-width:1000px) 50vw, 65vw';image.srcset=`${photo.thumb_url} 700w, ${photo.web_url} 2200w`;}
+  image.src=photo.thumb_url||photo.web_url||photo.url;
+  image.addEventListener('error',()=>{image.hidden=true;if(!button.querySelector('.image-error')){const message=document.createElement('span');message.className='image-error';message.textContent='Preview unavailable. Open photograph';button.append(message);}});
+  button.append(image);button.addEventListener('click',()=>openPhoto(photos,index,button));
+  const caption=document.createElement('figcaption');
+  const number=document.createElement('span');number.className='photo-number';number.textContent=String(index+1).padStart(2,'0');
+  const label=document.createElement('span');label.className='photo-label';label.textContent=photo.location||photo.title||photo.sport||'Untitled';
+  const category=document.createElement('span');category.className='photo-category';category.textContent=photo.sport||'Photograph';
+  caption.append(number,label,category);figure.append(button,caption);return figure;
 }

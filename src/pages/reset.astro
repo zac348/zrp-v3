@@ -29,18 +29,18 @@ body { min-height: 100vh; display: flex; align-items: center; justify-content: c
 
   <div id="form-wrap" style="display:none">
     <div class="field">
-      <label>New password</label>
+      <label for="pw1">New password</label>
       <input type="password" id="pw1" placeholder="••••••••" autocomplete="new-password"/>
     </div>
     <div class="field">
-      <label>Confirm new password</label>
+      <label for="pw2">Confirm new password</label>
       <input type="password" id="pw2" placeholder="••••••••" autocomplete="new-password"/>
     </div>
     <button class="btn" style="width:100%;margin-top:4px" id="save-btn" onclick="savePw()">Save new password</button>
   </div>
 
-  <p class="err" id="err-msg"></p>
-  <p class="ok" id="ok-msg"></p>
+  <p class="err" id="err-msg" role="alert"></p>
+  <p class="ok" id="ok-msg" role="status"></p>
   <a href="/login" class="back">← Back to login</a>
 </div>
 

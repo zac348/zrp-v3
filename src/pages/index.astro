@@ -1,508 +1,61 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import PhotoViewer from '../components/PhotoViewer.astro';
 import { PRIMARY_CTA } from '../config.js';
+const equipment = [
+  ['Sony A7 III', 'Full-frame camera'], ['Tamron 28–75mm f/2.8', 'Portraits, families & events'],
+  ['Sony 55–210mm', 'Sports & distance'], ['DJI Mini 3', 'Aerial photographs'],
+  ['DJI Mic Mini', 'Wireless audio'], ['Insta360', 'Action & behind the scenes'], ['Meta Ray-Bans', 'Behind-the-scenes video'],
+];
 ---
-<Layout title="Zachary Routsong Photography">
+<Layout title="Zachary Routsong — Photography, Valdosta GA">
+  <header class="masthead">
+    <div class="masthead-meta"><span>Independent photographer</span><span>Valdosta, Georgia</span></div>
+    <h1>Zachary <em>Routsong</em></h1>
+    <div class="masthead-bottom"><span>Portraits / Families / Events / Sports</span><a href="#portfolio">Selected photographs <span aria-hidden="true">↓</span></a></div>
+  </header>
 
-<style is:global>
-/* ── HERO ── */
-.hero {
-  padding: 64px 28px 48px;
-  border-bottom: 1px solid var(--border);
-}
-@media (max-width: 700px) { .hero { padding: 40px 18px 36px } }
-.hero-inner { max-width: 1060px; margin: 0 auto }
-.hero-kicker {
-  font-family: var(--font-sans);
-  font-size: 15px;
-  letter-spacing: .01em;
-  color: var(--text-2);
-  margin-bottom: 20px;
-}
-.hero-name {
-  font-family: var(--font-serif);
-  font-weight: 320;
-  font-size: clamp(44px, 7.5vw, 100px);
-  line-height: .96;
-  letter-spacing: -.03em;
-  color: var(--text);
-  margin: 0 0 28px;
-}
-.hero-name span { display: block }
-.hero-name .indent { margin-left: clamp(20px, 6vw, 88px); font-style: italic }
-.hero-foot {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 24px;
-  flex-wrap: wrap;
-}
-.hero-role {
-  font-size: 14px;
-  color: var(--text-2);
-  line-height: 1.7;
-  max-width: 380px;
-}
-.hero-role em { font-family: var(--font-serif); font-style: italic; color: var(--text); font-size: 15px }
-
-/* Section scaffold, category filter, and masonry grid now live in global.css
-   (shared with /portfolio). */
-
-/* ── ABOUT / GEAR SWITCH ── */
-.folder-tabs {
-  display: flex;
-  gap: 24px;
-  margin-bottom: 32px;
-  border-bottom: 1px solid var(--border);
-}
-.folder-tab {
-  font-family: var(--font-sans);
-  font-size: 14px;
-  color: var(--text-3);
-  background: none;
-  border: none;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
-  padding: 10px 0;
-  cursor: pointer;
-  transition: color .2s;
-}
-.folder-tab:hover { color: var(--text) }
-.folder-tab.active { color: var(--text); border-bottom-color: var(--text) }
-
-/* ── GEAR GRID ── */
-.gear-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 28px 32px;
-}
-.gear-card { border-top: 1px solid var(--border); padding-top: 20px }
-.gear-icon { width: 44px; height: 44px; color: var(--text-2); margin-bottom: 14px }
-.gear-icon svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round }
-.gear-name {
-  font-family: var(--font-serif);
-  font-size: 17px;
-  color: var(--text);
-  margin-bottom: 5px;
-}
-.gear-spec { font-size: 12px; color: var(--text-2); line-height: 1.6; margin-bottom: 10px }
-.gear-uses {
-  font-family: var(--font-sans);
-  font-size: 12px;
-  letter-spacing: .01em;
-  color: var(--text-3);
-  line-height: 1.8;
-}
-.gear-uses::before { content: 'used for — '; color: var(--accent) }
-
-/* ── ABOUT ── */
-.about-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
-  gap: 56px;
-  align-items: start;
-}
-@media (max-width: 860px) { .about-grid { grid-template-columns: 1fr 1fr; gap: 36px } }
-@media (max-width: 620px) { .about-grid { grid-template-columns: 1fr; gap: 32px } }
-
-.about-photo {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
-.about-lede {
-  font-family: var(--font-serif);
-  font-weight: 330;
-  font-size: clamp(20px, 2.6vw, 27px);
-  line-height: 1.45;
-  letter-spacing: -.01em;
-  color: var(--text);
-  margin-bottom: 20px;
-}
-.about-lede em { font-style: italic }
-.about-body {
-  font-size: 13.5px;
-  color: var(--text-2);
-  line-height: 1.85;
-  max-width: 480px;
-  margin-bottom: 32px;
-}
-
-/* fact rows instead of stat boxes */
-.facts { list-style: none; margin: 0 0 32px; padding: 0; max-width: 480px }
-.facts li {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  padding: 11px 0;
-  border-top: 1px solid var(--border);
-}
-.facts li:last-child { border-bottom: 1px solid var(--border) }
-.facts .f-label {
-  font-family: var(--font-sans);
-  font-size: 12px;
-  letter-spacing: .01em;
-  color: var(--text-3);
-}
-.facts .f-value {
-  font-family: var(--font-serif);
-  font-size: 17px;
-  color: var(--text);
-}
-/* ── CONTACT ── */
-#contact { scroll-margin-top: 64px }
-.contact-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
-  gap: 64px;
-  align-items: start;
-}
-@media (max-width: 860px) { .contact-grid { grid-template-columns: 1fr; gap: 36px } }
-.contact-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 10px }
-.contact-form { display: flex; flex-direction: column; gap: 14px; max-width: 520px }
-.contact-form .btn { align-self: flex-start; margin-top: 4px }
-.contact-status { font-size: 13px; color: var(--text-2); line-height: 1.6; min-height: 1.6em }
-.contact-status.err { color: var(--red) }
-.hp-field { position: absolute; left: -5000px; top: auto; height: 0; overflow: hidden }
-@media (max-width: 700px) {
-  .contact-actions .btn, .contact-form .btn { align-self: stretch; width: 100% }
-}
-</style>
-
-<!-- HERO -->
-<header class="hero">
-  <div class="hero-inner">
-    <p class="hero-kicker">Photographer — Valdosta, Georgia</p>
-    <h1 class="hero-name">
-      <span>Zachary</span>
-      <span class="indent">Routsong</span>
-    </h1>
-    <div class="hero-foot">
-      <p class="hero-role"><em>Portraits, families, events &amp; sports.</em><br/>Private gallery, quick turnaround, simple pricing. Sessions from <span id="hero-price">$40</span>.</p>
-      <span><a href={PRIMARY_CTA.href} class="btn">{PRIMARY_CTA.label}</a></span>
+  <section class="cover" aria-label="Featured photographs" aria-roledescription="carousel">
+    <div class="cover-stage" aria-busy="true">
+      <button type="button" id="cover-open" aria-label="Open featured photograph" disabled>
+        <img id="cover-image" alt="" width="2200" height="1238" fetchpriority="high" hidden/>
+        <span class="photo-loading" id="cover-loading">Loading photographs</span>
+      </button>
     </div>
-  </div>
-</header>
-
-<!-- WORK -->
-<section class="section" id="portfolio">
-  <div class="sec-head">
-    <span class="sec-num">01</span>
-    <h2>Selected work</h2>
-    <span class="rule"></span>
-  </div>
-  <div class="work-index" id="cat-tags">
-    <button class="cat-tag disabled">Loading…</button>
-  </div>
-  <div class="grid" id="portfolio-grid">
-    <div class="placeholder-cell"><span>Loading…</span></div>
-    <div class="placeholder-cell"><span>Loading…</span></div>
-    <div class="placeholder-cell"><span>Loading…</span></div>
-  </div>
-  <p class="port-count" id="port-count"></p>
-  <div style="margin-top:22px"><a href="/portfolio" class="btn" id="port-link">See the full portfolio</a></div>
-</section>
-
-<!-- ABOUT / GEAR -->
-<section class="section" id="about" style="border-top:1px solid var(--border)">
-  <div class="sec-head">
-    <span class="sec-num">02</span>
-    <h2>About</h2>
-    <span class="rule"></span>
-  </div>
-
-  <div class="folder-tabs" role="tablist">
-    <button class="folder-tab active" id="ft-about" role="tab" aria-selected="true" onclick="showPanel('about')">About me</button>
-    <button class="folder-tab" id="ft-gear" role="tab" aria-selected="false" onclick="showPanel('gear')">My gear</button>
-  </div>
-
-  <div class="folder-panel">
-    <!-- ABOUT ME -->
-    <div id="panel-about">
-      <div class="about-grid">
-        <img src="/zachary-800.jpg" srcset="/zachary-800.jpg 800w, /zachary.jpg 3240w" sizes="(max-width:620px) 100vw, (max-width:1060px) 50vw, 540px" width="3240" height="2160" alt="Zachary Routsong" class="about-photo" loading="lazy" decoding="async"/>
-        <div>
-          <p class="about-lede">Based in Valdosta. I shoot a little bit of everything — the goal is photos that <em>look like the moment felt.</em></p>
-          <p class="about-body">Portraits, families, events, and sports. Sharp, well-edited photos, delivered in a private gallery within the week.</p>
-          <ul class="facts">
-            <li><span class="f-label">Starting price</span><span class="f-value" id="stat-starting-price">$40</span></li>
-            <li><span class="f-label">Turnaround</span><span class="f-value">5–7 days</span></li>
-            <li><span class="f-label">Edited photos</span><span class="f-value">25+ per session</span></li>
-            <li><span class="f-label">Coverage</span><span class="f-value">Valdosta &amp; nearby</span></li>
-          </ul>
-          <a href={PRIMARY_CTA.href} class="btn">{PRIMARY_CTA.label}</a>
-        </div>
-      </div>
+    <div class="cover-caption">
+      <div class="cover-location"><span class="tiny-label">From the portfolio</span><p id="cover-title" aria-live="polite">A photograph by Zachary Routsong</p></div>
+      <div class="cover-controls"><span id="cover-count">— / —</span><button type="button" id="cover-prev" aria-label="Previous featured photograph" disabled>←</button><button type="button" id="cover-next" aria-label="Next featured photograph" disabled>→</button></div>
     </div>
+  </section>
 
-    <!-- MY GEAR -->
-    <div id="panel-gear" style="display:none">
-      <div class="gear-grid">
+  <section id="portfolio" class="selected-work page-inset" aria-labelledby="work-heading">
+    <div class="section-heading"><div><p class="tiny-label">01 / The photographs</p><h2 id="work-heading">Selected <em>work.</em></h2></div><div class="category-filters" id="cat-tags" aria-label="Filter photographs"></div></div>
+    <div class="selected-grid" id="portfolio-grid" aria-busy="true"><p class="collection-message">Loading the portfolio…</p></div>
+    <div class="collection-bottom"><p id="port-count" aria-live="polite"></p><a class="line-link" href="/portfolio" id="port-link">The complete portfolio <span aria-hidden="true">↗</span></a></div>
+  </section>
 
-        <div class="gear-card">
-          <div class="gear-icon"><svg viewBox="0 0 44 44"><rect x="5" y="14" width="34" height="21" rx="2"/><path d="M15 14l2.5-4h9l2.5 4"/><circle cx="22" cy="24.5" r="6.5"/><circle cx="22" cy="24.5" r="3"/><path d="M33 19h2.5"/></svg></div>
-          <div class="gear-name">Sony A7 III</div>
-          <p class="gear-spec">24MP full-frame mirrorless. Fast autofocus, strong in low light.</p>
-          <p class="gear-uses">Every session</p>
-        </div>
+  <section id="about" class="about-section page-inset" aria-labelledby="about-heading">
+    <div class="about-heading"><p class="tiny-label">02 / The photographer</p><h2 id="about-heading">About<br/><em>Zachary.</em></h2></div>
+    <figure class="about-portrait"><img src="/zachary-800.jpg" srcset="/zachary-800.jpg 800w, /zachary.jpg 3240w" sizes="(max-width:700px) 90vw, 40vw" alt="Zachary at home in Valdosta" width="3240" height="2160" loading="lazy"/><figcaption><span>Zachary Routsong</span><span>Valdosta, GA</span></figcaption></figure>
+    <div class="about-copy"><p>I’m based in Valdosta, Georgia. I photograph portraits, families, events, and sports in the area.</p><p>Sessions include edited photographs delivered through a private download gallery, typically within 5–7 days.</p><dl class="session-facts"><div><dt>Where I work</dt><dd>Valdosta &amp; nearby</dd></div><div><dt>Edited photographs</dt><dd>25+ per session</dd></div><div><dt>Sessions</dt><dd id="starting-price">Ask for pricing</dd></div></dl><a class="line-link" href={PRIMARY_CTA.href}>{PRIMARY_CTA.label} <span aria-hidden="true">↗</span></a></div>
+    <details class="equipment"><summary>Equipment <span aria-hidden="true">+</span></summary><dl>{equipment.map(([name,use])=><div><dt>{name}</dt><dd>{use}</dd></div>)}</dl></details>
+  </section>
 
-        <div class="gear-card">
-          <div class="gear-icon"><svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="14"/><circle cx="22" cy="22" r="8.5"/><circle cx="22" cy="22" r="3.5"/></svg></div>
-          <div class="gear-name">Tamron 28–75mm f/2.8</div>
-          <p class="gear-spec">Fast standard zoom — the everyday lens. Sharp wide open.</p>
-          <p class="gear-uses">Portraits · Families · Events</p>
-        </div>
-
-        <div class="gear-card">
-          <div class="gear-icon"><svg viewBox="0 0 44 44"><rect x="4" y="17" width="24" height="11" rx="1.5"/><path d="M28 15.5h8v14h-8"/><path d="M12 17v11M19 17v11"/></svg></div>
-          <div class="gear-name">Sony 55–210mm</div>
-          <p class="gear-spec">f/4.5–6.3 telephoto zoom. Reach for shots from the stands.</p>
-          <p class="gear-uses">Sports · Candids at distance</p>
-        </div>
-
-        <div class="gear-card">
-          <div class="gear-icon"><svg viewBox="0 0 44 44"><circle cx="10" cy="12" r="4.5"/><circle cx="34" cy="12" r="4.5"/><circle cx="10" cy="32" r="4.5"/><circle cx="34" cy="32" r="4.5"/><rect x="16" y="18" width="12" height="8" rx="2"/><path d="M13 15l4 4M31 15l-4 4M13 29l4-4M31 29l-4-4"/></svg></div>
-          <div class="gear-name">DJI Mini 3</div>
-          <p class="gear-spec">4K aerial camera, under 249g. Angles you can't get from the ground.</p>
-          <p class="gear-uses">Aerials · Venues · Outdoor events</p>
-        </div>
-
-        <div class="gear-card">
-          <div class="gear-icon"><svg viewBox="0 0 44 44"><rect x="15" y="7" width="13" height="17" rx="3.5"/><path d="M18 12h7M21.5 24v6c0 5 8 3 8 8"/><circle cx="29.5" cy="39" r="2"/></svg></div>
-          <div class="gear-name">DJI Mic Mini</div>
-          <p class="gear-spec">Ultra-light wireless mic. Clean audio without cables in the shot.</p>
-          <p class="gear-uses">Interviews · Video add-ons</p>
-        </div>
-
-        <div class="gear-card">
-          <div class="gear-icon"><svg viewBox="0 0 44 44"><rect x="14.5" y="5" width="15" height="34" rx="4.5"/><circle cx="22" cy="14" r="5.5"/><circle cx="22" cy="14" r="2"/><path d="M18 31h8"/></svg></div>
-          <div class="gear-name">Insta360</div>
-          <p class="gear-spec">360° capture with the invisible-stick effect. Angles that follow the action.</p>
-          <p class="gear-uses">Action cams · Behind the scenes</p>
-        </div>
-
-        <div class="gear-card">
-          <div class="gear-icon"><svg viewBox="0 0 44 44"><rect x="5.5" y="17" width="14" height="11" rx="5"/><rect x="24.5" y="17" width="14" height="11" rx="5"/><path d="M19.5 20.5c1.5-1.5 3.5-1.5 5 0M5.5 19.5L2.5 17M38.5 19.5l3-2.5"/><circle cx="9" cy="20" r="1.2"/></svg></div>
-          <div class="gear-name">Meta Ray-Bans</div>
-          <p class="gear-spec">Hands-free POV camera built into glasses.</p>
-          <p class="gear-uses">POV clips · Behind the scenes</p>
-        </div>
-
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- CONTACT -->
-<section class="section" id="contact" style="border-top:1px solid var(--border)">
-  <div class="sec-head">
-    <span class="sec-num">03</span>
-    <h2>Contact</h2>
-    <span class="rule"></span>
-  </div>
-
-  <div class="contact-grid">
-    <div>
-      <p class="about-lede">Text is fastest. Or send a message and I'll get back to you.</p>
-      <div class="contact-actions">
-        <a href="sms:+12293001006" class="btn">Text 229-300-1006</a>
-        <a href="mailto:zac@zrphotos.net" class="btn">Email</a>
-        <a href="https://ig.me/m/zacharyroutsongphotos" target="_blank" rel="noopener" class="btn">Instagram</a>
-      </div>
-    </div>
-
+  <section id="contact" class="contact-section page-inset" aria-labelledby="contact-heading">
+    <div class="contact-heading"><p class="tiny-label">03 / Enquiries</p><h2 id="contact-heading">Contact</h2><p>For availability and pricing, send your session type, location, and preferred date. Text is the quickest way to reach me.</p><a class="contact-number" href="sms:+12293001006">229–300–1006 <span aria-hidden="true">↗</span></a><div class="contact-other"><a href="mailto:zac@zrphotos.net">Email Zachary</a><a href="https://ig.me/m/zacharyroutsongphotos" target="_blank" rel="noopener">Instagram</a></div><p class="contact-local">Sessions in Valdosta and the surrounding area.</p></div>
     <form id="contact-form" class="contact-form">
-      <!-- invisible to people, irresistible to bots -->
-      <div class="hp-field" aria-hidden="true">
-        <input type="text" id="c-website" name="website" tabindex="-1" autocomplete="off"/>
-      </div>
-      <div class="field"><label for="c-name">Name</label>
-        <input type="text" id="c-name" autocomplete="name" required maxlength="100"/></div>
-      <div class="field"><label for="c-contact">Phone or email</label>
-        <input type="text" id="c-contact" required maxlength="200"/></div>
-      <div class="field"><label for="c-message">What are you looking for?</label>
-        <textarea id="c-message" rows="4" required maxlength="3000" placeholder="Senior pics, a game, family photos…"></textarea></div>
-      <div class="field"><label for="c-date">Date, if you have one</label>
-        <input type="text" id="c-date" maxlength="100" placeholder="e.g. mid October"/></div>
-      <div class="agree-row">
-        <input type="checkbox" id="c-local" required/>
-        <label for="c-local">I understand Zachary only shoots locally — Valdosta and nearby.</label>
-      </div>
-      <div class="agree-row">
-        <input type="checkbox" id="c-agree" required/>
-        <label for="c-agree">I agree to the <a href="/privacy" target="_blank">Privacy Policy</a> and I'm 13 or older (or a parent or guardian).</label>
-      </div>
-      <button type="submit" class="btn" id="c-submit">Send</button>
+      <div class="hp-field" aria-hidden="true"><label for="c-website">Website</label><input type="text" id="c-website" name="website" tabindex="-1" autocomplete="off"/></div>
+      <div class="field"><label for="c-name">Your name <span>(required)</span></label><input type="text" id="c-name" name="name" autocomplete="name" required maxlength="100"/></div>
+      <div class="field"><label for="c-contact">Email or phone <span>(required)</span></label><input type="text" id="c-contact" name="contact" required maxlength="200"/></div>
+      <div class="field field-full"><label for="c-message">Session details <span>(required)</span></label><textarea id="c-message" name="message" rows="3" required maxlength="3000" placeholder="Session type and location"></textarea></div>
+      <div class="field field-full"><label for="c-date">Preferred date (optional)</label><input type="text" id="c-date" name="date" maxlength="100" placeholder="Date or month"/></div>
+      <div class="agree-row"><input type="checkbox" id="c-local" required/><label for="c-local">My session is in Valdosta or nearby.</label></div>
+      <div class="agree-row"><input type="checkbox" id="c-agree" required/><label for="c-agree">I agree to the <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a> and I’m 13 or older, or a parent or guardian.</label></div>
+      <button type="submit" class="send-button" id="c-submit"><span>Send enquiry</span><span aria-hidden="true">↗</span></button>
       <p class="contact-status" id="c-status" role="status" aria-live="polite"></p>
     </form>
-  </div>
-</section>
-
-<!-- LIGHTBOX -->
-<div class="lightbox" id="lb" role="dialog" aria-modal="true" aria-label="Photo">
-  <button class="lb-close" type="button" aria-label="Close">×</button>
-  <img id="lb-img" src="" alt=""/>
-</div>
-
-<script>
-import { createClient } from '@supabase/supabase-js';
-import { makeTile, bindLightbox } from '../lib/gallery.js';
-
-const sb = createClient(
-  import.meta.env.PUBLIC_SUPABASE_URL,
-  import.meta.env.PUBLIC_SUPABASE_ANON_KEY
-);
-
-let allPhotos = [], activeCat = null;
-
-async function loadPortfolio() {
-  // Six at random out of the whole portfolio — nothing to pick by hand.
-  // Only the columns the grid needs, so this stays a few KB of JSON.
-  const { data, error } = await sb
-    .from('portfolio_photos')
-    .select('url, web_url, thumb_url, width, height, sport, title, location')
-    .eq('on_portfolio', true)
-    .limit(300);
-
-  if (error || !data || !data.length) {
-    // No photos yet — hide the whole section instead of showing empty boxes
-    document.getElementById('portfolio').style.display = 'none';
-    return;
-  }
-
-  allPhotos = data;
-
-  // Category counts (the `sport` column doubles as the photo's category)
-  const catCounts = {};
-  data.forEach(p => { if (p.sport) catCounts[p.sport] = (catCounts[p.sport] || 0) + 1; });
-  const cats = Object.keys(catCounts).sort();
-
-  const tagsEl = document.getElementById('cat-tags');
-  if (!cats.length) {
-    tagsEl.innerHTML = '<button class="cat-tag disabled">No tagged photos yet</button>';
-  } else {
-    tagsEl.innerHTML =
-      '<button class="cat-tag active" id="tag-all" onclick="filterCat(null)">All</button>' +
-      cats.map(c =>
-        `<button class="cat-tag" onclick="filterCat('${c}')">${c} <span style="opacity:.55">(${catCounts[c]})</span></button>`
-      ).join('');
-  }
-
-  filterCat(null);
-}
-
-function shuffle(arr) {
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
-}
-
-function filterCat(cat) {
-  activeCat = cat;
-  // The homepage is a teaser: never more than 6 images, always a fresh draw.
-  // The full archive lives on /portfolio.
-  const pool = cat ? allPhotos.filter(p => p.sport === cat) : allPhotos;
-  const photos = shuffle([...pool]).slice(0, 6);
-  const countText = pool.length > photos.length
-    ? photos.length + ' of ' + pool.length + ' photographs' + (cat ? ' — ' + cat : ' — shuffled')
-    : photos.length + ' photograph' + (photos.length !== 1 ? 's' : '') + (cat ? ' — ' + cat : '');
-  renderGrid(photos);
-  document.getElementById('port-count').textContent = countText;
-  const link = document.getElementById('port-link');
-  link.href = cat ? '/portfolio?cat=' + encodeURIComponent(cat) : '/portfolio';
-  link.textContent = cat ? 'See all ' + cat : 'See the full portfolio';
-  document.querySelectorAll('.cat-tag').forEach(t => {
-    const label = t.textContent.trim();
-    t.classList.toggle('active', cat ? label.startsWith(cat) : t.id === 'tag-all');
-  });
-}
-window.filterCat = filterCat;
-
-function renderGrid(photos) {
-  const g = document.getElementById('portfolio-grid');
-  if (!photos.length) {
-    g.innerHTML = '<div class="placeholder-cell" style="aspect-ratio:auto;padding:48px"><span>No photos in this category yet</span></div>';
-    return;
-  }
-  g.replaceChildren(...photos.map((p, i) => makeTile(p, i, 3)));   // first row loads right away
-}
-
-bindLightbox();
-
-// ── ABOUT / GEAR FOLDER TABS ──
-function showPanel(which) {
-  document.getElementById('panel-about').style.display = which === 'about' ? 'block' : 'none';
-  document.getElementById('panel-gear').style.display  = which === 'gear'  ? 'block' : 'none';
-  ['about', 'gear'].forEach(k => {
-    const tab = document.getElementById('ft-' + k);
-    tab.classList.toggle('active', which === k);
-    tab.setAttribute('aria-selected', String(which === k));
-  });
-}
-window.showPanel = showPanel;
-
-async function loadStartingPrice() {
-  try {
-    const { data } = await sb.from('package_pricing').select('base_price, sale_price, on_sale').eq('available', true);
-    if (!data?.length) return;
-    const lowest = Math.min(...data.map(p => (p.on_sale && p.sale_price) ? p.sale_price : p.base_price));
-    if (isFinite(lowest)) {
-      document.getElementById('stat-starting-price').textContent = '$' + lowest;
-      const hp = document.getElementById('hero-price');
-      if (hp) hp.textContent = '$' + lowest;
-    }
-  } catch(e) {}
-}
-
-// Anchors like /#contact are resolved before the photo grid loads. Once it
-// renders the page grows and the anchor ends up off-screen, so jump back to it.
-loadPortfolio().finally(() => {
-  const target = location.hash.length > 1 && document.getElementById(location.hash.slice(1));
-  if (target) requestAnimationFrame(() => target.scrollIntoView());
-});
-loadStartingPrice();
-
-// ── CONTACT FORM ──
-const CONTACT_LOADED = Date.now();
-const contactForm = document.getElementById('contact-form');
-contactForm?.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const btn = document.getElementById('c-submit');
-  const status = document.getElementById('c-status');
-  const val = id => document.getElementById(id).value.trim();
-
-  btn.disabled = true; btn.textContent = 'Sending…';
-  status.className = 'contact-status'; status.textContent = '';
-
-  let ok = false;
-  try {
-    const res = await fetch('/api/contact', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name: val('c-name'),
-        contact: val('c-contact'),
-        message: val('c-message'),
-        date: val('c-date'),
-        website: document.getElementById('c-website').value,
-        elapsed: Date.now() - CONTACT_LOADED,
-      }),
-    });
-    ok = !!(await res.json()).ok;
-  } catch (_) {}
-
-  if (ok) {
-    contactForm.reset();
-    status.textContent = "Got it. I'll get back to you soon.";
-    btn.textContent = 'Sent';
-  } else {
-    status.classList.add('err');
-    status.textContent = "That didn't go through. Text me at 229-300-1006 instead.";
-    btn.disabled = false; btn.textContent = 'Send';
-  }
-});
-</script>
+  </section>
+  <noscript><p class="no-script">Enable JavaScript to browse the photographs and use the form. You can also <a href="sms:+12293001006">text Zachary</a> or <a href="mailto:zac@zrphotos.net">send an email</a>.</p></noscript>
+  <PhotoViewer/>
+  <script src="../lib/home.js"></script>
 </Layout>

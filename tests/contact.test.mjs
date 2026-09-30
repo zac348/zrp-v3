@@ -1,0 +1,11 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {onRequestPost} from '../functions/api/contact.js';
+const valid={name:'Test Person',contact:'test@example.test',message:'Local test only',date:'October',website:'',elapsed:5000};
+function context(body=valid,env={},origin='https://example.test'){return {request:new Request('https://example.test/api/contact',{method:'POST',headers:{'Content-Type':'application/json',origin},body:JSON.stringify(body)}),env};}
+const emailEnv={RESEND_API_KEY:'test-only',ZACHARY_EMAIL:'owner@example.test',FROM_EMAIL:'studio@example.test'};
+test('rejects another origin without sending mail',async t=>{let calls=0;t.mock.method(globalThis,'fetch',async()=>{calls++;throw new Error('Unexpected network');});assert.equal((await onRequestPost(context(valid,emailEnv,'https://other.test'))).status,403);assert.equal(calls,0);});
+test('rejects missing required data and unavailable email settings',async()=>{assert.equal((await onRequestPost(context({...valid,message:''}))).status,400);assert.equal((await onRequestPost(context())).status,503);});
+test('honeypot and short elapsed time do not send mail',async t=>{let calls=0;t.mock.method(globalThis,'fetch',async()=>{calls++;return Response.json({});});await onRequestPost(context({...valid,website:'bot'},emailEnv));await onRequestPost(context({...valid,elapsed:1},emailEnv));assert.equal(calls,0);});
+test('formats owner mail and acknowledgment with escaped user content',async t=>{const calls=[];t.mock.method(globalThis,'fetch',async(url,options)=>{calls.push(JSON.parse(options.body));return Response.json({id:'mock'});});const response=await onRequestPost(context({...valid,name:'<Test>',message:'<script>bad</script>'},emailEnv));assert.equal(response.status,200);assert.equal(calls.length,2);assert.match(calls[0].html,/&lt;script&gt;/);assert.doesNotMatch(calls[0].html,/<script>/);assert.equal(calls[0].reply_to,'test@example.test');});
+test('phone enquiry sends only the owner notification',async t=>{let calls=0;t.mock.method(globalThis,'fetch',async()=>{calls++;return Response.json({});});assert.equal((await onRequestPost(context({...valid,contact:'229-555-0100'},emailEnv))).status,200);assert.equal(calls,1);});

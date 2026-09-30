@@ -35,7 +35,7 @@ html,body { height: 100% }
   border: none; background: none;
   width: 100%; text-align: left; text-decoration: none;
   white-space: nowrap;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Public Sans', sans-serif;
 }
 .sb-link:hover, .sb-link.active { background: var(--surface-dim); color: var(--text) }
 .sb-link svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 1.5; flex-shrink: 0 }
@@ -43,7 +43,7 @@ html,body { height: 100% }
 .logout-btn {
   font-size: 12px; color: var(--text-3);
   background: none; border: none; cursor: pointer;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Public Sans', sans-serif;
   transition: color .15s;
 }
 .logout-btn:hover { color: var(--red) }
@@ -103,8 +103,8 @@ html,body { height: 100% }
 .drop-text { font-size: 13px; color: var(--text-2); margin-bottom: 4px }
 .drop-sub { font-size: 12px; color: var(--text-3) }
 
-.prog-wrap { height: 2px; background: var(--border); border-radius: 2px; margin-bottom: 8px; display: none }
-.prog-bar { height: 100%; background: var(--text); border-radius: 2px; transition: width .3s; width: 0 }
+.prog-wrap { height: 2px; background: var(--border); border-radius: 0; margin-bottom: 8px; display: none }
+.prog-bar { height: 100%; background: var(--text); border-radius: 0; transition: width .3s; width: 0 }
 .upload-status { font-size: 12px; color: var(--text-2); min-height: 16px; margin-bottom: 16px }
 
 /* PHOTOS GRID */
@@ -137,7 +137,7 @@ html,body { height: 100% }
 .bulk-select-all input { width: 14px; height: 14px; accent-color: var(--text); cursor: pointer; flex-shrink: 0 }
 .bulk-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap }
 .bulk-select {
-  font-family: 'DM Sans', sans-serif; font-size: 12px; color: var(--text);
+  font-family: 'Public Sans', sans-serif; font-size: 12px; color: var(--text);
   background: var(--surface-dim); border: 1px solid var(--border);
   border-radius: var(--radius); padding: 5px 26px 5px 8px; height: 30px;
   outline: none; cursor: pointer; appearance: none;
@@ -169,7 +169,7 @@ html,body { height: 100% }
 
 .badge {
   font-family: var(--font-sans); font-size: 12px; letter-spacing: .01em;
-  padding: 2px 8px; border-radius: 3px; border: 1px solid;
+  padding: 2px 8px; border-radius: 0; border: 1px solid;
   white-space: nowrap;
 }
 .badge.pending   { color: var(--amber);  border-color: var(--amber-border);  background: var(--amber-bg) }
@@ -232,7 +232,7 @@ html,body { height: 100% }
 }
 .cal-bulk-bar.visible { display: flex }
 .bulk-bar-label { font-family: var(--font-sans); font-size: 12px; letter-spacing: .01em; color: var(--text-3); margin-right: 4px }
-.cal-dot { width: 4px; height: 4px; border-radius: 50% }
+.availability-mark { width: 12px; height: 2px }
 .cal-legend { display: flex; gap: 14px; padding: 12px 18px; border-top: 1px solid var(--border); flex-wrap: wrap }
 .cal-legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-3) }
 .legend-dot { width: 7px; height: 7px; border-radius: 50% }
@@ -268,7 +268,7 @@ html,body { height: 100% }
 .block-row-left strong { color: var(--text); margin-right: 6px }
 .block-status-badge {
   font-family: var(--font-sans); font-size: 12px; letter-spacing: .01em;
-  padding: 2px 7px; border-radius: 3px; border: 1px solid;
+  padding: 2px 7px; border-radius: 0; border: 1px solid;
 }
 .block-status-badge.unavailable { color: var(--red);   border-color: var(--red-border);   background: var(--red-bg) }
 .block-status-badge.partial     { color: var(--amber); border-color: var(--amber-border); background: var(--amber-bg) }
@@ -337,7 +337,7 @@ html,body { height: 100% }
 .coupon-meta { font-size: 12px; color: var(--text-3) }
 .coupon-badge {
   font-family: var(--font-sans); font-size: 12px; letter-spacing: .01em;
-  padding: 2px 7px; border-radius: 3px; border: 1px solid;
+  padding: 2px 7px; border-radius: 0; border: 1px solid;
 }
 .coupon-badge.percent { color: var(--purple); border-color: rgba(124,58,237,.25); background: var(--purple-bg) }
 .coupon-badge.fixed   { color: var(--green);  border-color: var(--green-border); background: var(--green-bg) }
@@ -554,9 +554,9 @@ html,body { height: 100% }
       </div>
       <div class="cal-grid" id="cal-grid"></div>
       <div class="cal-legend">
-        <div class="cal-legend-item"><div class="legend-dot" style="background:var(--red)"></div>Unavailable</div>
-        <div class="cal-legend-item"><div class="legend-dot" style="background:var(--amber)"></div>Partial</div>
-        <div class="cal-legend-item"><div class="legend-dot" style="background:var(--green)"></div>Available</div>
+        <div class="cal-legend-item">Unavailable</div>
+        <div class="cal-legend-item">Partial</div>
+        <div class="cal-legend-item">Available</div>
       </div>
     </div>
     <div class="day-editor" id="day-editor">
@@ -1503,7 +1503,7 @@ function renderCalendar() {
     el.innerHTML = `<span>${d}</span>`;
     if (status) {
       const dot = document.createElement('div');
-      dot.className = 'cal-dot';
+      dot.className = 'availability-mark';
       dot.style.background = status==='unavailable' ? 'var(--red)' : status==='partial' ? 'var(--amber)' : 'var(--green)';
       el.appendChild(dot);
     }
@@ -1843,31 +1843,33 @@ if (envCanvas) {
     envCtx.strokeStyle = bdr; envCtx.lineWidth = 2; envCtx.strokeRect(1,1,envCanvas.width-2,envCanvas.height-2);
     envCtx.fillStyle = ink; envCtx.fillRect(0,0,8,envCanvas.height);
 
-    envCtx.fillStyle = text3; envCtx.font = '600 28px sans-serif'; envCtx.letterSpacing='6px';
+    envCtx.fillStyle = text3; envCtx.font = '600 28px "Public Sans"'; envCtx.letterSpacing='6px';
     envCtx.fillText('ZACHARY ROUTSONG PHOTOGRAPHY', 60, 75); envCtx.letterSpacing='0px';
     envCtx.fillStyle = bdr; envCtx.fillRect(60,95,envCanvas.width-120,1);
 
-    if (client) { envCtx.fillStyle=text2; envCtx.font='300 36px sans-serif'; envCtx.fillText('For: '+client, 60, 185); }
+    if (client) { envCtx.fillStyle=text2; envCtx.font='300 36px "Public Sans"'; envCtx.fillText('For: '+client, 60, 185); }
 
-    envCtx.fillStyle=text3; envCtx.font='400 28px monospace'; envCtx.letterSpacing='3px';
+    envCtx.fillStyle=text3; envCtx.font='400 28px "Public Sans"'; envCtx.letterSpacing='3px';
     envCtx.fillText('PRIVATE GALLERY', 60, client?280:240); envCtx.letterSpacing='0px';
 
-    envCtx.fillStyle=ink; envCtx.font='300 120px sans-serif';
+    envCtx.fillStyle=ink; envCtx.font='400 120px "Bodoni Moda"';
     envCtx.fillText('Your photos', 60, client?440:400);
     envCtx.fillText('are ready.', 60, client?580:540);
 
-    if (msg) { envCtx.fillStyle=text2; envCtx.font='400 30px sans-serif'; envCtx.fillText(msg, 60, 700); }
+    if (msg) { envCtx.fillStyle=text2; envCtx.font='400 30px "Public Sans"'; envCtx.fillText(msg, 60, 700); }
 
     envCtx.fillStyle=bdr; envCtx.fillRect(60,1100,envCanvas.width-120,1);
-    envCtx.fillStyle=text3; envCtx.font='400 26px monospace'; envCtx.letterSpacing='1px';
+    envCtx.fillStyle=text3; envCtx.font='400 26px "Public Sans"'; envCtx.letterSpacing='1px';
     envCtx.fillText('229-300-1006', 60, 1155); envCtx.letterSpacing='0px';
     envCtx.textAlign='right';
     envCtx.fillText('zacharyroutsongphotos', envCanvas.width-60, 1155);
     envCtx.textAlign='left';
   }
   window.renderEnv = renderEnv;
+  document.fonts.ready.then(renderEnv);
 
-  function downloadEnv() {
+  async function downloadEnv() {
+    await document.fonts.ready;
     renderEnv();
     const a = document.createElement('a'); a.download='envelope.png'; a.href=envCanvas.toDataURL('image/png'); a.click();
   }

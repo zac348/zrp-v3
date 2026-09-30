@@ -70,7 +70,7 @@ import Layout from '../layouts/Layout.astro';
 .toggle-pill.active { border-color: var(--border-2); background: var(--surface-dim) }
 .toggle-left { display: flex; align-items: center; gap: 10px; flex: 1 }
 .toggle-box {
-  width: 14px; height: 14px; border-radius: 3px; border: 1px solid var(--border-2);
+  width: 14px; height: 14px; border-radius: 0; border: 1px solid var(--border-2);
   flex-shrink: 0; display: flex; align-items: center; justify-content: center;
   transition: background .15s, border-color .15s;
 }
@@ -105,7 +105,7 @@ import Layout from '../layouts/Layout.astro';
 .submit-btn {
   width: 100%; background: var(--ink); color: var(--bg);
   border: none; border-radius: var(--radius); padding: 14px;
-  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+  font-family: 'Public Sans', sans-serif; font-size: 14px; font-weight: 500;
   cursor: pointer; transition: background .15s; grid-column: 1/-1; margin-top: 4px;
 }
 .submit-btn:hover:not(:disabled) { background: var(--ink-hover) }

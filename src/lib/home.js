@@ -65,6 +65,7 @@ loadStartingPrice().then(price=>{if(price!==null)document.getElementById('starti
 const loadedAt=Date.now();
 const form=document.getElementById('contact-form');
 let submitting=false;
+let enquiryId=crypto.randomUUID();
 form.addEventListener('submit',async event=>{
   event.preventDefault();if(submitting||!form.reportValidity())return;
   const value=id=>document.getElementById(id).value.trim();
@@ -73,9 +74,9 @@ form.addEventListener('submit',async event=>{
   if(!name||!contact||!message){status.textContent='Please fill in your name, contact details, and a message.';status.classList.add('err');return;}
   submitting=true;button.disabled=true;button.firstElementChild.textContent='Sending enquiry…';status.classList.remove('err');status.textContent='';
   try {
-    const response=await fetch('/api/contact',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,contact,message,date:value('c-date'),website:value('c-website'),elapsed:Date.now()-loadedAt}),signal:AbortSignal.timeout(20000)});
+    const response=await fetch('/api/contact',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({submission_id:enquiryId,name,contact,message,date:value('c-date'),website:value('c-website'),elapsed:Date.now()-loadedAt}),signal:AbortSignal.timeout(30000)});
     const data=await response.json();if(!response.ok||!data.ok)throw new Error('Could not send');
-    form.reset();status.textContent='Your message has been sent. Zachary will get back to you soon.';button.firstElementChild.textContent='Enquiry sent';
+    enquiryId=crypto.randomUUID();form.reset();status.textContent='Your enquiry is saved. Zachary will get back to you soon.';button.firstElementChild.textContent='Enquiry sent';
   }catch(_){status.classList.add('err');status.textContent='Your message didn’t go through. Please try again, or text 229–300–1006.';button.disabled=false;button.firstElementChild.textContent='Send enquiry';}
   finally{submitting=false;}
 });

@@ -48,10 +48,25 @@ export async function onRequestPost(context) {
     return Response.json({ ok: false, error: 'Name, contact, and message are required' }, { status: 400 });
   }
 
-  const to = recipients(env);
-  if (!env.RESEND_API_KEY || !to.length) {
-    return Response.json({ ok: false, error: 'Email is not configured' }, { status: 503 });
+  // Save the enquiry before notifications. The draft is the durable record;
+  // an email outage must never make a successfully saved enquiry look lost.
+  if (!env.PUBLIC_SUPABASE_URL || !env.PUBLIC_SUPABASE_ANON_KEY) {
+    return Response.json({ ok: false, error: 'Enquiries are not configured' }, { status: 503 });
   }
+  try {
+    const saved = await fetch(`${env.PUBLIC_SUPABASE_URL.replace(/\/$/,'')}/functions/v1/delivery`, {
+      method: 'POST', headers: { apikey: env.PUBLIC_SUPABASE_ANON_KEY, 'Content-Type':'application/json' },
+      body: JSON.stringify({ action:'enquire', ...f, submission_id:b.submission_id, website:b.website, elapsed:b.elapsed }),
+      signal: AbortSignal.timeout(15000),
+    });
+    if (!saved.ok) return Response.json({ok:false,error:'Could not save your enquiry. Please try again.'},{status:saved.status===429?429:503});
+    const result = await saved.json();
+    if (!result.ok) throw new Error('Enquiry was not saved');
+    if (!result.created) return Response.json({ok:true,saved:true});
+  } catch { return Response.json({ok:false,error:'Could not save your enquiry. Please try again.'},{status:503}); }
+
+  const to = recipients(env);
+  if (!env.RESEND_API_KEY || !to.length) return Response.json({ok:true,saved:true,notified:false});
 
   const from = env.FROM_EMAIL || 'ZRP <onboarding@resend.dev>';
   const senderEmail = EMAIL_RE.test(f.contact) ? f.contact : null;
@@ -90,7 +105,7 @@ export async function onRequestPost(context) {
     });
   }
 
-  return Response.json({ ok: ownerSent, acked }, { status: ownerSent ? 200 : 502 });
+  return Response.json({ ok: true, saved:true, notified:ownerSent, acked });
 }
 
 function shell(inner) {

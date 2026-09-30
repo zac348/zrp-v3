@@ -22,7 +22,8 @@ const authPage = path === '/login' || path === '/reset';
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     {redirectTo && <meta http-equiv="refresh" content={`0; url=${redirectTo}`}/>}
-    {(redirectTo || ['/admin','/login','/reset','/confirm','/invoice','/gallery','/coupon-card'].includes(path)) && <meta name="robots" content="noindex"/>}
+    {(redirectTo || ['/admin','/login','/reset','/confirm','/invoice','/gallery','/client-details','/client-gallery','/coupon-card'].includes(path)) && <meta name="robots" content="noindex,nofollow"/>}
+    {['/client-details','/client-gallery'].includes(path) && <meta name="referrer" content="no-referrer"/>}
     <title>{title}</title>
     <meta name="description" content={description}/>
     <meta name="theme-color" content="#eeeae3"/>

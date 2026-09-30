@@ -52,22 +52,34 @@ It walks every photo that doesn't have a web version yet, builds the smaller ver
 - **Privacy model: the link IS the password.** Gallery links are long random URLs — anyone who has one can view and download. Don't post gallery links publicly; send them directly to the client.
 - Galleries created automatically when a booking is confirmed get a random link too.
 
-## Online booking is OFF right now — people reach out instead
+## Enquiries → client albums (Galleries tab)
 
-Booking is switched off. Every "Book a session" button now says **Get in touch** and goes to the **Contact** section at the bottom of the homepage. Old `/book` links (group chats, Google, coupon links) redirect there too.
+The homepage contact form now saves an **admin-only draft album** and sends the existing email notifications. Saved enquiries remain available even if notification email fails.
 
-**The Contact section** has direct links for **Text**, **Email**, and **Instagram** — plus a short form: name, phone or email, what they're looking for, and a date if they have one. Before sending, they have to tick **"I understand Zachary only shoots locally — Valdosta and nearby"**, so nobody reaches out expecting you to drive across the country.
+1. Open **Admin → Galleries → Enquiries & client albums**. Each contact submission appears as **New enquiry**.
+2. Click **Accept** or **Decline**. Accepting does not create a Google Drive folder and does not automatically email the client.
+3. Under **Awaiting details**, choose **Copy client form link** (send it by text or email yourself) or **Fill in details** to enter the agreed session information yourself. The private form expires 30 days after acceptance; **Replace form link** invalidates the previous one.
+4. Completing the required details saves them, then creates exactly one client folder in the **cli_delivery Shared drive**. The folder is named using the session date, client name, and session type. Both client and admin use the same completion process.
+5. If Google fails, the details remain saved and the album displays **Folder needs attention**. Fix the stated access problem, then click **Retry folder**. The reserved folder ID is reused; retrying does not make duplicates.
+6. Use **Open photo folder** to upload finished files directly to that folder (not into nested subfolders). Click **Publish gallery** when ready, then **Copy gallery link**. Empty folders cannot be published.
+7. The gallery shows Drive previews and streams the exact original uploaded file for downloads. Clients do not need Google accounts. **Unpublish** disables gallery access again. Anyone holding a published gallery link can view/download it; send it privately.
 
-- Form messages go straight to your email (`ZACHARY_EMAIL`), subject **"New message — [their name]"**. If they left an email address you can just hit reply; if they left a phone number, text them.
-- If they left an email, they get an automatic **"Got your message"** reply.
-- Nothing is saved to the admin panel — **the email is the record.** Upside: the form keeps working even if Supabase is down.
-- It has the same bot trap as booking, so spam gets dropped quietly.
+The client-details link and gallery link are separate random secrets. Completed forms show only a receipt, not the submitted private details. New enquiry records have no public database permissions. Only explicitly allowed studio admins can manage them.
 
-**Nothing breaks for clients already in progress:** anyone you've already accepted can still finish at their `/confirm` link, and invoices, galleries, and the admin Bookings tab all keep working.
+The **Check Drive connection** button verifies that the service account can add children in the configured Shared drive. It does not create a folder.
 
-**Coupons** are dormant while booking is off — their links land on the contact section.
+Online self-service booking remains off. The older Bookings tab, confirmation links, invoices, and existing R2 galleries continue to work independently. New contact enquiries are managed in Galleries, not the older Bookings tab.
 
-**To turn online booking back on:** open `src/config.js`, change `BOOKING_OPEN = false` to `true`, commit, and push. Every button, the footer, and the `/book` page switch back together in about two minutes. (Or just ask Claude to do it.)
+### Delivery service deployment
+
+- Database migration: `supabase/migrations/202609300001_delivery_workflow.sql` (additive, private tables only).
+- Edge Function: `delivery`; JWT gateway verification is disabled because enquiries and private-link forms are public routes. Every admin action independently verifies the Supabase session and the `delivery_admins` allowlist.
+- Secret: `GOOGLE_SERVICE_ACCOUNT_JSON`, held only by Supabase.
+- Parent Shared drive: `0AHwV0eI44SAaUk9PVA`; optionally override with `GOOGLE_DRIVE_PARENT_ID`.
+- `scripts/setup-delivery.py` applies the migration using the existing Supabase CLI login without printing the token.
+- Deploy with `npx --yes supabase@2.118.0 functions deploy delivery --project-ref jrowfpgezkfeyzfyzfps --use-api`.
+- Grant another trusted studio admin access by adding their existing `auth.users.id` to `delivery_admins` through an authorized database administrator.
+- Album listing currently loads the most recent 500 enquiries. Gallery files are paged from Drive and displayed 24 at a time.
 
 ## Bookings (Bookings tab) — the flow
 

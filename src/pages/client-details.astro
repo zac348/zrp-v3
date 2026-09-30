@@ -1,0 +1,73 @@
+---
+import Layout from '../layouts/Layout.astro';
+import '../styles/delivery.css';
+---
+<Layout title="Session details — ZRP" description="Private session details for Zachary Routsong Photography.">
+  <div class="details-page">
+    <h1>Session details</h1>
+    <p id="details-intro">Loading your private form…</p>
+    <p class="delivery-status" id="details-status" role="status" aria-live="polite"></p>
+    <form id="details-form" hidden>
+      <div class="details-grid">
+        <div class="field"><label for="d-name">Full name</label><input id="d-name" name="name" required maxlength="100" autocomplete="name"/></div>
+        <div class="field"><label for="d-email">Email</label><input id="d-email" name="email" type="email" required maxlength="200" autocomplete="email"/></div>
+        <div class="field"><label for="d-phone">Phone (optional)</label><input id="d-phone" name="phone" type="tel" maxlength="50" autocomplete="tel"/></div>
+        <div class="field"><label for="d-type">Session type</label><input id="d-type" name="session_type" required maxlength="100" placeholder="Portraits, family, sports…"/></div>
+        <div class="field"><label for="d-date">Agreed session date</label><input id="d-date" name="date" type="date" required/></div>
+        <div class="field"><label for="d-time">Time (optional)</label><input id="d-time" name="time" type="time"/><small>Local time at the session location.</small></div>
+        <div class="field wide"><label for="d-location">Session location / address</label><textarea id="d-location" name="location" required maxlength="500" rows="2"></textarea></div>
+        <div class="field wide"><label for="d-notes">Anything else Zachary should know? (optional)</label><textarea id="d-notes" name="notes" maxlength="3000" rows="3"></textarea></div>
+      </div>
+      <p style="font-size:12px;margin-bottom:20px">These details are shared with Zachary to arrange your session. <a href="/privacy">Privacy policy</a>.</p>
+      <button type="submit" class="btn" id="details-submit">Complete details</button>
+    </form>
+    <a id="details-admin-back" href="/admin" hidden>Back to admin</a>
+  </div>
+</Layout>
+<script>
+import {createClient} from '@supabase/supabase-js';
+import {delivery} from '../lib/delivery-api.js';
+const form=document.getElementById('details-form');
+const status=document.getElementById('details-status');
+const intro=document.getElementById('details-intro');
+const button=document.getElementById('details-submit');
+const id=new URLSearchParams(location.search).get('id');
+const token=location.hash.slice(1);
+const target=id?{id}:{token};
+const sb=id?createClient(import.meta.env.PUBLIC_SUPABASE_URL,import.meta.env.PUBLIC_SUPABASE_ANON_KEY):null;
+let submitting=false;
+async function session(){
+  if(!sb)return;
+  const {data}=await sb.auth.getSession();
+  if(!data.session)throw new Error('Sign in to the admin panel first, then reopen Fill in details.');
+  return data.session;
+}
+function receipt(state){
+  form.hidden=true;
+  intro.textContent='Your session details have been received.';
+  status.textContent=state==='folder_error'?'Your details are saved. Zachary will finish setting up your album.':state==='processing'?'Your details are saved and your album is being set up. You can close this page.':'Zachary will share your private gallery when the photographs are ready.';
+}
+async function load(){
+  try{
+    const r=await delivery('form',target,await session());
+    if(id)document.getElementById('details-admin-back').hidden=false;
+    if(r.status!=='accepted'){receipt(r.status);return;}
+    intro.textContent=id?'Enter the agreed session details for this client. Completing this form creates their photo folder.':'Please confirm the details you discussed with Zachary.';
+    const contact=r.contact || '';
+    const initial=r.details || {name:r.name,email:contact.includes('@')?contact:'',phone:contact.includes('@')?'':contact,date:/^\d{4}-\d{2}-\d{2}$/.test(r.preferred_date)?r.preferred_date:''};
+    for(const [key,value]of Object.entries(initial)){const input=form.elements.namedItem(key);if(input)input.value=value || '';}
+    form.hidden=false;
+  }catch(e){intro.textContent='The form could not be opened.';status.textContent=e.message;}
+}
+form.addEventListener('submit',async e=>{
+  e.preventDefault();if(submitting||!form.reportValidity())return;
+  submitting=true;button.disabled=true;button.textContent='Saving details…';status.textContent='';
+  try{
+    const details=Object.fromEntries(new FormData(form));
+    const r=await delivery('complete',{...target,details},await session());
+    receipt(r.status);
+  }catch(e){status.textContent=e.message+' Your entries are still here; you can try again.';}
+  finally{submitting=false;button.disabled=false;button.textContent='Complete details';}
+});
+load();
+</script>

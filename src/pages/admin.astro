@@ -1,4 +1,5 @@
 ---
+import '../styles/delivery.css';
 import Layout from '../layouts/Layout.astro';
 import { BOOKING_OPEN } from '../config.js';
 ---
@@ -497,7 +498,19 @@ html,body { height: 100% }
   <!-- GALLERIES -->
   <div class="tab" id="tab-galleries">
     <h1 class="main-title">Client galleries</h1>
-    <p class="main-sub">Create private galleries and share the link with clients.</p>
+    <p class="main-sub">Review enquiries, collect session details, and deliver the finished photos.</p>
+    <section class="delivery-section" aria-labelledby="delivery-title">
+      <h2 id="delivery-title" class="sec-label">Enquiries &amp; client albums</h2>
+      <div class="delivery-controls">
+        <label for="delivery-filter">Show</label>
+        <select id="delivery-filter"><option value="active">Active enquiries</option><option value="all">All</option><option value="pending">New enquiries</option><option value="accepted">Awaiting details</option><option value="ready">Ready for photos</option><option value="published">Published</option><option value="declined">Declined</option></select>
+        <button class="btn-sm" id="delivery-refresh" type="button">Refresh</button>
+        <button class="btn-sm" id="delivery-check" type="button">Check Drive connection</button>
+      </div>
+      <p class="delivery-status" id="delivery-admin-status" role="status" aria-live="polite"></p>
+      <div id="delivery-list"><p class="no-data">Loading enquiries…</p></div>
+    </section>
+    <h2 class="sec-label">Existing website galleries</h2>
     <div class="gal-form">
       <div class="field"><label>Gallery name</label><input type="text" id="new-gal-name" placeholder="e.g. Smith Family — Fall 2025"/></div>
       <button class="btn" onclick="createGallery()" style="align-self:flex-end">Create gallery</button>
@@ -673,12 +686,14 @@ html,body { height: 100% }
 
 <script>
 import { createClient } from '@supabase/supabase-js';
+import { setupDeliveryAdmin } from '../lib/delivery-admin.js';
 const sb = createClient(
   import.meta.env.PUBLIC_SUPABASE_URL,
   import.meta.env.PUBLIC_SUPABASE_ANON_KEY
 );
 
 // ── AUTH ──
+const loadDeliveries = setupDeliveryAdmin(sb);
 sb.auth.getSession().then(({ data }) => {
   if (!data.session) window.location.href = '/login';
   else loadAll();
@@ -708,7 +723,7 @@ window.switchTab = switchTab;
 let allPhotos = [], allGalleries = [], allBookings = [], allBlocks = [], allCoupons = [];
 
 async function loadAll() {
-  await Promise.all([loadPhotos(), loadGalleries(), loadBookings(), loadBlocks(), loadCoupons(), loadPricing()]);
+  await Promise.all([loadPhotos(), loadGalleries(), loadBookings(), loadBlocks(), loadCoupons(), loadPricing(), loadDeliveries()]);
   updateStats();
 }
 

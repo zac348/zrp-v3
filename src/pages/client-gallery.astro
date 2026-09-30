@@ -1,0 +1,46 @@
+---
+import Layout from '../layouts/Layout.astro';
+import '../styles/delivery.css';
+---
+<Layout title="Your photographs — ZRP" description="A private photo gallery from Zachary Routsong Photography.">
+  <div class="details-page" style="max-width:1120px">
+    <h1 id="drive-gallery-title">Your photographs</h1>
+    <p id="drive-gallery-info">Loading your gallery…</p>
+    <p class="delivery-status" id="drive-gallery-status" role="status" aria-live="polite"></p>
+    <div class="delivery-grid" id="drive-gallery-grid"></div>
+    <button type="button" class="btn" id="drive-gallery-more" hidden style="margin-top:24px">Show more photographs</button>
+  </div>
+</Layout>
+<script>
+import {delivery} from '../lib/delivery-api.js';
+const token=location.hash.slice(1);
+const grid=document.getElementById('drive-gallery-grid');
+const more=document.getElementById('drive-gallery-more');
+const info=document.getElementById('drive-gallery-info');
+const status=document.getElementById('drive-gallery-status');
+let files=[],shown=0;
+function fileUrl(action,file){return '/api/delivery?'+new URLSearchParams({action,token,file});}
+function render(){
+  const page=files.slice(shown,shown+24);shown+=page.length;
+  for(const file of page){
+    const article=document.createElement('article');article.className='delivery-file';
+    if(file.mimeType.startsWith('image/')){
+      const preview=document.createElement('a');preview.href=fileUrl('preview',file.id);preview.target='_blank';preview.rel='noopener noreferrer';preview.setAttribute('aria-label',`Open preview of ${file.name}`);
+      const img=document.createElement('img');img.src=preview.href;img.alt=file.name;img.loading='lazy';img.decoding='async';
+      img.addEventListener('error',()=>{img.remove();preview.textContent='Preview unavailable';preview.removeAttribute('href');});preview.append(img);article.append(preview);
+    }
+    const label=document.createElement('p');label.textContent=file.name;article.append(label);
+    const a=document.createElement('a');a.className='btn-sm';a.textContent='Download original';a.href=fileUrl('file',file.id);a.download=file.name;article.append(a);
+    grid.append(article);
+  }
+  more.hidden=shown>=files.length;
+}
+more.addEventListener('click',render);
+try{
+  const r=await delivery('gallery',{token});files=r.files;
+  document.getElementById('drive-gallery-title').textContent=r.name;
+  info.textContent=`${r.date} · ${files.length} file${files.length===1?'':'s'}. Downloads are the original uploaded files.`;
+  if(!files.length)status.textContent='No photographs are available yet. Please check back with Zachary.';
+  render();
+}catch(e){info.textContent='This private gallery could not be opened.';status.textContent=e.message;}
+</script>

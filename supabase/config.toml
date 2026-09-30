@@ -1,0 +1,4 @@
+project_id = "zrp-delivery"
+
+[functions.delivery]
+verify_jwt = false

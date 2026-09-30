@@ -39,7 +39,7 @@ The audit was supplied in the conversation before edits began.
 
 Production build: 15 routes generated successfully.
 
-11 API tests pass (`npm test`), covering contact-origin checks, required fields, unavailable email configuration, bot filtering, message escaping, acknowledgment behavior, gallery membership verification, missing objects/settings, and upstream failures. Mail requests are mocked; no email is sent by these tests.
+12 API tests pass (`npm test`), covering contact-origin checks, required fields, unavailable email configuration, bot filtering, message escaping, acknowledgment behavior, gallery membership verification, missing objects/settings, and upstream failures. Mail requests are mocked; no email is sent by these tests.
 
 Browser checks passed:
 
@@ -61,7 +61,7 @@ Browser checks passed:
 
 Desktop, mobile, portfolio, contact, login, and dark-theme screenshots were visually reviewed.
 
-Live email delivery, authenticated production admin actions, and the new download function inside the deployed Cloudflare environment have NOT been exercised. The build and local browser checks do not prove that production secrets, email provider settings, or R2 bindings are correct. Existing production settings are still required.
+Live email delivery and authenticated production admin mutations have NOT been exercised. A live private-gallery original download has been verified against its stored original: SHA-256 hashes, byte counts, and image dimensions match. The smaller web preview has a different hash and dimensions. A regression test also verifies byte preservation from upload through download, and failure rather than preview substitution when the original is missing. The build and local browser checks do not prove that production secrets, email provider settings, or R2 bindings are correct. Existing production settings are still required.
 
 ## Run and deploy
 

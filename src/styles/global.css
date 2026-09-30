@@ -381,7 +381,7 @@ footer {
   position: fixed;
   inset: 0;
   background: rgba(26,25,24,.94);
-  z-index: 999;
+  z-index: 8500;
   align-items: center;
   justify-content: center;
 }

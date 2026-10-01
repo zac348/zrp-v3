@@ -99,7 +99,12 @@ export class Calendar extends Store {
     });
     if(!response.ok)throw new Error('Calendar insert failed');
     const after=await this.db(`availability?date=eq.${date}`);
-    if(after.some(row=>!this.own(row,id)&&['available','partial','unavailable'].includes(row.status))){
+    // Concurrent enquiries may both insert before either reads the other. Only
+    // the higher UUID yields to another automatic block, so they cannot both
+    // remove themselves and accidentally reopen the date. Manual entries win.
+    const conflict=after.some(row=>!this.own(row,id)&&['available','partial','unavailable'].includes(row.status)&&
+      (!UUID.test(row.id||'') || !this.own(row,row.id) || row.id<id));
+    if(conflict){
       for(const row of after.filter(row=>this.own(row,id)))await this.removeRow(row,id);
       return {status:'already_blocked',date};
     }

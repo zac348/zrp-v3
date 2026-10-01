@@ -91,3 +91,8 @@ test('calendar messages gracefully support an older backend and all result statu
  assert.equal(calendarMessage({status:'unblocked',date:'2099-10-12'},'Declined'),'Declined. Oct 12 is open again.');
  assert.match(calendarMessage({status:'failed',date:'2099-10-12'},'Details saved'),/Details saved, but.*Block Oct 12/);
 });
+test('two different enquiries accepted concurrently leave one full-day block in place',async()=>{
+ const calendar=new MockCalendar();
+ await Promise.all([calendar.sync(id,details.date),calendar.sync('bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',details.date)]);
+ assert.equal(calendar.rows.length,1);assert.equal(calendar.rows[0].status,'unavailable');assert.equal(calendar.rows[0].date,details.date);
+});

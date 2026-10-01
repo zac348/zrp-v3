@@ -2,32 +2,14 @@
 import Layout from '../layouts/Layout.astro';
 ---
 <Layout title="Reset Password — ZRP" noNav={true} noFooter={true}>
-<style is:global>
-body { min-height: 100vh; display: flex; align-items: center; justify-content: center }
-.box { width: 100%; max-width: 340px; padding: 0 24px }
-.logo {
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: .01em;
-  color: var(--muted);
-  text-align: center;
-  margin-bottom: 40px;
-}
-.title { font-size: 20px; font-weight: 300; text-align: center; margin-bottom: 4px; letter-spacing: -.02em }
-.sub { font-size: 12px; color: var(--muted); text-align: center; margin-bottom: 32px }
-.field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px }
-.err { font-size: 12px; color: var(--error); text-align: center; margin-top: 10px; display: none }
-.ok  { font-size: 12px; color: var(--success); text-align: center; margin-top: 10px; display: none }
-.back { display: block; text-align: center; margin-top: 20px; font-size: 12px; color: var(--muted); text-decoration: none; transition: color .15s }
-.back:hover { color: var(--ink) }
-</style>
+
 
 <div class="box">
   <p class="logo">Zachary Routsong Photography</p>
   <h1 class="title">Set a new password</h1>
   <p class="sub" id="sub-msg">Checking your reset link…</p>
 
-  <div id="form-wrap" style="display:none">
+  <div id="form-wrap" hidden>
     <div class="field">
       <label for="pw1">New password</label>
       <input type="password" id="pw1" placeholder="••••••••" autocomplete="new-password"/>
@@ -36,11 +18,11 @@ body { min-height: 100vh; display: flex; align-items: center; justify-content: c
       <label for="pw2">Confirm new password</label>
       <input type="password" id="pw2" placeholder="••••••••" autocomplete="new-password"/>
     </div>
-    <button class="btn" style="width:100%;margin-top:4px" id="save-btn" onclick="savePw()">Save new password</button>
+    <button class="btn" id="save-btn">Save new password</button>
   </div>
 
-  <p class="err" id="err-msg" role="alert"></p>
-  <p class="ok" id="ok-msg" role="status"></p>
+  <p class="err" id="err-msg" hidden role="alert"></p>
+  <p class="ok" id="ok-msg" hidden role="status"></p>
   <a href="/login" class="back">← Back to login</a>
 </div>
 
@@ -62,8 +44,8 @@ function enableForm() {
   if (linkOk) return;
   linkOk = true;
   subEl.textContent = 'Choose a new password for your admin account.';
-  formEl.style.display = 'block';
-  errEl.style.display = 'none';
+  formEl.hidden = false;
+  errEl.hidden = true;
 }
 
 // The reset link signs the visitor in with a temporary recovery session.
@@ -78,23 +60,23 @@ setTimeout(() => {
   if (!linkOk) {
     subEl.textContent = 'This reset link is invalid or has expired.';
     errEl.textContent = 'Go back to the login page and click "Forgot password?" to get a fresh link.';
-    errEl.style.display = 'block';
+    errEl.hidden = false;
   }
 }, 2500);
 
 async function savePw() {
   const p1 = document.getElementById('pw1').value;
   const p2 = document.getElementById('pw2').value;
-  errEl.style.display = 'none';
+  errEl.hidden = true;
 
   if (p1.length < 8) {
     errEl.textContent = 'Password needs to be at least 8 characters.';
-    errEl.style.display = 'block';
+    errEl.hidden = false;
     return;
   }
   if (p1 !== p2) {
     errEl.textContent = 'Passwords do not match.';
-    errEl.style.display = 'block';
+    errEl.hidden = false;
     return;
   }
 
@@ -104,16 +86,18 @@ async function savePw() {
   const { error } = await sb.auth.updateUser({ password: p1 });
   if (error) {
     errEl.textContent = error.message || 'Could not update the password — try again.';
-    errEl.style.display = 'block';
+    errEl.hidden = false;
     btn.disabled = false; btn.textContent = 'Save new password';
   } else {
     okEl.textContent = 'Password updated — taking you to the dashboard…';
-    okEl.style.display = 'block';
+    okEl.hidden = false;
     setTimeout(() => { window.location.href = '/admin'; }, 1200);
   }
 }
-window.savePw = savePw;
 
+document.getElementById('save-btn').addEventListener('click',savePw);
 document.addEventListener('keydown', e => { if (e.key === 'Enter' && linkOk) savePw(); });
 </script>
 </Layout>
+
+<style>.err,.ok{margin-top:16px;font-size:14px}.ok{color:var(--success)}.forgot{display:block;min-height:44px;margin-top:12px;background:none;border:0;text-decoration:underline;font-size:14px}.btn{width:100%}</style>

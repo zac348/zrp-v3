@@ -2,38 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 ---
 <Layout title="Admin Login — ZRP" noNav={true} noFooter={true}>
-<style is:global>
-body { min-height: 100vh; display: flex; align-items: center; justify-content: center }
-.box { width: 100%; max-width: 340px; padding: 0 24px }
-.logo {
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: .01em;
-  color: var(--muted);
-  text-align: center;
-  margin-bottom: 40px;
-}
-.title { font-size: 20px; font-weight: 300; text-align: center; margin-bottom: 4px; letter-spacing: -.02em }
-.sub { font-size: 12px; color: var(--muted); text-align: center; margin-bottom: 32px }
-.field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px }
-.err { font-size: 12px; color: var(--error); text-align: center; margin-top: 10px; display: none }
-.ok  { font-size: 12px; color: var(--success); text-align: center; margin-top: 10px; display: none }
-.back { display: block; text-align: center; margin-top: 20px; font-size: 12px; color: var(--muted); text-decoration: none; transition: color .15s }
-.back:hover { color: var(--ink) }
-.forgot {
-  display: block;
-  margin: 14px auto 0;
-  background: none;
-  border: none;
-  font-family: inherit;
-  font-size: 12px;
-  color: var(--muted);
-  text-decoration: underline;
-  cursor: pointer;
-  transition: color .15s;
-}
-.forgot:hover { color: var(--ink) }
-</style>
+
 
 <div class="box">
   <p class="logo">Zachary Routsong Photography</p>
@@ -50,10 +19,10 @@ body { min-height: 100vh; display: flex; align-items: center; justify-content: c
     <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" required/>
   </div>
 
-  <button class="btn" style="width:100%;margin-top:4px" id="login-btn" type="submit">Sign in</button>
-  <p class="err" id="err-msg" role="alert"></p>
-  <p class="ok" id="ok-msg" role="status"></p>
-  <button class="forgot" id="forgot-btn" type="button" onclick="forgotPw()">Forgot password?</button>
+  <button class="btn" id="login-btn" type="submit">Sign in</button>
+  <p class="err" id="err-msg" hidden role="alert"></p>
+  <p class="ok" id="ok-msg" hidden role="status"></p>
+  <button class="forgot" id="forgot-btn" type="button">Forgot password?</button>
   </form>
   <a href="/" class="back">← Back to site</a>
 </div>
@@ -72,15 +41,15 @@ sb.auth.getSession().then(({ data }) => {
 
 function showErr(msg) {
   const errEl = document.getElementById('err-msg');
-  document.getElementById('ok-msg').style.display = 'none';
+  document.getElementById('ok-msg').hidden = true;
   errEl.textContent = msg;
-  errEl.style.display = 'block';
+  errEl.hidden = false;
 }
 function showOk(msg) {
   const okEl = document.getElementById('ok-msg');
-  document.getElementById('err-msg').style.display = 'none';
+  document.getElementById('err-msg').hidden = true;
   okEl.textContent = msg;
-  okEl.style.display = 'block';
+  okEl.hidden = false;
 }
 
 // Translate Supabase errors into something specific
@@ -98,7 +67,7 @@ async function doLogin() {
   const email    = document.getElementById('email').value.trim();
   const password = document.getElementById('password').value;
   const btn      = document.getElementById('login-btn');
-  document.getElementById('err-msg').style.display = 'none';
+  document.getElementById('err-msg').hidden = true;
   btn.disabled = true; btn.textContent = 'Signing in…';
 
   const { error } = await sb.auth.signInWithPassword({ email, password });
@@ -109,7 +78,6 @@ async function doLogin() {
     window.location.href = '/admin';
   }
 }
-window.doLogin = doLogin;
 
 async function forgotPw() {
   const email = document.getElementById('email').value.trim();
@@ -127,8 +95,10 @@ async function forgotPw() {
     showOk('If an account exists for ' + email + ', a reset link is on its way. Check your inbox.');
   }
 }
-window.forgotPw = forgotPw;
 
+document.getElementById('forgot-btn').addEventListener('click',forgotPw);
 document.getElementById('login-form').addEventListener('submit', e => { e.preventDefault(); doLogin(); });
 </script>
 </Layout>
+
+<style>.err,.ok{margin-top:16px;font-size:14px}.ok{color:var(--success)}.forgot{display:block;min-height:44px;margin-top:12px;background:none;border:0;text-decoration:underline;font-size:14px}.btn{width:100%}</style>

@@ -3,12 +3,12 @@ import Layout from '../layouts/Layout.astro';
 import '../styles/delivery.css';
 ---
 <Layout title="Your photographs — ZRP" description="A private photo gallery from Zachary Routsong Photography.">
-  <div class="details-page" style="max-width:1120px">
+  <div class="details-page client-album">
     <h1 id="drive-gallery-title">Your photographs</h1>
     <p id="drive-gallery-info">Loading your gallery…</p>
     <p class="delivery-status" id="drive-gallery-status" role="status" aria-live="polite"></p>
     <div class="delivery-grid" id="drive-gallery-grid"></div>
-    <button type="button" class="btn" id="drive-gallery-more" hidden style="margin-top:24px">Show more photographs</button>
+    <button type="button" class="btn" id="drive-gallery-more" hidden>Show more photographs</button>
   </div>
 </Layout>
 <script>
@@ -25,8 +25,8 @@ function render(){
   for(const file of page){
     const article=document.createElement('article');article.className='delivery-file';
     if(file.mimeType.startsWith('image/')){
-      const preview=document.createElement('a');preview.href=fileUrl('preview',file.id);preview.target='_blank';preview.rel='noopener noreferrer';preview.setAttribute('aria-label',`Open preview of ${file.name}`);
-      const img=document.createElement('img');img.src=preview.href;img.alt=file.name;img.loading='lazy';img.decoding='async';
+      const preview=document.createElement('a');preview.className='delivery-preview';preview.href=fileUrl('preview',file.id);preview.target='_blank';preview.rel='noopener noreferrer';preview.setAttribute('aria-label',`Open preview of ${file.name}`);
+      const img=document.createElement('img');img.width=256;img.height=192;img.src=preview.href;img.alt=file.name;img.loading='lazy';img.decoding='async';
       img.addEventListener('error',()=>{img.remove();preview.textContent='Preview unavailable';preview.removeAttribute('href');});preview.append(img);article.append(preview);
     }
     const label=document.createElement('p');label.textContent=file.name;article.append(label);

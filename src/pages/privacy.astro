@@ -2,67 +2,10 @@
 import Layout from '../layouts/Layout.astro';
 ---
 <Layout title="Privacy Policy — Zachary Routsong Photography">
-<style is:global>
-.priv-page {
-  max-width: 680px;
-  margin: 0 auto;
-  padding: 56px 28px 96px;
-}
-.priv-page h1 {
-  font-size: 26px;
-  font-weight: 300;
-  letter-spacing: -.02em;
-  margin-bottom: 6px;
-}
-.priv-meta {
-  font-family: var(--font-sans);
-  font-size: 12px;
-  letter-spacing: .01em;
-  color: var(--muted);
-  margin-bottom: 36px;
-}
-.priv-page h2 {
-  font-size: 14px;
-  font-weight: 500;
-  margin-top: 36px;
-  margin-bottom: 8px;
-  color: var(--ink);
-}
-.priv-page p {
-  font-size: 13px;
-  line-height: 1.85;
-  color: var(--muted);
-  margin-bottom: 12px;
-}
-.priv-page ul {
-  margin: 0 0 12px 0;
-  padding-left: 18px;
-}
-.priv-page ul li {
-  font-size: 13px;
-  line-height: 1.85;
-  color: var(--muted);
-  margin-bottom: 3px;
-}
-.priv-page a { color: var(--ink); text-decoration: underline; }
-.priv-page a:hover { opacity: .7; }
-.priv-divider {
-  border: none;
-  border-top: 1px solid var(--rule);
-  margin: 28px 0;
-}
-.priv-callout {
-  background: var(--surface);
-  border: 1px solid var(--rule);
-  border-radius: var(--radius-lg);
-  padding: 14px 18px;
-  margin-bottom: 28px;
-}
-.priv-callout p { margin-bottom: 0; }
-</style>
+<style>.priv-page{max-width:760px;margin:auto;padding:64px var(--gutter) 96px}.priv-meta{color:var(--muted);font-size:13px;margin:16px 0 32px}.priv-page h2{font:500 20px/1.5 var(--font-sans);margin:32px 0 16px}.priv-page p,.priv-page li{margin-bottom:16px}.priv-page ul{padding-left:24px}</style>
 
 <div class="priv-page">
-  <div class="sec-label" style="margin-bottom:8px">legal</div>
+  <div class="sec-label">legal</div>
   <h1>Privacy Policy</h1>
   <p class="priv-meta">Effective July 30, 2026</p>
 
@@ -180,6 +123,6 @@ import Layout from '../layouts/Layout.astro';
 
   <hr class="priv-divider"/>
 
-  <p style="font-size:12px;color:var(--muted);line-height:1.8">If I make any meaningful changes to this policy, I'll update the date at the top. Questions? Just reach out.</p>
+  <p>If I make any meaningful changes to this policy, I'll update the date at the top. Questions? Just reach out.</p>
 </div>
 </Layout>

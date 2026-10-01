@@ -50,7 +50,7 @@ const authPage = path === '/login' || path === '/reset';
           root.classList.toggle('dark', dark);
           root.dataset.themePreference = preference;
           root.style.colorScheme = dark ? 'dark' : 'light';
-          document.querySelector('meta[name="theme-color"]').content = dark ? '#0b0b0b' : '#ffffff';
+          document.querySelector('meta[name="theme-color"]').content = dark ? '#202020' : '#ffffff';
           window.dispatchEvent(new Event('zrp-theme-change'));
         };
         window.zrpTheme = {

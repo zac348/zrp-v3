@@ -174,7 +174,7 @@ html,body { height: 100% }
   white-space: nowrap;
 }
 .badge.pending   { color: var(--amber);  border-color: var(--amber-border);  background: var(--amber-bg) }
-.badge.accepted  { color: var(--purple, #7c3aed); border-color: rgba(124,58,237,.25); background: var(--purple-bg, rgba(124,58,237,.08)) }
+.badge.accepted  { color: var(--purple, #7c3aed); border-color: var(--border-2); background: var(--purple-bg, rgba(124,58,237,.08)) }
 .badge.approved  { color: var(--green);  border-color: var(--green-border);  background: var(--green-bg) }
 .badge.confirmed { color: var(--green);  border-color: var(--green-border);  background: var(--green-bg) }
 .badge.delivered { color: var(--text-2); border-color: var(--border); background: var(--surface-dim) }
@@ -340,7 +340,7 @@ html,body { height: 100% }
   font-family: var(--font-sans); font-size: 12px; letter-spacing: .01em;
   padding: 2px 7px; border-radius: 0; border: 1px solid;
 }
-.coupon-badge.percent { color: var(--purple); border-color: rgba(124,58,237,.25); background: var(--purple-bg) }
+.coupon-badge.percent { color: var(--purple); border-color: var(--border-2); background: var(--purple-bg) }
 .coupon-badge.fixed   { color: var(--green);  border-color: var(--green-border); background: var(--green-bg) }
 .coupon-badge.travel  { color: var(--amber);  border-color: var(--amber-border); background: var(--amber-bg) }
 .coupon-badge.expired, .coupon-badge.inactive-badge { color: var(--text-3); border-color: var(--border) }
@@ -379,7 +379,7 @@ html,body { height: 100% }
     <button class="sb-link" id="gallery-nav" onclick="switchTab('galleries',this)">
       <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Galleries
     </button>
-    <button class="sb-link" onclick="switchTab('bookings',this)">
+    <button class="sb-link" id="bookings-nav" onclick="switchTab('bookings',this)">
       <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Bookings
     </button>
     {BOOKING_OPEN && (
@@ -413,7 +413,7 @@ html,body { height: 100% }
   <div class="tab active" id="tab-overview">
     <h1 class="main-title">Dashboard</h1>
     <p class="main-sub">Welcome back, Zachary.</p>
-    <p style="margin-bottom:24px"><a href="#enquiries" onclick="switchTab('galleries',document.getElementById('gallery-nav'))">Review contact enquiries and client albums</a></p>
+    <p style="margin-bottom:24px"><a href="#enquiries" onclick="switchTab('bookings',document.getElementById('bookings-nav'))">Review enquiries and bookings</a></p>
     <div class="stats-row">
       <div class="stat"><div class="stat-n" id="st-photos">—</div><div class="stat-l">Photos</div></div>
       <div class="stat"><div class="stat-n" id="st-galleries">—</div><div class="stat-l">Galleries</div></div>
@@ -499,19 +499,7 @@ html,body { height: 100% }
   <!-- GALLERIES -->
   <div class="tab" id="tab-galleries">
     <h1 class="main-title">Client galleries</h1>
-    <p class="main-sub">Review enquiries, collect session details, and deliver the finished photos.</p>
-    <section class="delivery-section" aria-labelledby="delivery-title">
-      <h2 id="delivery-title" class="sec-label">Enquiries &amp; client albums</h2>
-      <div class="delivery-controls">
-        <label for="delivery-filter">Show</label>
-        <select id="delivery-filter"><option value="active">Active enquiries</option><option value="all">All</option><option value="pending">New enquiries</option><option value="accepted">Awaiting details</option><option value="ready">Ready for photos</option><option value="published">Published</option><option value="declined">Declined</option></select>
-        <button class="btn-sm" id="delivery-refresh" type="button">Refresh</button>
-        <button class="btn-sm" id="delivery-check" type="button">Check Drive connection</button>
-      </div>
-      <p class="delivery-status" id="delivery-admin-status" role="status" aria-live="polite"></p>
-      <div id="delivery-list"><p class="no-data">Loading enquiries…</p></div>
-    </section>
-    <h2 class="sec-label">Existing website galleries</h2>
+    <p class="main-sub">Create and manage standalone photo galleries. Client requests and Drive deliveries are in Bookings.</p>
     <div class="gal-form">
       <div class="field"><label>Gallery name</label><input type="text" id="new-gal-name" placeholder="e.g. Smith Family — Fall 2025"/></div>
       <button class="btn" onclick="createGallery()" style="align-self:flex-end">Create gallery</button>
@@ -523,17 +511,24 @@ html,body { height: 100% }
   <!-- BOOKINGS -->
   <div class="tab" id="tab-bookings">
     <h1 class="main-title">Bookings</h1>
-    <p class="main-sub">Manage booking requests. Finished bookings can be deleted from here — you'll be asked to type the client's name first.</p>
-    <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">
-      <button class="btn-sm on-ink" onclick="filterBookings('all',this)" id="bfilt-all">All</button>
-      <button class="btn-sm" onclick="filterBookings('pending',this)"    id="bfilt-pending">Pending</button>
-      <button class="btn-sm" onclick="filterBookings('accepted',this)"   id="bfilt-accepted">Accepted</button>
-      <button class="btn-sm" onclick="filterBookings('confirmed',this)"  id="bfilt-confirmed">Confirmed</button>
-      <button class="btn-sm" onclick="filterBookings('delivered',this)"  id="bfilt-delivered">Delivered</button>
-      <button class="btn-sm" onclick="filterBookings('cancelled',this)"  id="bfilt-cancelled">Cancelled</button>
-      <button class="btn-sm" onclick="filterBookings('past',this)"       id="bfilt-past">Past</button>
+    <p class="main-sub">Review new enquiries above. Accepted requests move into Active bookings below.</p>
+    <div class="delivery-controls">
+      <button class="btn-sm" id="delivery-refresh" type="button">Refresh</button>
+      <button class="btn-sm" id="delivery-check" type="button">Check Drive connection</button>
     </div>
-    <div class="booking-list" id="all-bookings"><p class="no-data">No bookings yet.</p></div>
+    <p class="delivery-status" id="delivery-admin-status" role="status" aria-live="polite"></p>
+    <section class="booking-section" aria-labelledby="new-enquiries-heading">
+      <header class="booking-section-heading"><h2 id="new-enquiries-heading">New enquiries</h2><span id="booking-count-new">0</span></header>
+      <div id="booking-list-new"><p class="no-data">Loading enquiries…</p></div>
+    </section>
+    <section class="booking-section" aria-labelledby="active-bookings-heading">
+      <header class="booking-section-heading"><h2 id="active-bookings-heading">Active bookings</h2><span id="booking-count-active">0</span></header>
+      <div id="booking-list-active"><p class="no-data">Loading bookings…</p></div>
+    </section>
+    <details class="booking-section booking-history">
+      <summary>Completed &amp; declined <span id="booking-count-history">0</span></summary>
+      <div id="booking-list-history"></div>
+    </details>
   </div>
 
   <!-- AVAILABILITY -->
@@ -694,10 +689,10 @@ const sb = createClient(
 );
 
 // ── AUTH ──
-const loadDeliveries = setupDeliveryAdmin(sb);
+const loadDeliveries = setupDeliveryAdmin(sb, {getLegacy:()=>allBookings, legacyCard:bookingCard, onChange:()=>{updateStats();renderOvBookings();}, refreshLegacy:loadBookings});
 sb.auth.getSession().then(({ data }) => {
   if (!data.session) window.location.href = '/login';
-  else { loadAll(); if(location.hash==='#enquiries') switchTab('galleries',document.getElementById('gallery-nav')); }
+  else { loadAll(); if(['#enquiries','#bookings'].includes(location.hash)) switchTab('bookings',document.getElementById('bookings-nav')); }
 });
 
 async function doLogout() { await sb.auth.signOut(); window.location.href = '/login'; }
@@ -731,8 +726,8 @@ async function loadAll() {
 function updateStats() {
   document.getElementById('st-photos').textContent   = allPhotos.length;
   document.getElementById('st-galleries').textContent = allGalleries.length;
-  document.getElementById('st-bookings').textContent  = allBookings.length;
-  document.getElementById('st-pending').textContent   = allBookings.filter(b => b.status === 'pending').length;
+  document.getElementById('st-bookings').textContent  = allBookings.length + loadDeliveries.rows().length;
+  document.getElementById('st-pending').textContent   = allBookings.filter(b => b.status === 'pending').length + loadDeliveries.rows().filter(b=>b.status==='pending').length;
   document.getElementById('st-portfolio').textContent = allPhotos.filter(p => p.on_portfolio).length;
   syncOptimizeButton();
 }
@@ -1207,7 +1202,6 @@ function isPastBooking(b) {
 }
 
 // ── BOOKINGS ──
-let bookingFilter = 'all';
 
 async function loadBookings() {
   const { data } = await sb.from('bookings').select('*').order('created_at', { ascending: false });
@@ -1216,27 +1210,15 @@ async function loadBookings() {
   renderOvBookings();
 }
 
-function filterBookings(filter, btn) {
-  bookingFilter = filter;
-  document.querySelectorAll('[id^="bfilt-"]').forEach(b => { b.classList.remove('on-ink'); });
-  if (btn) btn.classList.add('on-ink');
-  renderBookings();
-}
-window.filterBookings = filterBookings;
-
 function renderBookings() {
-  const list = document.getElementById('all-bookings');
-  let bookings = allBookings;
-  if (bookingFilter === 'past') bookings = bookings.filter(isPastBooking);
-  else if (bookingFilter !== 'all') bookings = bookings.filter(b => b.status === bookingFilter);
-  if (!bookings.length) { list.innerHTML = `<p class="no-data">No ${bookingFilter === 'all' ? '' : bookingFilter + ' '}bookings.</p>`; return; }
-  list.innerHTML = bookings.map(b => bookingCard(b)).join('');
+  loadDeliveries.render();
+  updateStats();
 }
 
 function renderOvBookings() {
   const list = document.getElementById('ov-bookings');
   const recent = allBookings.slice(0, 5);
-  if (!recent.length) { list.innerHTML = '<p class="no-data">No bookings yet.</p>'; return; }
+  if (!recent.length) { list.innerHTML = loadDeliveries.rows().length ? '<p class="no-data">Your new requests are in the Bookings tab.</p>' : '<p class="no-data">No bookings yet.</p>'; return; }
   list.innerHTML = recent.map(b => bookingCard(b)).join('');
 }
 

@@ -1,10 +1,9 @@
 import {delivery,copyPrivateLink} from './delivery-api.js';
+import {groupBookings} from './booking-groups.js';
 const labels={pending:'New enquiry',accepted:'Awaiting details',processing:'Creating folder',folder_error:'Folder needs attention',ready:'Ready for photos',published:'Published',declined:'Declined'};
 function node(tag,text,cls) { const e=document.createElement(tag); if(text)e.textContent=text; if(cls)e.className=cls; return e; }
-export function setupDeliveryAdmin(sb) {
-  const list=document.getElementById('delivery-list');
+export function setupDeliveryAdmin(sb, options = {}) {
   const status=document.getElementById('delivery-admin-status');
-  const filter=document.getElementById('delivery-filter');
   let rows=[]; let busy=false;
   async function session() {
     const {data}=await sb.auth.getSession();
@@ -13,15 +12,21 @@ export function setupDeliveryAdmin(sb) {
   async function act(action,data={}) { return delivery(action,data,await session()); }
   function show(message) { status.textContent=message; }
   async function load() {
-    try { rows=(await act('list')).requests; render(); show(''); }
-    catch(e) { show(e.message); list.replaceChildren(); }
+    try { rows=(await act('list')).requests; render(); show(''); options.onChange?.(); }
+    catch(e) { show('Enquiries could not refresh: '+e.message); render(); }
   }
   function render() {
-    list.replaceChildren();
-    const selected=filter.value;
-    const visible=rows.filter(r=>selected==='all' || (selected==='active'?!['declined','published'].includes(r.status):r.status===selected));
-    if(!visible.length) {list.append(node('p','No enquiries in this view.','no-data')); return;}
-    for(const row of visible) {
+    const groups=groupBookings(rows,options.getLegacy?.() || []);
+    for(const [key,entries] of Object.entries(groups)) {
+      const list=document.getElementById('booking-list-'+key);
+      document.getElementById('booking-count-'+key).textContent=String(entries.length);
+      list.replaceChildren();
+      if(!entries.length)list.append(node('p',key==='new'?'No new enquiries.':key==='active'?'No active bookings.':'No completed or declined bookings.','no-data'));
+      for(const {row,source} of entries) {
+        if(source==='legacy') {
+          const wrapper=node('div',null,'legacy-booking');
+          wrapper.innerHTML=options.legacyCard(row);list.append(wrapper);continue;
+        }
       const article=node('article',null,'delivery-row');
       const head=node('div',null,'delivery-row-head');
       const title=node('h3',row.details?.name || row.name);
@@ -46,7 +51,7 @@ export function setupDeliveryAdmin(sb) {
         }); actions.append(b);
       }
       function link(label,url) {const a=node('a',label,'btn-sm');a.href=url;a.target='_blank';a.rel='noopener noreferrer';actions.append(a);}
-      if(row.status==='pending') button('Accept',async()=>{await act('accept',{id:row.id});return 'Accepted. Copy the private form link or fill in the details yourself.';});
+      if(row.status==='pending') button('Accept',async()=>{await act('accept',{id:row.id});return 'Moved to Active bookings. Copy the private form link or fill in the details yourself.';});
       if(row.status==='accepted') {
         const expired=Date.parse(row.token_expires_at)<Date.now();
         if(!expired) button('Copy client form link',async()=>{await copyPrivateLink(`${location.origin}/client-details#${row.details_token}`);return 'Private form link copied. It expires in 30 days from acceptance.';});
@@ -69,11 +74,13 @@ export function setupDeliveryAdmin(sb) {
         }
       }
       article.append(actions);list.append(article);
+      }
     }
   }
-  filter.addEventListener('change',render);
-  document.getElementById('delivery-refresh').addEventListener('click',()=>{if(!busy)load();});
+  document.getElementById('delivery-refresh').addEventListener('click',async()=>{if(!busy){await options.refreshLegacy?.();await load();}});
   document.getElementById('delivery-check').addEventListener('click',async()=>{show('Checking Drive access…');try{const r=await act('health');show(`Connected to ${r.name}. Folder creation is available.`);}catch(e){show(e.message);}});
-  window.addEventListener('focus',()=>{if(!busy)load();});
+  window.addEventListener('focus',async()=>{if(!busy){await options.refreshLegacy?.();await load();}});
+  load.render=render;
+  load.rows=()=>rows;
   return load;
 }

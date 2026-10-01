@@ -26,7 +26,7 @@ const authPage = path === '/login' || path === '/reset';
     {['/client-details','/client-gallery'].includes(path) && <meta name="referrer" content="no-referrer"/>}
     <title>{title}</title>
     <meta name="description" content={description}/>
-    <meta name="theme-color" content="#eeeae3"/>
+    <meta name="theme-color" content="#ffffff"/>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
     <link rel="apple-touch-icon" href="/apple-touch-icon.png"/>
     <link rel="preload" href="/fonts/bodoni-moda-400-normal.ttf" as="font" type="font/ttf" crossorigin/>
@@ -50,7 +50,7 @@ const authPage = path === '/login' || path === '/reset';
           root.classList.toggle('dark', dark);
           root.dataset.themePreference = preference;
           root.style.colorScheme = dark ? 'dark' : 'light';
-          document.querySelector('meta[name="theme-color"]').content = dark ? '#191a18' : '#eeeae3';
+          document.querySelector('meta[name="theme-color"]').content = dark ? '#0b0b0b' : '#ffffff';
           window.dispatchEvent(new Event('zrp-theme-change'));
         };
         window.zrpTheme = {

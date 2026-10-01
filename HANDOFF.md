@@ -52,11 +52,11 @@ It walks every photo that doesn't have a web version yet, builds the smaller ver
 - **Privacy model: the link IS the password.** Gallery links are long random URLs — anyone who has one can view and download. Don't post gallery links publicly; send them directly to the client.
 - Galleries created automatically when a booking is confirmed get a random link too.
 
-## Enquiries → client albums (Galleries tab)
+## Enquiries → client albums (Bookings tab)
 
 The homepage contact form now saves an **admin-only draft album** and sends the existing email notifications. Saved enquiries remain available even if notification email fails.
 
-1. Open **Admin → Galleries → Enquiries & client albums**. Each contact submission appears as **New enquiry**.
+1. Open **Admin → Bookings → New enquiries**. Each contact submission appears as **New enquiry**.
 2. Click **Accept** or **Decline**. Accepting does not create a Google Drive folder and does not automatically email the client.
 3. Under **Awaiting details**, choose **Copy client form link** (send it by text or email yourself) or **Fill in details** to enter the agreed session information yourself. The private form expires 30 days after acceptance; **Replace form link** invalidates the previous one.
 4. Completing the required details saves them, then creates exactly one client folder in the **cli_delivery Shared drive**. The folder is named using the session date, client name, and session type. Both client and admin use the same completion process.
@@ -68,7 +68,7 @@ The client-details link and gallery link are separate random secrets. Completed 
 
 The **Check Drive connection** button verifies that the service account can add children in the configured Shared drive. It does not create a folder.
 
-Package booking is enabled at `/book`. Requests use current server-verified package, add-on, and promo pricing and appear as draft albums in Galleries. `/quick-book` redirects to this same form. Accepting does not create a Drive folder; completing the private details form does. Dates and totals remain requests/estimates until Zachary confirms them. The older Bookings tab, confirmation links, invoices, and existing R2 galleries continue to work independently. New contact enquiries are managed in Galleries, not the older Bookings tab.
+Package booking is enabled at `/book`. Requests use current server-verified package, add-on, and promo pricing and appear as draft albums in Bookings. `/quick-book` redirects to this same form. Accepting does not create a Drive folder; completing the private details form does. Dates and totals remain requests/estimates until Zachary confirms them. The older Bookings tab, confirmation links, invoices, and existing R2 galleries continue to work independently. New and existing requests share the Bookings tab: New enquiries at the top, Active bookings below, and completed/declined records in the collapsed history.
 
 ### Delivery service deployment
 

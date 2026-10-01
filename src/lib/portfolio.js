@@ -12,10 +12,10 @@ async function publicRows(table, query) {
 export function loadPublicPhotos() {
   return publicRows('portfolio_photos', 'select=url,web_url,thumb_url,width,height,sport,title,location&on_portfolio=eq.true&order=created_at.desc&limit=500');
 }
-export async function loadStartingPrice() {
-  const data = await publicRows('package_pricing', 'select=base_price,sale_price,on_sale&available=eq.true');
-  const prices = data.map(p => Number(p.on_sale && p.sale_price != null ? p.sale_price : p.base_price)).filter(p => Number.isFinite(p) && p >= 0);
-  return prices.length ? Math.min(...prices) : null;
+export async function loadStartingPackage() {
+  const data = await publicRows('package_pricing', 'select=package_name,base_price,sale_price,on_sale&available=eq.true');
+  const prices = data.map(p => ({name:p.package_name,price:Number(p.on_sale && p.sale_price != null ? p.sale_price : p.base_price)})).filter(p => Number.isFinite(p.price) && p.price >= 0).sort((a,b)=>a.price-b.price);
+  return prices[0] || null;
 }
 export function renderCategoryFilters(photos, onSelect) {
   const counts = new Map();
@@ -27,7 +27,7 @@ export function renderCategoryFilters(photos, onSelect) {
     button.type = 'button'; button.className = 'category-filter'; button.dataset.category = category || '';
     button.append(document.createTextNode(category || 'All work'));
     const count = document.createElement('sup'); count.textContent = String(category ? counts.get(category) : photos.length).padStart(2, '0');
-    button.append(count); button.addEventListener('click', () => onSelect(category));
+    button.append(count); button.addEventListener('click', () => crossfade(() => onSelect(category)));
     return button;
   }));
   return categories;
@@ -37,4 +37,9 @@ export function syncCategoryFilters(category) {
     const active = button.dataset.category === (category || '');
     button.classList.toggle('active', active);button.setAttribute('aria-pressed',String(active));
   });
+}
+
+export function crossfade(update) {
+  if (document.startViewTransition && !matchMedia('(prefers-reduced-motion: reduce)').matches) document.startViewTransition(update);
+  else update();
 }

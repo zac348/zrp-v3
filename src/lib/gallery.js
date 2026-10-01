@@ -23,7 +23,7 @@ function showPhoto() {
   const status=document.getElementById('viewer-status'); status.hidden=true; image.hidden=false;
   image.onload=()=>{status.hidden=true;image.hidden=false;};
   image.onerror=()=>{image.hidden=true;status.hidden=false;status.textContent='This photograph couldn’t load. Try another photograph, or close the viewer.';};
-  image.alt=photoAlt(photo);image.src=photo.web_url||photo.url||photo.thumb_url;
+  image.alt=photoAlt(photo);image.width=photo.width||2200;image.height=photo.height||1467;image.src=photo.web_url||photo.thumb_url||'';
   document.getElementById('viewer-count').textContent=`${String(position+1).padStart(2,'0')} / ${String(collection.length).padStart(2,'0')}`;
   document.getElementById('viewer-caption').textContent=photoAlt(photo);
   document.getElementById('viewer-prev').disabled=collection.length<2;
@@ -41,14 +41,14 @@ export function makeTile(photo,index,photos,eagerCount=0) {
   const figure=document.createElement('figure');figure.className='photo-entry';
   const button=document.createElement('button');button.type='button';button.className='photo-button';button.setAttribute('aria-label','View '+photoAlt(photo));
   const image=document.createElement('img');image.loading=index<eagerCount?'eager':'lazy';image.decoding='async';image.alt=photoAlt(photo);
-  if(photo.width&&photo.height){image.width=photo.width;image.height=photo.height;}
+  image.width=photo.width||700;image.height=photo.height||467;
   if(photo.thumb_url&&photo.web_url){image.sizes='(max-width:600px) 100vw, (max-width:1000px) 50vw, 65vw';image.srcset=`${photo.thumb_url} 700w, ${photo.web_url} 2200w`;}
-  image.src=photo.thumb_url||photo.web_url||photo.url;
+  image.src=photo.thumb_url||photo.web_url||'';
   image.addEventListener('error',()=>{image.hidden=true;if(!button.querySelector('.image-error')){const message=document.createElement('span');message.className='image-error';message.textContent='Preview unavailable. Open photograph';button.append(message);}});
+  image.addEventListener('load',()=>image.classList.add('loaded'));
   button.append(image);button.addEventListener('click',()=>openPhoto(photos,index,button));
   const caption=document.createElement('figcaption');
-  const number=document.createElement('span');number.className='photo-number';number.textContent=String(index+1).padStart(2,'0');
   const label=document.createElement('span');label.className='photo-label';label.textContent=photo.location||photo.title||photo.sport||'Untitled';
   const category=document.createElement('span');category.className='photo-category';category.textContent=photo.sport||'Photograph';
-  caption.append(number,label,category);figure.append(button,caption);return figure;
+  caption.append(label,category);figure.append(button,caption);return figure;
 }

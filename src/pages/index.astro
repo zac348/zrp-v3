@@ -1,7 +1,11 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import PhotoViewer from '../components/PhotoViewer.astro';
-import { PRIMARY_CTA } from '../config.js';
+import SectionHeading from '../components/SectionHeading.astro';
+import Button from '../components/Button.astro';
+import '../styles/collection.css';
+import '../styles/home.css';
+import { BOOKING_OPEN, PRIMARY_CTA } from '../config.js';
 const equipment = [
   ['Sony A7 III', 'Full-frame camera'], ['Tamron 28–75mm f/2.8', 'Portraits, families & events'],
   ['Sony 55–210mm', 'Sports & distance'], ['DJI Mini 3', 'Aerial photographs'],
@@ -9,40 +13,41 @@ const equipment = [
 ];
 ---
 <Layout title="Zachary Routsong — Photography, Valdosta GA">
-  <header class="masthead">
-    <div class="masthead-meta"><span>Independent photographer</span><span>Valdosta, Georgia</span></div>
-    <h1>Zachary <em>Routsong</em></h1>
-    <div class="masthead-bottom"><span>Portraits / Families / Events / Sports</span><a href="#portfolio">Selected photographs <span aria-hidden="true">↓</span></a></div>
-  </header>
-
-  <section class="cover" aria-label="Featured photographs" aria-roledescription="carousel">
+  <section class="cover" aria-label="Featured photographs" aria-roledescription="carousel" tabindex="0">
     <div class="cover-stage" aria-busy="true">
-      <button type="button" id="cover-open" aria-label="Open featured photograph" disabled>
-        <img id="cover-image" alt="" width="2200" height="1238" fetchpriority="high" hidden/>
-        <span class="photo-loading" id="cover-loading">Loading photographs</span>
-      </button>
+      <img id="cover-image" alt="" width="2200" height="1238" fetchpriority="high" hidden/>
+      <p class="photo-loading" id="cover-loading" role="status">Loading photographs</p>
     </div>
-    <div class="cover-caption">
-      <div class="cover-location"><span class="tiny-label">From the portfolio</span><p id="cover-title" aria-live="polite">A photograph by Zachary Routsong</p></div>
-      <div class="cover-controls"><span id="cover-count">— / —</span><button type="button" id="cover-prev" aria-label="Previous featured photograph" disabled>←</button><button type="button" id="cover-next" aria-label="Next featured photograph" disabled>→</button></div>
+    <div class="cover-name"><h1>Zachary <span>Routsong</span></h1><p>Photography in Valdosta, Georgia</p></div>
+    <div class="cover-bottom">
+      <div class="cover-links"><a href="#portfolio">See the work</a><a href={PRIMARY_CTA.href}>{PRIMARY_CTA.label}</a></div>
+      <div class="cover-caption"><button id="cover-open" type="button" disabled aria-label="Open featured photograph"><span id="cover-title">From the portfolio</span></button><div class="cover-controls"><span id="cover-count" aria-live="polite">— / —</span><button type="button" id="cover-prev" aria-label="Previous featured photograph" disabled>←</button><button type="button" id="cover-next" aria-label="Next featured photograph" disabled>→</button></div></div>
     </div>
+  </section>
+  <section class="statement page-inset" aria-label="Photography sessions">
+    <p class="statement-line">Portraits, families,<br/>events and sports <a id="statement-photo-link" hidden><img id="statement-photo" alt="" loading="lazy" width="400" height="267"/></a><span>in Valdosta, Georgia.</span></p>
+    <div class="statement-note"><p>Edited photographs, delivered through a private gallery.</p><Button href={PRIMARY_CTA.href}>{PRIMARY_CTA.label}</Button></div>
   </section>
 
   <section id="portfolio" class="selected-work page-inset" aria-labelledby="work-heading">
-    <div class="section-heading"><div><p class="tiny-label">01 / The photographs</p><h2 id="work-heading">Selected <em>work.</em></h2></div><div class="category-filters" id="cat-tags" aria-label="Filter photographs"></div></div>
+    <SectionHeading id="work-heading" title="Selected photographs"><div class="category-filters" id="cat-tags" aria-label="Filter photographs"></div></SectionHeading>
     <div class="selected-grid" id="portfolio-grid" aria-busy="true"><p class="collection-message">Loading the portfolio…</p></div>
-    <div class="collection-bottom"><p id="port-count" aria-live="polite"></p><a class="line-link" href="/portfolio" id="port-link">The complete portfolio <span aria-hidden="true">↗</span></a></div>
+    <div class="collection-bottom"><p id="port-count" aria-live="polite"></p><a class="line-link" href="/portfolio" id="port-link">The complete portfolio</a></div>
+  </section>
+
+  <section class="booking-steps page-inset" aria-labelledby="steps-heading">
+    <h2 id="steps-heading">Booking</h2><ol><li><h3>{BOOKING_OPEN ? 'Request a session' : 'Get in touch'}</h3><p>{BOOKING_OPEN ? 'Choose a package and a preferred date.' : 'Send your session type, location, and preferred date.'}</p></li><li><h3>Confirm the details</h3><p>Once I accept, we’ll agree on the time and place.</p></li><li><h3>Receive your photographs</h3><p>A private gallery, typically within 5–7 days of your session.</p></li></ol>
   </section>
 
   <section id="about" class="about-section page-inset" aria-labelledby="about-heading">
-    <div class="about-heading"><p class="tiny-label">02 / The photographer</p><h2 id="about-heading">About<br/><em>Zachary.</em></h2></div>
+    <div class="about-heading"><h2 id="about-heading">About Zachary</h2></div>
     <figure class="about-portrait"><img src="/zachary-800.jpg" srcset="/zachary-800.jpg 800w, /zachary.jpg 3240w" sizes="(max-width:700px) 90vw, 40vw" alt="Zachary at home in Valdosta" width="3240" height="2160" loading="lazy"/><figcaption><span>Zachary Routsong</span><span>Valdosta, GA</span></figcaption></figure>
-    <div class="about-copy"><p>I’m based in Valdosta, Georgia. I photograph portraits, families, events, and sports in the area.</p><p>Sessions include edited photographs delivered through a private download gallery, typically within 5–7 days.</p><dl class="session-facts"><div><dt>Where I work</dt><dd>Valdosta &amp; nearby</dd></div><div><dt>Edited photographs</dt><dd>25+ per session</dd></div><div><dt>Sessions</dt><dd id="starting-price">Ask for pricing</dd></div></dl><a class="line-link" href={PRIMARY_CTA.href}>{PRIMARY_CTA.label} <span aria-hidden="true">↗</span></a></div>
+    <div class="about-copy"><p>I’m based in Valdosta, Georgia. I photograph portraits, families, events, and sports in the area.</p><p>Sessions include edited photographs delivered through a private download gallery, typically within 5–7 days.</p><dl class="session-facts"><div><dt>Where I work</dt><dd>Valdosta &amp; nearby</dd></div><div><dt>Edited photographs</dt><dd>25+ per session</dd></div><div><dt>Sessions</dt><dd id="starting-price">Ask for pricing</dd></div></dl><a class="line-link" href={PRIMARY_CTA.href}>{PRIMARY_CTA.label}</a></div>
     <details class="equipment"><summary>Equipment <span aria-hidden="true">+</span></summary><dl>{equipment.map(([name,use])=><div><dt>{name}</dt><dd>{use}</dd></div>)}</dl></details>
   </section>
 
   <section id="contact" class="contact-section page-inset" aria-labelledby="contact-heading">
-    <div class="contact-heading"><p class="tiny-label">03 / Enquiries</p><h2 id="contact-heading">Contact</h2><p>For availability and pricing, send your session type, location, and preferred date. Text is the quickest way to reach me.</p><div class="contact-links" role="group" aria-label="Contact Zachary">
+    <div class="contact-heading"><h2 id="contact-heading">Contact</h2><p>For availability and pricing, send your session type, location, and preferred date. Text is the quickest way to reach me.</p><div class="contact-links" role="group" aria-label="Contact Zachary">
       <a href="https://ig.me/m/zacharyroutsongphotos" target="_blank" rel="noopener" aria-label="Message Zachary on Instagram" title="Instagram">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
       </a>
@@ -61,11 +66,12 @@ const equipment = [
       <div class="field field-full"><label for="c-date">Preferred date (optional)</label><input type="text" id="c-date" name="date" maxlength="100" placeholder="Date or month"/></div>
       <div class="agree-row"><input type="checkbox" id="c-local" required/><label for="c-local">My session is in Valdosta or nearby.</label></div>
       <div class="agree-row"><input type="checkbox" id="c-agree" required/><label for="c-agree">I agree to the <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a> and I’m 13 or older, or a parent or guardian.</label></div>
-      <button type="submit" class="send-button" id="c-submit"><span>Send enquiry</span><span aria-hidden="true">↗</span></button>
+      <button type="submit" class="send-button" id="c-submit"><span>Send enquiry</span></button>
       <p class="contact-status" id="c-status" role="status" aria-live="polite"></p>
     </form>
   </section>
   <noscript><p class="no-script">Enable JavaScript to browse the photographs and use the form. You can also <a href="sms:+12293001006">text Zachary</a> or <a href="mailto:zac@zrphotos.net">send an email</a>.</p></noscript>
+  <div class="mobile-cta" id="mobile-cta" hidden><a href="sms:+12293001006">Text Zachary</a><a href={PRIMARY_CTA.href}>{PRIMARY_CTA.label}</a></div>
   <PhotoViewer/>
   <script src="../lib/home.js"></script>
 </Layout>

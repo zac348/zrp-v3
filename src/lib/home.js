@@ -1,4 +1,5 @@
-import { loadPublicPhotos, loadStartingPrice, renderCategoryFilters, syncCategoryFilters } from './portfolio.js';
+import { loadPublicPhotos, loadStartingPackage, renderCategoryFilters, syncCategoryFilters } from './portfolio.js';
+import { packageFeatures } from './packages.js';
 import { makeTile, bindLightbox, openPhoto, photoAlt } from './gallery.js';
 bindLightbox();
 const grid=document.getElementById('portfolio-grid');
@@ -14,7 +15,10 @@ function coverPhoto(index) {
   coverImage.alt=photoAlt(photo);coverImage.hidden=false;
   coverImage.onload=()=>{if(version===coverVersion){coverLoading.hidden=true;document.querySelector('.cover-stage').setAttribute('aria-busy','false');}};
   coverImage.onerror=()=>{if(version===coverVersion){coverImage.hidden=true;coverLoading.hidden=false;coverLoading.textContent='This photograph couldn’t load. Try the next one.';document.querySelector('.cover-stage').setAttribute('aria-busy','false');}};
-  coverImage.src=photo.web_url||photo.url||photo.thumb_url;
+  coverImage.width=photo.width||2200;coverImage.height=photo.height||1467;
+  coverImage.sizes='100vw';coverImage.srcset=photo.thumb_url&&photo.web_url?`${photo.thumb_url} 700w, ${photo.web_url} 2200w`:'';
+  coverImage.dataset.crop=photo.location?.includes('Thorncrown')?'architecture':'horizon';
+  coverImage.src=photo.web_url||photo.thumb_url||'';
   document.getElementById('cover-title').textContent=photo.location||photo.title||photo.sport||'From the portfolio';
   document.getElementById('cover-count').textContent=`${String(coverIndex+1).padStart(2,'0')} / ${String(featured.length).padStart(2,'0')}`;
   coverOpen.setAttribute('aria-label','View '+photoAlt(photo));coverOpen.disabled=false;
@@ -53,13 +57,26 @@ loadPublicPhotos().then(photos=>{
   const second=wide.find(p=>p.location?.includes('Thorncrown')&&p!==first);
   const third=wide.find(p=>p.location?.includes('Sarasota')&&p!==first);
   featured=[...new Set([first,second,third,...wide].filter(Boolean))].slice(0,4);
+  const inline=photos.find(p=>p.location?.includes('Sarasota'))||first;
+  const link=document.getElementById('statement-photo-link'),img=document.getElementById('statement-photo');
+  if(inline.web_url||inline.thumb_url){link.href='/portfolio?cat='+encodeURIComponent(inline.sport||'');link.hidden=false;img.src=inline.thumb_url||inline.web_url;img.alt=photoAlt(inline);img.width=inline.width||400;img.height=inline.height||267;img.addEventListener('error',()=>link.hidden=true);}
   coverPhoto(0);renderCategoryFilters(photos,filter);filter(null);
 }).catch(()=>showUnavailable()).finally(()=>{
   grid.setAttribute('aria-busy','false');
   const target=location.hash&&document.getElementById(location.hash.slice(1));
   if(target)requestAnimationFrame(()=>target.scrollIntoView({behavior:'instant'}));
 });
-loadStartingPrice().then(price=>{if(price!==null)document.getElementById('starting-price').textContent='From '+new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(price);}).catch(()=>{});
+loadStartingPackage().then(pkg=>{if(pkg){const el=document.getElementById('starting-price');el.textContent='From '+new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(pkg.price);el.title=pkg.name+': '+packageFeatures(pkg.name).join(', ');}}).catch(()=>{});
+const cover=document.querySelector('.cover');
+cover.addEventListener('keydown',e=>{if(featured.length&&['ArrowLeft','ArrowRight'].includes(e.key)){e.preventDefault();coverPhoto(coverIndex+(e.key==='ArrowLeft'?-1:1));}});
+let touchX=null;
+cover.addEventListener('touchstart',e=>touchX=e.changedTouches[0].clientX,{passive:true});
+cover.addEventListener('touchend',e=>{const delta=e.changedTouches[0].clientX-touchX;if(touchX!==null&&Math.abs(delta)>50&&featured.length)coverPhoto(coverIndex+(delta<0?1:-1));touchX=null;},{passive:true});
+const header=document.querySelector('.site-header'),cta=document.getElementById('mobile-cta');
+let pastCover=false,contactVisible=false;
+const updateCTA=()=>cta.hidden=!pastCover||contactVisible;
+new IntersectionObserver(([entry])=>{pastCover=!entry.isIntersecting;header.classList.toggle('over-photo',entry.isIntersecting);updateCTA();},{threshold:0}).observe(cover);
+new IntersectionObserver(([entry])=>{contactVisible=entry.isIntersecting;updateCTA();},{threshold:0}).observe(document.getElementById('contact'));
 
 // Form handling stays independent of the photo service.
 const loadedAt=Date.now();

@@ -324,17 +324,14 @@ import { BOOKING_OPEN } from '../config.js';
 </div>
 
 <script>
+import { packageFeatures } from '../lib/packages.js';
 import { createClient } from '@supabase/supabase-js';
 const sb = createClient(
   import.meta.env.PUBLIC_SUPABASE_URL,
   import.meta.env.PUBLIC_SUPABASE_ANON_KEY
 );
 
-const DEFAULT_PKGS = [
-  { name:'Basic',    price:40,  popular:false, on_sale:false, features:['1–2 hrs coverage','25 edited photos','Private gallery link'] },
-  { name:'Standard', price:75,  popular:true,  on_sale:false, features:['Up to 3 hrs coverage','60 edited photos','Private gallery link','1 free 5×7 print'] },
-  { name:'Premium',  price:120, popular:false, on_sale:false, features:['Full day coverage','100+ edited photos','Private gallery link','3 free 5×7 prints'] },
-];
+
 
 let selPkg = null;
 
@@ -352,17 +349,15 @@ loadAddons();
 async function loadPackages() {
   const { data, error } = await sb.from('package_pricing').select('*').eq('available', true).order('base_price');
   if(error || !data?.length){document.getElementById("pkg-grid").textContent="Packages are unavailable right now. Please contact Zachary.";return;}
-  const pkgs = (data && data.length)
-    ? data.map((p, i) => ({
+  const pkgs = data.map((p, i) => ({
         id:       String(p.id),
         name:     p.package_name,
         price:    (p.on_sale && p.sale_price != null) ? p.sale_price : p.base_price,
         origPrice: (p.on_sale && p.sale_price != null) ? p.base_price : null,
         popular:  p.package_name === 'Standard',
         on_sale:  !!(p.on_sale && p.sale_price != null),
-        features: DEFAULT_PKGS.find(x=>x.name===p.package_name)?.features || ['Photos included', 'Private gallery link'],
-      }))
-    : DEFAULT_PKGS;
+        features: packageFeatures(p.package_name),
+      }));
   renderPackages(pkgs);
 }
 

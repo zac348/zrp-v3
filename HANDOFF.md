@@ -20,12 +20,6 @@ Everything you need to run **zrphotos.net** day to day. No coding required for a
 5. **Photos are automatically resized on upload.** Each one is saved three ways: your untouched original (what clients download), a ~2200px web version (used when someone opens a photo), and a ~700px thumbnail (used in the grids). Visitors never download the full-size file — that's the difference between a 3 MB page and a 30 MB one.
 6. **You no longer pick what's on the homepage.** It shows up to 6 photos from your Portfolio, alternating categories for a balanced selection. Newer photos appear first within each category. Nothing to manage.
 7. **Titles & locations:** the upload form has optional Title and Location fields (they apply to the whole batch). Fix individual photos anytime with the **Edit** button on a photo card, or select several and use **Set location**. Titles/locations appear below each photograph, and they double as the photo's description for screen readers and Google. With no title, the category + location is used (e.g. "Soccer, Valwood School") — so filling in locations is worth it.
-   - ⚠️ One-time setup: these two fields need two database columns. In Supabase → SQL Editor, run this once:
-   ```sql
-   alter table portfolio_photos add column if not exists title text;
-   alter table portfolio_photos add column if not exists location text;
-   ```
-   Until you do, photos still upload fine — they just save without title/location and the admin tells you so.
 
 ## What's public: one Portfolio, one switch
 

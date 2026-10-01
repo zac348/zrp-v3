@@ -125,7 +125,7 @@ const authPage = path === '/login' || path === '/reset';
         });
         const bar = document.getElementById('consent-bar');
         let accepted; try { accepted = localStorage.getItem('zrp-consent'); } catch (_) {}
-        if (!accepted && /^\/(book|quick-book|confirm)\/?$/.test(location.pathname)) bar.classList.add('show');
+        if (!accepted && /^\/(book|quick-book)\/?$/.test(location.pathname)) bar.classList.add('show');
         const dismiss = () => { bar.classList.remove('show'); try { localStorage.setItem('zrp-consent', '1'); } catch (_) {} };
         document.getElementById('dismiss-consent').addEventListener('click', dismiss);
         window.dismissConsent = dismiss;

@@ -665,21 +665,6 @@ html,body { height: 100% }
 </main>
 </div>
 
-<!-- DELETE BOOKING CONFIRMATION -->
-<div class="del-modal" id="del-modal" role="dialog" aria-modal="true" aria-labelledby="del-title">
-  <div class="del-box">
-    <h2 id="del-title">Delete this booking?</h2>
-    <p class="del-summary" id="del-summary"></p>
-    <p class="del-warn">This permanently removes the booking record. Their gallery and photos aren't touched, but their invoice link will stop working. This can't be undone.</p>
-    <label for="del-input">To confirm, type <strong id="del-phrase"></strong></label>
-    <input type="text" id="del-input" autocomplete="off" spellcheck="false"/>
-    <div class="del-actions">
-      <button class="btn-sm" onclick="closeDeleteModal()">Cancel</button>
-      <button class="btn-sm red" id="del-confirm" onclick="confirmDeleteBooking()" disabled>Delete booking</button>
-    </div>
-  </div>
-</div>
-
 <script>
 import { createClient } from '@supabase/supabase-js';
 import { setupDeliveryAdmin } from '../lib/delivery-admin.js';
@@ -689,7 +674,7 @@ const sb = createClient(
 );
 
 // ── AUTH ──
-const loadDeliveries = setupDeliveryAdmin(sb, {getLegacy:()=>allBookings, legacyCard:bookingCard, onChange:()=>{updateStats();renderOvBookings();}, refreshLegacy:loadBookings});
+const loadDeliveries = setupDeliveryAdmin(sb, {onChange:()=>{updateStats();renderOvBookings();}});
 sb.auth.getSession().then(({ data }) => {
   if (!data.session) window.location.href = '/login';
   else { loadAll(); if(['#enquiries','#bookings'].includes(location.hash)) switchTab('bookings',document.getElementById('bookings-nav')); }
@@ -716,18 +701,18 @@ function switchTab(name, btn) {
 window.switchTab = switchTab;
 
 // ── STATE ──
-let allPhotos = [], allGalleries = [], allBookings = [], allBlocks = [], allCoupons = [];
+let allPhotos = [], allGalleries = [], allBlocks = [], allCoupons = [];
 
 async function loadAll() {
-  await Promise.all([loadPhotos(), loadGalleries(), loadBookings(), loadBlocks(), loadCoupons(), loadPricing(), loadDeliveries()]);
+  await Promise.all([loadPhotos(), loadGalleries(), loadBlocks(), loadCoupons(), loadPricing(), loadDeliveries()]);
   updateStats();
 }
 
 function updateStats() {
   document.getElementById('st-photos').textContent   = allPhotos.length;
   document.getElementById('st-galleries').textContent = allGalleries.length;
-  document.getElementById('st-bookings').textContent  = allBookings.length + loadDeliveries.rows().length;
-  document.getElementById('st-pending').textContent   = allBookings.filter(b => b.status === 'pending').length + loadDeliveries.rows().filter(b=>b.status==='pending').length;
+  document.getElementById('st-bookings').textContent  = loadDeliveries.rows().length;
+  document.getElementById('st-pending').textContent   = loadDeliveries.rows().filter(b=>b.status==='pending').length;
   document.getElementById('st-portfolio').textContent = allPhotos.filter(p => p.on_portfolio).length;
   syncOptimizeButton();
 }
@@ -813,11 +798,7 @@ function photoCardClick(id) { togglePhotoSelect(id, !selectedPhotoIds.has(id)); 
 window.photoCardClick = photoCardClick;
 
 // ── TITLE / LOCATION EDITING ──
-function metaColError(error) {
-  return /column/i.test(error?.message || '')
-    ? 'Title/location columns missing — run the SQL in HANDOFF.md first.'
-    : 'Error: ' + (error?.message || 'unknown');
-}
+function metaColError(error) { return 'Error: ' + (error?.message || 'unknown'); }
 
 async function editPhotoMeta(id) {
   const p = allPhotos.find(x => x.id === id);
@@ -1043,15 +1024,7 @@ async function handleFiles(files) {
       height: dims?.height || null,
     };
     const { error: insErr } = await sb.from('portfolio_photos').insert(row);
-    if (insErr) {
-      // A newer column is missing — save what the schema does support
-      const { error: fallbackErr } = await sb.from('portfolio_photos').insert({
-        file_name: row.file_name, storage_path: row.storage_path,
-        url: row.url, sport: row.sport, gallery_id: row.gallery_id, file_size: row.file_size,
-      });
-      if (!fallbackErr) status.textContent = 'Saved, but some fields need the SQL in HANDOFF.md: ' + insErr.message;
-      else { status.textContent = 'Error: ' + insErr.message; continue; }
-    }
+    if (insErr) { status.textContent = 'Error: ' + insErr.message; continue; }
     done++;
     progBar.style.width = Math.round((done / files.length) * 100) + '%';
   }
@@ -1194,228 +1167,11 @@ function todayStr() {
   return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;
 }
 
-// "Past" = finished (delivered/cancelled) or the session date has gone by.
-// Only these can be deleted; an upcoming booking has to be cancelled first.
-function isPastBooking(b) {
-  if (b.status === 'delivered' || b.status === 'cancelled') return true;
-  return !!b.event_date && b.event_date < todayStr();
-}
-
-// ── BOOKINGS ──
-
-async function loadBookings() {
-  const { data } = await sb.from('bookings').select('*').order('created_at', { ascending: false });
-  allBookings = data || [];
-  renderBookings();
-  renderOvBookings();
-}
-
-function renderBookings() {
-  loadDeliveries.render();
-  updateStats();
-}
-
 function renderOvBookings() {
   const list = document.getElementById('ov-bookings');
-  const recent = allBookings.slice(0, 5);
-  if (!recent.length) { list.innerHTML = loadDeliveries.rows().length ? '<p class="no-data">Your new requests are in the Bookings tab.</p>' : '<p class="no-data">No bookings yet.</p>'; return; }
-  list.innerHTML = recent.map(b => bookingCard(b)).join('');
+  const recent = loadDeliveries.rows().slice(0, 5);
+  list.innerHTML = recent.length ? recent.map(row => `<p><a href="#bookings">${esc(row.details?.name || row.name)}</a> — ${esc(row.status)}</p>`).join('') : '<p class="no-data">No enquiries yet.</p>';
 }
-
-function bookingCard(b) {
-  // Everything below came from a public form — escape it before it touches the page
-  const name   = [b.first_name, b.last_name].filter(Boolean).join(' ') || 'Unknown';
-  const status = b.status || 'pending';
-  const numDisplay = b.ztn_number || b.booking_number || b.id?.slice(-8).toUpperCase() || '—';
-  const venue = b.venue_address || b.event_location || '—';
-  const gal = b.gallery_id ? allGalleries.find(g => g.id === b.gallery_id) : null;
-  const id = esc(b.id);
-
-  return `<div class="booking-card">
-    <div class="booking-head">
-      <div>
-        <div class="booking-name">${esc(name)}</div>
-        <div class="booking-num">${esc(numDisplay)}</div>
-      </div>
-      <div class="booking-badges">
-        <span class="badge ${esc(status)}">${esc(status)}</span>
-        ${b.package_selected ? `<span class="badge pkg">${esc(b.package_selected.split('—')[0].trim())}</span>` : ''}
-      </div>
-    </div>
-    <div class="booking-details">
-      <div class="booking-detail"><strong>Date</strong>${esc(b.event_date || '—')}</div>
-      <div class="booking-detail"><strong>Time</strong>${esc(b.event_time || '—')}</div>
-      <div class="booking-detail"><strong>Session</strong>${esc(b.sport_type || '—')}</div>
-      <div class="booking-detail"><strong>Venue</strong>${esc(venue)}</div>
-      <div class="booking-detail"><strong>Total</strong>${esc(b.total || '—')}</div>
-      <div class="booking-detail"><strong>Deposit</strong>${esc(b.deposit || '—')}</div>
-      <div class="booking-detail"><strong>Email</strong>${esc(b.email || '—')}</div>
-      <div class="booking-detail"><strong>Phone</strong>${esc(b.phone || '—')}</div>
-      ${b.addons_selected ? `<div class="booking-detail" style="grid-column:1/-1"><strong>Add-ons</strong>${esc(b.addons_selected)}</div>` : ''}
-      ${b.notes ? `<div class="booking-detail" style="grid-column:1/-1"><strong>Notes</strong>${esc(b.notes)}</div>` : ''}
-      ${b.gallery_id ? `<div class="booking-detail" style="grid-column:1/-1"><strong>Gallery</strong>${gal
-        ? `<a href="/gallery?g=${encodeURIComponent(gal.slug)}" target="_blank" style="color:var(--text-2);text-decoration:underline">${esc(gal.name || gal.slug)}</a>`
-        : 'Created — see the Galleries tab'}</div>` : ''}
-    </div>
-    <div class="booking-actions">
-      ${status === 'pending'   ? `<button class="btn-sm green"  onclick="acceptBooking('${id}')" title="Accept and email client with confirm link">Accept</button>` : ''}
-      ${status === 'accepted'  ? `<button class="btn-sm on-ink" onclick="setStatus('${id}','confirmed')">Mark confirmed</button>` : ''}
-      ${status === 'confirmed' ? `<button class="btn-sm on-ink" onclick="setStatus('${id}','delivered')">Mark delivered</button>` : ''}
-      ${status !== 'cancelled' ? `<button class="btn-sm red"    onclick="setStatus('${id}','cancelled')">Cancel</button>` : ''}
-      ${status !== 'pending'   ? `<button class="btn-sm"        onclick="setStatus('${id}','pending')">Reset</button>` : ''}
-      ${b.ztn_number ? `<a class="btn-sm" href="/invoice?ztn=${encodeURIComponent(b.ztn_number)}" target="_blank">Invoice</a>` : ''}
-      ${b.email ? `<button class="btn-sm" onclick="mailTo('${id}')" title="Open email client">Email</button>` : ''}
-      ${isPastBooking(b) ? `<button class="btn-sm red" style="margin-left:auto" onclick="openDeleteModal('${id}')">Delete</button>` : ''}
-    </div>
-  </div>`;
-}
-
-// ── DELETE PAST BOOKINGS ──
-let pendingDelete = null, deleteTrigger = null;
-
-function openDeleteModal(id) {
-  const b = allBookings.find(x => x.id === id);
-  if (!b || !isPastBooking(b)) return;               // never offered for active bookings
-  const name = [b.first_name, b.last_name].filter(Boolean).join(' ').trim();
-  pendingDelete = { id, phrase: name || 'DELETE' };
-  deleteTrigger = document.activeElement;
-  const num = b.ztn_number || b.booking_number || '';
-  document.getElementById('del-summary').textContent =
-    [name || 'Unnamed booking', num, b.event_date, b.status].filter(Boolean).join(' · ');
-  document.getElementById('del-phrase').textContent = pendingDelete.phrase;
-  const input = document.getElementById('del-input');
-  input.value = '';
-  const btn = document.getElementById('del-confirm');
-  btn.disabled = true; btn.textContent = 'Delete booking';
-  document.getElementById('del-modal').classList.add('open');
-  input.focus();
-}
-window.openDeleteModal = openDeleteModal;
-
-function closeDeleteModal() {
-  document.getElementById('del-modal').classList.remove('open');
-  pendingDelete = null;
-  if (deleteTrigger && deleteTrigger.focus) deleteTrigger.focus();
-}
-window.closeDeleteModal = closeDeleteModal;
-
-function deletePhraseMatches() {
-  const typed = document.getElementById('del-input').value.trim().toLowerCase();
-  return !!pendingDelete && typed === pendingDelete.phrase.toLowerCase();
-}
-
-document.getElementById('del-input').addEventListener('input', () => {
-  document.getElementById('del-confirm').disabled = !deletePhraseMatches();
-});
-document.getElementById('del-modal').addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeDeleteModal();
-  if (e.key === 'Enter' && deletePhraseMatches()) confirmDeleteBooking();
-});
-
-async function confirmDeleteBooking() {
-  if (!deletePhraseMatches()) return;
-  const btn = document.getElementById('del-confirm');
-  btn.disabled = true; btn.textContent = 'Deleting…';
-  // .select() returns the rows actually removed — an empty result means the
-  // database refused (no delete permission), which would otherwise look like success
-  const { data, error } = await sb.from('bookings').delete().eq('id', pendingDelete.id).select('id');
-  if (error || !data || !data.length) {
-    btn.disabled = false; btn.textContent = 'Delete booking';
-    toast(error ? 'Could not delete: ' + error.message
-                : 'The database blocked the delete — see "Deleting bookings" in HANDOFF.md');
-    return;
-  }
-  closeDeleteModal();
-  await loadBookings();
-  updateStats();
-  toast('Booking deleted');
-}
-window.confirmDeleteBooking = confirmDeleteBooking;
-
-async function acceptBooking(id) {
-  const known = allBookings.find(x => x.id === id) || {};
-  const name = [known.first_name, known.last_name].filter(Boolean).join(' ') || 'this client';
-  if (!confirm('Accept booking for ' + name + '?\n\nThis will update their status and email them a link to complete their booking.')) return;
-
-  // Step 1: read booking
-  const { data: booking, error: getErr } = await sb.from('bookings').select('*').eq('id', id).single();
-  if (getErr || !booking) { toast('Could not read booking'); return; }
-
-  // Step 2: update status
-  const { error: upErr } = await sb.from('bookings').update({ status: 'accepted' }).eq('id', id);
-  if (upErr) { toast('DB error: ' + upErr.message); return; }
-
-  await loadBookings();
-  toast('Accepted ✓');
-
-  // Step 2.5: auto-block the session date on the availability calendar
-  // (cancelling a booking does NOT auto-unblock — remove the block manually if needed)
-  if (booking.event_date) {
-    try {
-      const { data: existing } = await sb.from('availability')
-        .select('id').eq('date', booking.event_date).eq('status', 'unavailable');
-      if (!existing || !existing.length) {
-        await sb.from('availability').insert({
-          date: booking.event_date,
-          status: 'unavailable',
-          note: 'Booked — ' + name,
-        });
-        await loadBlocks();
-        toast('Calendar: ' + booking.event_date + ' blocked');
-      }
-    } catch (e) { console.error('auto-block failed:', e); }
-  }
-
-  // Step 3: send email
-  try {
-    const res = await fetch('/api/accept-booking', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email:   booking.email,
-        name:    [booking.first_name, booking.last_name].filter(Boolean).join(' '),
-        token:   booking.id,
-        booking: {
-          event_date:       booking.event_date,
-          sport_type:       booking.sport_type,
-          package_selected: booking.package_selected,
-          total:            booking.total,
-        },
-      }),
-    });
-    const d = await res.json();
-    if (d.emailSent) {
-      toast('Email sent to ' + booking.email);
-    } else {
-      const reason = d.debug || d.resendError || 'unknown error';
-      alert(
-        'Booking accepted, but the confirmation email did NOT send.\n\n' +
-        'Reason: ' + reason + '\n\n' +
-        'The client has not received their link. You can reach them directly at ' +
-        booking.email + ' — or fix the email setup (see HANDOFF.md) and accept again.'
-      );
-      console.error('accept-booking email not sent:', reason);
-    }
-  } catch(e) {
-    alert('Booking accepted, but the confirmation email failed to send (' + e.message +
-          ').\n\nThe client at ' + booking.email + ' has not received their link.');
-    console.error('Email error:', e);
-  }
-}
-window.acceptBooking = acceptBooking;
-
-async function setStatus(id, status) {
-  await sb.from('bookings').update({ status }).eq('id', id);
-  await loadBookings(); toast('Status updated to ' + status);
-}
-window.setStatus = setStatus;
-
-function mailTo(id) {
-  const b = allBookings.find(x => x.id === id); if (!b || !b.email) return;
-  const first = b.first_name || '';
-  window.open('mailto:' + encodeURIComponent(b.email) + '?subject=' + encodeURIComponent('Your booking — ZRP') + '&body=' + encodeURIComponent('Hi ' + first + ','));
-}
-window.mailTo = mailTo;
 
 // ── AVAILABILITY CALENDAR ──
 let calYear, calMonth, calBlocks = [], selectedDate = null, blockType = null;

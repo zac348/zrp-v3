@@ -16,17 +16,14 @@ export function setupDeliveryAdmin(sb, options = {}) {
     catch(e) { show('Enquiries could not refresh: '+e.message); render(); }
   }
   function render() {
-    const groups=groupBookings(rows,options.getLegacy?.() || []);
+    const groups=groupBookings(rows);
     for(const [key,entries] of Object.entries(groups)) {
       const list=document.getElementById('booking-list-'+key);
       document.getElementById('booking-count-'+key).textContent=String(entries.length);
       list.replaceChildren();
       if(!entries.length)list.append(node('p',key==='new'?'No new enquiries.':key==='active'?'No active bookings.':'No completed or declined bookings.','no-data'));
       for(const {row,source} of entries) {
-        if(source==='legacy') {
-          const wrapper=node('div',null,'legacy-booking');
-          wrapper.innerHTML=options.legacyCard(row);list.append(wrapper);continue;
-        }
+
       const article=node('article',null,'delivery-row');
       const head=node('div',null,'delivery-row-head');
       const title=node('h3',row.details?.name || row.name);
@@ -77,9 +74,9 @@ export function setupDeliveryAdmin(sb, options = {}) {
       }
     }
   }
-  document.getElementById('delivery-refresh').addEventListener('click',async()=>{if(!busy){await options.refreshLegacy?.();await load();}});
+  document.getElementById('delivery-refresh').addEventListener('click',async()=>{if(!busy){await load();}});
   document.getElementById('delivery-check').addEventListener('click',async()=>{show('Checking Drive access…');try{const r=await act('health');show(`Connected to ${r.name}. Folder creation is available.`);}catch(e){show(e.message);}});
-  window.addEventListener('focus',async()=>{if(!busy){await options.refreshLegacy?.();await load();}});
+  window.addEventListener('focus',async()=>{if(!busy){await load();}});
   load.render=render;
   load.rows=()=>rows;
   return load;

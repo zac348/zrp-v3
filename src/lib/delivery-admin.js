@@ -1,4 +1,5 @@
 import {delivery,copyPrivateLink} from './delivery-api.js';
+import {calendarMessage} from './calendar-message.js';
 import {groupBookings} from './booking-groups.js';
 const labels={pending:'New enquiry',accepted:'Awaiting details',processing:'Creating folder',folder_error:'Folder needs attention',ready:'Ready for photos',published:'Published',declined:'Declined'};
 function node(tag,text,cls) { const e=document.createElement(tag); if(text)e.textContent=text; if(cls)e.className=cls; return e; }
@@ -48,7 +49,7 @@ export function setupDeliveryAdmin(sb, options = {}) {
         }); actions.append(b);
       }
       function link(label,url) {const a=node('a',label,'btn-sm');a.href=url;a.target='_blank';a.rel='noopener noreferrer';actions.append(a);}
-      if(row.status==='pending') button('Accept',async()=>{await act('accept',{id:row.id});return 'Moved to Active bookings. Copy the private form link or fill in the details yourself.';});
+      if(row.status==='pending') button('Accept',async()=>{const result=await act('accept',{id:row.id});if(result.calendar)return calendarMessage(result.calendar);return 'Moved to Active bookings. Copy the private form link or fill in the details yourself.';});
       if(row.status==='accepted') {
         const expired=Date.parse(row.token_expires_at)<Date.now();
         if(!expired) button('Copy client form link',async()=>{await copyPrivateLink(`${location.origin}/client-details#${row.details_token}`);return 'Private form link copied. It expires in 30 days from acceptance.';});
@@ -58,8 +59,8 @@ export function setupDeliveryAdmin(sb, options = {}) {
           await act('renew',{id:row.id});return 'New form link created. Use Copy client form link.';
         });
       }
-      if(['pending','accepted'].includes(row.status)) button('Decline',async()=>{if(confirm('Decline this enquiry? Its private form will become unavailable.'))await act('decline',{id:row.id});});
-      if(row.status==='folder_error' || row.status==='processing') button('Retry folder',async()=>{const r=await act('retry',{id:row.id});return r.status==='ready'?'Drive folder is ready.':r.status==='processing'?'Still creating the folder. Refresh shortly.':r.message;});
+      if(['pending','accepted'].includes(row.status)) button('Decline',async()=>{if(confirm('Decline this enquiry? Its private form will become unavailable.')){const result=await act('decline',{id:row.id});return calendarMessage(result.calendar,'Declined')||'Enquiry declined.';}});
+      if(row.status==='folder_error' || row.status==='processing') button('Retry folder',async()=>{const r=await act('retry',{id:row.id});return r.status==='ready'?(calendarMessage(r.calendar,'Details saved')||'Drive folder is ready.'):r.status==='processing'?'Still creating the folder. Refresh shortly.':r.message;});
       if(['ready','published'].includes(row.status)) {
         link('Open photo folder',`https://drive.google.com/drive/folders/${encodeURIComponent(row.drive_folder_id)}`);
         if(row.status==='ready') button('Publish gallery',async()=>{await act('publish',{id:row.id});return 'Gallery published. Copy its private link to share it.';});

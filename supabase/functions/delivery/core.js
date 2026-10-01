@@ -60,6 +60,76 @@ export class Store {
   enquire(b) { return this.db('rpc/delivery_enquire', 'POST', { p_submission: b.submission_id, p_name: b.name, p_contact: b.contact, p_message: b.message, p_date: b.date }); }
 }
 
+// The existing availability id is UUID-shaped. Reuse the enquiry UUID as a
+// deterministic primary key: overlapping workers cannot insert duplicate blocks.
+export class Calendar extends Store {
+  today() {
+    const parts=new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
+    const value=type=>parts.find(p=>p.type===type).value;
+    return `${value('year')}-${value('month')}-${value('day')}`;
+  }
+  note(id) { return `Booked (ref ${id.slice(0,8)})`; }
+  own(row, id) { return row.id===id && row.note===this.note(id) && row.status==='unavailable' && !row.start_time; }
+  async owned(id) {
+    return (await this.db(`availability?id=eq.${id}&note=eq.${encodeURIComponent(this.note(id))}`)).filter(row=>this.own(row,id));
+  }
+  async removeRow(row,id) {
+    // Both the date and exact note remain predicates at deletion time. Owner
+    // changes to status/time are protected even if they happen after our read.
+    await this.db(`availability?id=eq.${id}&date=eq.${row.date}&note=eq.${encodeURIComponent(this.note(id))}&status=eq.unavailable&start_time=is.null`,'DELETE');
+  }
+  async remove(id) {
+    const rows=await this.owned(id);
+    for(const row of rows)await this.removeRow(row,id);
+    return {status:rows.length?'unblocked':'no_date',date:rows[0]?.date||null};
+  }
+  async sync(id,date) {
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(date||'') || !Number.isFinite(Date.parse(date)) || new Date(date).toISOString().slice(0,10)!==date)return {status:'no_date',date:null};
+    const owned=await this.owned(id);
+    for(const row of owned)if(row.date!==date)await this.removeRow(row,id);
+    if(date<this.today())return {status:'skipped_past',date};
+    const rows=await this.db(`availability?date=eq.${date}`);
+    // Explicit Available or Partial entries are intentional owner overrides.
+    const other=rows.find(row=>!this.own(row,id)&&(row.status==='available'||row.status==='partial'||row.status==='unavailable'));
+    if(other)return {status:'already_blocked',date};
+    if(rows.some(row=>this.own(row,id)))return {status:'blocked',date};
+    const response=await this.fetch(`${this.env.SUPABASE_URL}/rest/v1/availability?on_conflict=id`,{
+      method:'POST',headers:{apikey:this.env.SUPABASE_SERVICE_ROLE_KEY,Authorization:`Bearer ${this.env.SUPABASE_SERVICE_ROLE_KEY}`,'Content-Type':'application/json',Prefer:'resolution=ignore-duplicates,return=representation'},
+      body:JSON.stringify({id,date,status:'unavailable',start_time:null,note:this.note(id)}),signal:AbortSignal.timeout(15000),
+    });
+    if(!response.ok)throw new Error('Calendar insert failed');
+    const after=await this.db(`availability?date=eq.${date}`);
+    if(after.some(row=>!this.own(row,id)&&['available','partial','unavailable'].includes(row.status))){
+      for(const row of after.filter(row=>this.own(row,id)))await this.removeRow(row,id);
+      return {status:'already_blocked',date};
+    }
+    if(!after.some(row=>this.own(row,id)))throw new Error('Calendar write could not be verified');
+    return {status:'blocked',date};
+  }
+}
+
+async function updateCalendar(store,calendar,row) {
+  if(!calendar)return undefined;
+  let date=row.details?.date||row.preferred_date||null;
+  try {
+    // An accept worker can finish after a client completion or decline. Read the
+    // latest saved state and reconcile again if another action changed it while
+    // the calendar write was in flight. No private fields go into availability.
+    let current=await store.get('id',row.id)||row;
+    for(let attempt=0;attempt<3;attempt++){
+      date=current.details?.date||current.preferred_date||null;
+      const result=current.status==='declined'?await calendar.remove(row.id):await calendar.sync(row.id,date);
+      const latest=await store.get('id',row.id)||current;
+      if(latest.status===current.status && (latest.details?.date||latest.preferred_date)===(current.details?.date||current.preferred_date))return result;
+      current=latest;
+    }
+    throw new Error('Calendar changed during update');
+  } catch (_) {
+    console.error('Delivery calendar update failed');
+    return {status:'failed',date:/^\d{4}-\d{2}-\d{2}$/.test(date||'')?date:null};
+  }
+}
+
 function b64(bytes) { return btoa(String.fromCharCode(...bytes)).replace(/=/g,'').replace(/\+/g,'-').replace(/\//g,'_'); }
 export class Drive {
   constructor(key, parent, fetcher = fetch) { this.key = key; this.parent = parent; this.fetch = fetcher; }
@@ -140,7 +210,7 @@ export class Drive {
   }
 }
 
-export async function finalize(store, drive, row, input, actor) {
+export async function finalize(store, drive, row, input, actor, calendar) {
   if (['ready','published'].includes(row.status)) return {ok:true,status:row.status};
   if (!['accepted','folder_error','processing'].includes(row.status)) throw new Problem('Zachary must accept this enquiry first.',409);
   if (row.status === 'processing' && Date.parse(row.locked_at) > Date.now()-120000) return {ok:true,status:'processing'};
@@ -150,6 +220,8 @@ export async function finalize(store, drive, row, input, actor) {
   const claimed = await store.patch(row.id, {status:'processing', details, lock_id:lock, locked_at:new Date().toISOString(), last_error:null, completed_by:row.completed_by || actor},filter);
   if (!claimed.length) return {ok:true,status:'processing'};
   let current = claimed[0];
+  const calendarResult=await updateCalendar(store,calendar,current);
+  const calendarResponse=actor==='admin'&&calendarResult?{calendar:calendarResult}:{};
   try {
     if (!current.drive_folder_id) {
       const id = await drive.generateId();
@@ -160,15 +232,15 @@ export async function finalize(store, drive, row, input, actor) {
     await drive.ensureFolder(current.drive_folder_id, folderName(details), row.id);
     const saved = await store.patch(row.id,{status:'ready',completed_at:new Date().toISOString(),lock_id:null,locked_at:null,last_error:null},`&lock_id=eq.${lock}`);
     if (!saved.length) return {ok:true,status:'processing'};
-    return {ok:true,status:'ready'};
+    return {ok:true,status:'ready',...calendarResponse};
   } catch(e) {
     const message = e instanceof Problem ? e.message : 'Drive is unavailable. Details are saved; use Retry folder.';
     await store.patch(row.id,{status:'folder_error',lock_id:null,locked_at:null,last_error:message},`&lock_id=eq.${lock}`);
-    return {ok:true,status:'folder_error',message:'Your details are saved. Zachary will finish setting up your album.'};
+    return {ok:true,status:'folder_error',message:'Your details are saved. Zachary will finish setting up your album.',...calendarResponse};
   }
 }
 
-export function createHandler({store,drive}) {
+export function createHandler({store,drive,calendar}) {
   return async request => {
     try {
       const url = new URL(request.url);
@@ -197,15 +269,17 @@ export function createHandler({store,drive}) {
         const row=await store.get('id',b.id); if(!row) throw new Problem('Enquiry not found.',404);
         if(action==='accept') {
           if(row.status!=='pending') throw new Problem('This enquiry has already been reviewed.',409);
-          await store.patch(row.id,{status:'accepted',token_expires_at:new Date(Date.now()+30*86400000).toISOString()},'&status=eq.pending');
+          const saved=await store.patch(row.id,{status:'accepted',token_expires_at:new Date(Date.now()+30*86400000).toISOString()},'&status=eq.pending');
+          if(saved.length&&calendar)result={ok:true,calendar:await updateCalendar(store,calendar,saved[0])};
         } else if(action==='decline') {
           if(!['pending','accepted'].includes(row.status)) throw new Problem('Only unfinished enquiries can be declined.',409);
           const saved=await store.patch(row.id,{status:'declined'},`&status=eq.${row.status}`);
           if(!saved.length) throw new Problem('This enquiry changed. Refresh and try again.',409);
+          if(calendar)result={ok:true,calendar:await updateCalendar(store,calendar,saved[0])};
         } else if(action==='renew') {
           if(row.status!=='accepted') throw new Problem('This form is no longer awaiting details.',409);
           await store.patch(row.id,{details_token:Array.from(crypto.getRandomValues(new Uint8Array(32)),v=>v.toString(16).padStart(2,'0')).join(''),token_expires_at:new Date(Date.now()+30*86400000).toISOString()},'&status=eq.accepted');
-        } else if(action==='retry') result=await finalize(store,drive,row,row.details,'admin');
+        } else if(action==='retry') result=await finalize(store,drive,row,row.details,'admin',calendar);
         else if(action==='publish') {
           if(row.status!=='ready') throw new Problem('Finish the client details and Drive folder first.',409);
           if(!(await drive.files(row.drive_folder_id)).length) throw new Problem('Upload the finished files to the Drive folder before publishing.',409);
@@ -225,7 +299,7 @@ export function createHandler({store,drive}) {
           // A completed client link becomes a receipt, never a way to retrieve
           // submitted private details or discover the separate gallery link.
           result={status:row.status,...(row.status==='accepted' || admin ? {name:row.name,contact:row.contact,preferred_date:row.preferred_date,details:row.details} : {})};
-        } else result=await finalize(store,drive,row,b.details,admin?'admin':'client');
+        } else result=await finalize(store,drive,row,b.details,admin?'admin':'client',calendar);
       } else if(['gallery','file','preview'].includes(action)) {
         if(!TOKEN.test(b.token || '')) throw new Problem('Gallery unavailable.',404);
         const row=await store.get('gallery_token',b.token);

@@ -26,6 +26,7 @@ import '../styles/delivery.css';
 </Layout>
 <script>
 import {createClient} from '@supabase/supabase-js';
+import {calendarMessage} from '../lib/calendar-message.js';
 import {delivery} from '../lib/delivery-api.js';
 const form=document.getElementById('details-form');
 const status=document.getElementById('details-status');
@@ -66,6 +67,7 @@ form.addEventListener('submit',async e=>{
     const details=Object.fromEntries(new FormData(form));
     const r=await delivery('complete',{...target,details},await session());
     receipt(r.status);
+    if(id&&r.calendar)status.textContent+=' '+calendarMessage(r.calendar,'Details saved');
   }catch(e){status.textContent=e.message+' Your entries are still here; you can try again.';}
   finally{submitting=false;button.disabled=false;button.textContent='Complete details';}
 });

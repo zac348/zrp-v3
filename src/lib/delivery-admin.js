@@ -67,7 +67,7 @@ export function setupDeliveryAdmin(sb, options = {}) {
           const url=`${location.origin}/client-gallery#${row.gallery_token}`;
           button('Copy gallery link',async()=>{await copyPrivateLink(url);return 'Private gallery link copied.';});
           link('View gallery',url);
-          button('Unpublish',async()=>{await act('unpublish',{id:row.id});return 'Gallery hidden from clients.';});
+          button('Unpublish',async()=>{if(!confirm('Unpublish this gallery? Its private link will stop showing photographs until you publish it again.'))return;await act('unpublish',{id:row.id});return 'Gallery hidden from clients.';});
         }
       }
       article.append(actions);list.append(article);

@@ -1,0 +1,22 @@
+<!-- BOOKINGS -->
+  <div class="tab" id="tab-bookings">
+    <h1 class="main-title">Bookings</h1>
+    <p class="main-sub">Review new enquiries above. Accepted requests move into Active bookings below.</p>
+    <div class="delivery-controls">
+      <button class="btn-sm" id="delivery-refresh" type="button">Refresh</button>
+      <button class="btn-sm" id="delivery-check" type="button">Check Drive connection</button>
+    </div>
+    <p class="delivery-status" id="delivery-admin-status" role="status" aria-live="polite"></p>
+    <section class="booking-section" aria-labelledby="new-enquiries-heading">
+      <header class="booking-section-heading"><h2 id="new-enquiries-heading">New enquiries</h2><span id="booking-count-new">0</span></header>
+      <div id="booking-list-new"><p class="no-data">Loading enquiries…</p></div>
+    </section>
+    <section class="booking-section" aria-labelledby="active-bookings-heading">
+      <header class="booking-section-heading"><h2 id="active-bookings-heading">Active bookings</h2><span id="booking-count-active">0</span></header>
+      <div id="booking-list-active"><p class="no-data">Loading bookings…</p></div>
+    </section>
+    <details class="booking-section booking-history">
+      <summary>Completed &amp; declined <span id="booking-count-history">0</span></summary>
+      <div id="booking-list-history"></div>
+    </details>
+  </div>

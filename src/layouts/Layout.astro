@@ -2,6 +2,7 @@
 import '../styles/fonts.css';
 import '../styles/global.css';
 import '../styles/site.css';
+import Appearance from '../components/Appearance.astro';
 import { PRIMARY_CTA } from '../config.js';
 interface Props {
   title: string;
@@ -79,15 +80,7 @@ const authPage = path === '/login' || path === '/reset';
         <a href="/portfolio" aria-current={path === '/portfolio' ? 'page' : undefined}>Work</a>
         <a href="/#about">About</a>
         <a href={PRIMARY_CTA.href}>{PRIMARY_CTA.label === 'Get in touch' ? 'Contact' : PRIMARY_CTA.label}</a>
-        <details class="theme-picker" id="theme-picker">
-          <summary id="theme-toggle" aria-label="Appearance: System" title="Appearance: System"><svg width="17" height="17" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="7" stroke="currentColor"/><path d="M10 3a7 7 0 0 1 0 14Z" fill="currentColor"/></svg></summary>
-          <fieldset class="theme-options">
-            <legend>Appearance</legend>
-            <label><input type="radio" name="theme" value="system" checked/>System</label>
-            <label><input type="radio" name="theme" value="light"/>Light</label>
-            <label><input type="radio" name="theme" value="dark"/>Dark</label>
-          </fieldset>
-        </details>
+        <Appearance/>
       </nav>
     </header>}
     <main id="main-content" tabindex="-1"><slot/></main>

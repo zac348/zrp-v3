@@ -1,0 +1,43 @@
+---
+import Appearance from '../Appearance.astro';
+import { BOOKING_OPEN } from '../../config.js';
+---
+<aside class="sidebar">
+  <div class="studio-heading"><div class="sidebar-logo">Studio</div><Appearance/></div>
+  <nav class="sidebar-nav">
+    <button class="sb-link active" data-tab="overview">
+      Overview
+    </button>
+    <button class="sb-link" data-tab="upload">
+      Photos
+    </button>
+    <button class="sb-link" id="gallery-nav" data-tab="galleries">
+      Galleries
+    </button>
+    <button class="sb-link" id="bookings-nav" data-tab="bookings">
+      Bookings
+    </button>
+    {BOOKING_OPEN && (
+    <button class="sb-link" data-tab="calendar">
+      Availability
+    </button>
+    )}
+    <button class="sb-link" data-tab="pricing">
+      Pricing
+    </button>
+    {BOOKING_OPEN && (
+    <button class="sb-link" data-tab="coupons">
+      Coupons
+    </button>
+    )}
+    <button class="sb-link" data-tab="envelope">
+      Envelopes
+    </button>
+    <a class="sb-link" href="/" target="_blank">
+      View site
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <button class="logout-btn" data-action="doLogout">Sign out</button>
+  </div>
+</aside>

@@ -1,0 +1,30 @@
+<!-- COUPONS -->
+  <div class="tab" id="tab-coupons">
+    <h1 class="main-title">Coupons</h1>
+    <p class="main-sub">Create and manage discount codes for clients.</p>
+    <div class="coupon-form-card">
+      <div class="sec-label">new coupon</div>
+      <div class="coupon-form-grid">
+        <div class="field"><label for="cp-code">Code</label>
+      <input type="text" id="cp-code" placeholder="e.g. SUMMER25" data-input="uppercase"/></div>
+        <div class="field"><label for="cp-type">Type</label>
+      <select id="cp-type" data-change="onCouponTypeChange">
+            <option value="percent">Percentage off</option>
+            <option value="fixed">Fixed $ off</option>
+            <option value="travel">Negate travel fee</option>
+          </select>
+        </div>
+        <div class="field" id="cp-value-wrap"><label id="cp-value-label">Discount %</label><input type="number" id="cp-value" placeholder="e.g. 20" min="0"/></div>
+        <div class="field"><label for="cp-expires">Expires (optional)</label>
+      <input type="date" id="cp-expires"/></div>
+        <div class="field"><label for="cp-max-uses">Max uses (optional)</label>
+      <input type="number" id="cp-max-uses" placeholder="Unlimited"/></div>
+        <div class="field">
+          <label class="visually-hidden">.</label>
+          <button class="btn" data-action="createCoupon">Create coupon</button>
+        </div>
+      </div>
+    </div>
+    <div class="sec-label">all coupons</div>
+    <div class="coupon-list" id="coupon-list"><p class="no-data">No coupons yet.</p></div>
+  </div>

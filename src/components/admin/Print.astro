@@ -1,0 +1,27 @@
+<!-- ENVELOPES -->
+  <div class="tab" id="tab-envelope">
+    <h1 class="main-title">Print</h1>
+    <p class="main-sub">Create a print-ready 4×6 envelope for client deliveries.</p>
+    <div class="env-page">
+      <div class="env-controls">
+        <div class="sec-label">customize</div>
+        <div class="field"><label for="env-client">Client name</label>
+      <input type="text" id="env-client" placeholder="e.g. Smith Family" data-input="renderEnv"/></div>
+        <div class="field"><label for="env-style">Style</label>
+      <select id="env-style" data-change="renderEnv">
+            <option value="light">Light — white</option>
+            <option value="dark">Dark — black</option>
+          </select>
+        </div>
+        <div class="field"><label for="env-msg">Message</label>
+      <input type="text" id="env-msg" placeholder="Thank you for your order!" maxlength="60" data-input="renderEnv"/></div>
+        <button class="space-top btn" data-action="downloadEnv">Download PNG</button>
+        <p class="muted-note space-top">Print at 6×4 inches</p>
+        <a href="/coupon-card" target="_blank" class="muted-note space-top">Open coupon card generator →</a>
+      </div>
+      <div>
+        <div class="sec-label">preview</div>
+        <div class="canvas-wrap"><canvas id="env-canvas"></canvas></div>
+      </div>
+    </div>
+  </div>

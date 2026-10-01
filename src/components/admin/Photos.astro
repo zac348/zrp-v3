@@ -1,0 +1,73 @@
+<!-- UPLOAD -->
+  <div class="tab" id="tab-upload">
+    <h1 class="main-title">Photos</h1>
+    <p class="main-sub">Add photos to your portfolio or a client gallery.</p>
+    <div class="field"><label for="up-sport">Category</label>
+      <select id="up-sport">
+        <option value="">Select category…</option>
+        <option>Portraits</option><option>Family</option><option>Seniors</option>
+        <option>Couples</option><option>Events</option><option>Sports</option>
+        <option>Branding</option><option>Landscape</option><option>Nature</option><option>Other</option>
+      </select>
+    </div>
+    <div class="field"><label for="up-gallery">Client gallery (optional)</label>
+      <select id="up-gallery"><option value="">None — not for a client</option></select></div>
+    <div class="actions">
+      <div class="grow field"><label for="up-title">Title (optional)</label>
+      <input type="text" id="up-title" placeholder="e.g. Friday night lights"/></div>
+      <div class="grow field"><label for="up-location">Location (optional)</label>
+      <input type="text" id="up-location" placeholder="e.g. Bazemore-Hyder Stadium"/></div>
+    </div>
+    <p class="muted-note">Applies to every file in this upload — edit per photo after with the Edit button.</p>
+    <div class="actions">
+      <input type="checkbox" id="up-portfolio"/>
+      <label for="up-portfolio" class="muted-note">Add to the public Portfolio page</label>
+    </div>
+    <p class="muted-note">Photos are automatically resized for the web on upload — the full-size original is kept for client downloads.</p>
+    <div class="drop-zone" id="drop-zone"><button class="btn-sm" type="button" data-action="chooseFiles">Choose photographs</button>
+      <input type="file" id="file-input" accept="image/*" multiple/>
+      <p class="drop-text">Click to select photos, or drag & drop</p>
+      <p class="drop-sub">JPG, PNG, WEBP — multiple OK</p>
+    </div>
+    <div class="prog-wrap" id="prog-wrap" hidden><progress id="prog-bar" max="100" value="0" aria-label="Upload progress"></progress></div>
+    <p class="upload-status" id="up-status" role="status" aria-live="polite"></p>
+    <div class="sec-label">all photos</div>
+    <div id="optimize-row" hidden>
+      <button class="btn-sm" id="optimize-btn" data-action="optimizeExisting">Optimize existing photos</button>
+      <span id="optimize-status" role="status" class="muted-note"></span>
+    </div>
+    <div class="bulk-bar" id="bulk-bar">
+      <div class="bulk-left">
+        <label class="bulk-select-all">
+          <input type="checkbox" id="select-all-cb" data-change="toggleSelectAll" data-args="[&quot;$checked&quot;]"/>
+          <span id="bulk-count">0 selected</span>
+        </label>
+      </div>
+      <div class="bulk-actions" id="bulk-actions" hidden>
+        <div class="actions">
+          <select id="bulk-sport" class="bulk-select">
+            <option value="">Change category…</option>
+            <option>Portraits</option><option>Family</option><option>Seniors</option>
+            <option>Couples</option><option>Events</option><option>Sports</option>
+            <option>Branding</option><option>Landscape</option><option>Nature</option><option>Other</option>
+          </select>
+          <button class="btn-sm on-ink" data-action="bulkChangeSport">Apply</button>
+        </div>
+        <div class="actions">
+          <select id="bulk-gallery" class="bulk-select"><option value="">Add to gallery…</option></select>
+          <button class="btn-sm on-ink" data-action="bulkAddToGallery">Apply</button>
+        </div>
+        <div class="actions">
+          <select id="bulk-portfolio" class="bulk-select">
+            <option value="">Portfolio page…</option>
+            <option value="add">Add to Portfolio</option>
+            <option value="remove">Remove from Portfolio</option>
+          </select>
+          <button class="btn-sm on-ink" data-action="bulkSetPortfolio">Apply</button>
+        </div>
+        <button class="btn-sm on-ink" data-action="bulkSetLocation">Set location</button>
+        <button class="btn-sm red" data-action="bulkDelete">Delete selected</button>
+      </div>
+    </div>
+    <div class="photos-grid" id="photos-grid"><p class="no-data">No photos yet.</p></div>
+  </div>

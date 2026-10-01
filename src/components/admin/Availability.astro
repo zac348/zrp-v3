@@ -1,0 +1,61 @@
+<!-- AVAILABILITY -->
+  <div class="tab" id="tab-calendar">
+    <h1 class="main-title">Availability</h1>
+    <p class="main-sub" id="avail-sub">Click any date to mark it available, partial, or unavailable.</p>
+
+    <!-- Bulk bar -->
+    <div class="cal-bulk-bar" id="cal-bulk-bar">
+      <span class="bulk-bar-label" id="bulk-count-label">0 days selected</span>
+      <button class="btype-btn" data-action="applyBulk" data-args="[&quot;unavailable&quot;]">Full day — unavailable</button>
+      <button class="btype-btn" data-action="applyBulk" data-args="[&quot;available&quot;]">Mark available</button>
+      <button class="btype-btn" data-action="applyBulk" data-args="[&quot;clear&quot;]">Clear</button>
+      <button class="btn-sm" data-action="toggleBulkMode">Cancel bulk</button>
+    </div>
+
+    <div class="actions">
+      <button class="btn-sm" id="bulk-mode-btn" data-action="toggleBulkMode">Bulk select</button>
+    </div>
+
+    <div class="cal-wrap">
+      <div class="cal-header">
+        <span class="cal-month" id="cal-month-label"></span>
+        <div class="cal-nav">
+          <button class="cal-nav-btn" data-action="shiftMonth" data-args="[-1]" aria-label="Previous month"></button>
+          <button class="cal-nav-btn" data-action="shiftMonth" data-args="[1]" aria-label="Next month"></button>
+        </div>
+      </div>
+      <div class="cal-grid">
+        <div class="cal-dow">Sun</div><div class="cal-dow">Mon</div><div class="cal-dow">Tue</div>
+        <div class="cal-dow">Wed</div><div class="cal-dow">Thu</div><div class="cal-dow">Fri</div><div class="cal-dow">Sat</div>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+      <div class="cal-legend">
+        <div class="cal-legend-item">Unavailable</div>
+        <div class="cal-legend-item">Partial</div>
+        <div class="cal-legend-item">Available</div>
+      </div>
+    </div>
+    <div class="day-editor" id="day-editor">
+      <div class="day-editor-title" id="editor-title"></div>
+      <div class="block-type-row">
+        <button class="btype-btn" id="btn-unavail" data-action="setBlockType" data-args="[&quot;unavailable&quot;]">Full day — unavailable</button>
+        <button class="btype-btn" id="btn-partial" data-action="setBlockType" data-args="[&quot;partial&quot;]">Partial block</button>
+        <button class="btype-btn" id="btn-avail" data-action="setBlockType" data-args="[&quot;available&quot;]">Mark available</button>
+        <button class="btype-btn" id="btn-clear" data-action="setBlockType" data-args="[&quot;clear&quot;]">Clear</button>
+      </div>
+      <div class="time-row hidden" id="time-row">
+        <div class="field"><label for="block-start">From</label>
+      <input type="time" id="block-start" value="09:00"/></div>
+        <div class="field"><label for="block-end">To</label>
+      <input type="time" id="block-end" value="17:00"/></div>
+      </div>
+      <div class="field"><label for="block-note">Note (optional)</label>
+      <input type="text" id="block-note" placeholder="e.g. Session booked"/></div>
+      <div class="editor-actions">
+        <button class="btn" data-action="saveBlock">Save</button>
+        <button class="btn-sm" data-action="closeEditor">Cancel</button>
+      </div>
+    </div>
+    <div class="sec-label">blocks this month</div>
+    <div class="blocks-list" id="blocks-list"><p class="no-data">No blocks set.</p></div>
+  </div>

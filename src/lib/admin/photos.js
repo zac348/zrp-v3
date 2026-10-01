@@ -1,3 +1,4 @@
+import {confirmChange, promptValue} from './dialog.js';
 import {checked, checkedFetch, esc, toast, fmtBytes} from './shared.js';
 export function setupPhotos(ctx) {
   const {sb,state}=ctx;
@@ -80,9 +81,9 @@ function metaColError(error) { return 'Error: ' + (error?.message || 'unknown');
 async function editPhotoMeta(id) {
   const p = state.photos.find(x => x.id === id);
   if (!p) return;
-  const title = prompt('Photo title (leave blank for none):', p.title || '');
+  const title = await promptValue('Photo title (leave blank for none):', p.title || '');
   if (title === null) return;
-  const location = prompt('Location (leave blank for none):', p.location || '');
+  const location = await promptValue('Location (leave blank for none):', p.location || '');
   if (location === null) return;
   const { error } = await sb.from('portfolio_photos')
     .update({ title: title.trim() || null, location: location.trim() || null })
@@ -93,7 +94,7 @@ async function editPhotoMeta(id) {
 
 async function bulkSetLocation() {
   if (!selectedPhotoIds.size) return;
-  const loc = prompt('Location for ' + selectedPhotoIds.size + ' photo(s) — blank clears it:', '');
+  const loc = await promptValue('Location for ' + selectedPhotoIds.size + ' photo(s) — blank clears it:', '');
   if (loc === null) return;
   const { error } = await sb.from('portfolio_photos')
     .update({ location: loc.trim() || null })
@@ -139,7 +140,7 @@ function photoKeys(p) {
 }
 
 async function delPhoto(id, storagePath) {
-  if (!confirm('Delete this photo? This cannot be undone.')) return;
+  if (!await confirmChange('Delete this photo? This cannot be undone.')) return;
   const photo = state.photos.find(p => p.id === id);
   const keys = photo ? photoKeys(photo) : (storagePath ? [storagePath] : []);
   if (keys.length) {
@@ -191,7 +192,7 @@ async function bulkSetPortfolio() {
 
 async function bulkDelete() {
   if (!selectedPhotoIds.size) return;
-  if (!confirm(`Delete ${selectedPhotoIds.size} photo(s)? This cannot be undone.`)) return;
+  if (!await confirmChange(`Delete ${selectedPhotoIds.size} photo(s)? This cannot be undone.`)) return;
   const ids = [...selectedPhotoIds];
   const photos = state.photos.filter(p => ids.includes(p.id));
   const paths = photos.flatMap(photoKeys);
@@ -215,6 +216,7 @@ dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classL
 dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
 dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
 fileInput.addEventListener('change', e => handleFiles(e.target.files));
+let uploading=false;
 
 // ── IMAGE RESIZING ──
 // Phones and laptops should never download a 14 MB original. On upload we make
@@ -250,14 +252,16 @@ async function uploadBlob(blob, filename) {
 }
 
 async function handleFiles(files) {
-  if (!files?.length) return;
+  if (!files?.length || uploading) return;
+  uploading=true;fileInput.disabled=true;
   const sport   = document.getElementById('up-sport').value;
   const galId   = document.getElementById('up-gallery').value || null;
   const onPort  = document.getElementById('up-portfolio').checked;
   const progWrap = document.getElementById('prog-wrap');
   const progBar  = document.getElementById('prog-bar');
   const status   = document.getElementById('up-status');
-  progWrap.hidden = false; let done = 0;
+  progWrap.hidden = false; let done = 0, failed = 0; const issues=[];
+  try {
 
   for (const file of files) {
     let orig, web = null, thumb = null, dims = null;
@@ -276,7 +280,8 @@ async function handleFiles(files) {
     } catch (e) {
       // Resizing failed (odd format, memory) — still save the original so nothing is lost
       status.textContent = `${file.name}: ${e.message}`;
-      if (!orig) continue;
+      if (!orig) {failed++;issues.push(file.name+': '+e.message);continue;}
+      issues.push(file.name+': original saved; previews need optimization.');
     }
 
     const upTitle = document.getElementById('up-title').value.trim() || null;
@@ -293,17 +298,17 @@ async function handleFiles(files) {
       width: dims?.width || null,
       height: dims?.height || null,
     };
-    const { error: insErr } = await checked(sb.from('portfolio_photos').insert(row));
-    if (insErr) { status.textContent = 'Error: ' + insErr.message; continue; }
+    const { error: insErr } = await sb.from('portfolio_photos').insert(row);
+    if (insErr) {failed++;issues.push(file.name+': '+insErr.message);continue;}
     done++;
     progBar.value = Math.round((done / files.length) * 100);
   }
 
-  progWrap.hidden = true; progBar.value = 0;
-  status.textContent = `✓ ${done} photo(s) uploaded`;
-  fileInput.value = '';
+  status.textContent = `${done} photo(s) uploaded`+(failed?`, ${failed} failed. `:'. ')+issues.join(' ');
   await loadPhotos(); ctx.overview.render();
-  toast(done + ' photo(s) uploaded');
+  toast(`${done} photo(s) uploaded`+(failed?`, ${failed} failed`:''));
+  } catch(error) {status.textContent='Upload could not finish: '+error.message;toast('Check the upload status before trying again.');}
+  finally {uploading=false;fileInput.disabled=false;progWrap.hidden=true;progBar.value=0;fileInput.value='';}
 }
 
 function syncOptimizeButton() {
@@ -321,7 +326,7 @@ async function optimizeExisting() {
   const status = document.getElementById('optimize-status');
 
   if (!todo.length) { toast('Every photo is already optimized'); return; }
-  if (!confirm(`Optimize ${todo.length} photo(s)?\n\nThis downloads each one, makes web + thumbnail versions, and uploads them. Originals are kept. You can leave this running.`)) return;
+  if (!await confirmChange(`Optimize ${todo.length} photo(s)?\n\nThis downloads each one, makes web + thumbnail versions, and uploads them. Originals are kept. You can leave this running.`)) return;
 
   btn.disabled = true;
   let done = 0, failed = 0, savedBytes = 0;

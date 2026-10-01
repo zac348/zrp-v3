@@ -1,3 +1,4 @@
+import {confirmChange} from './dialog.js';
 import {checked, checkedFetch, esc, toast, fmtBytes} from './shared.js';
 export function setupPricing(ctx) {
   const {sb,state}=ctx;
@@ -94,7 +95,7 @@ async function seedAddons() {
 }
 
 async function deleteAddon(id) {
-  if (!confirm('Delete this add-on? Clients will no longer see it.')) return;
+  if (!await confirmChange('Delete this add-on? Clients will no longer see it.')) return;
   const { error } = await checked(sb.from('addon_pricing').delete().eq('id', id));
   if (error) { toast('Could not delete: ' + error.message); return; }
   await loadPricing(); toast('Add-on deleted');

@@ -1,3 +1,4 @@
+import {confirmChange} from './dialog.js';
 import {checked, checkedFetch, esc, toast, fmtBytes} from './shared.js';
 export function setupGalleries(ctx) {
   const {sb,state}=ctx;
@@ -50,7 +51,7 @@ async function createGallery() {
 }
 
 async function deleteGallery(id, name) {
-  if (!confirm(`Delete gallery "${name}"? Photos will not be deleted.`)) return;
+  if (!await confirmChange(`Delete gallery "${name}"? Photos will not be deleted.`)) return;
   await checked(sb.from('portfolio_photos').update({ gallery_id: null }).eq('gallery_id', id));
   await checked(sb.from('client_galleries').delete().eq('id', id));
   await ctx.photos.load();await loadGalleries(); toast('Gallery deleted');

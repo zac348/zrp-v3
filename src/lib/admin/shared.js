@@ -19,6 +19,10 @@ export function bindActions(actions) {
     const el=e.target.closest('[data-'+attr+']');if(!el)return;
     const fn=actions[el.dataset[attr]];if(!fn)return;
     const args=JSON.parse(el.dataset.args||'[]').map(arg=>arg==='$checked'?el.checked:arg);
+    const button=event==='click'&&el.tagName==='BUTTON';
+    if(button&&el.disabled)return;
+    if(button)el.disabled=true;
     try{await fn(...args);}catch(error){toast(error.message||'The change could not be saved.');}
+    finally{if(button)el.disabled=false;}
   });
 }

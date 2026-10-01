@@ -1,3 +1,4 @@
+import {confirmChange} from './dialog.js';
 import {checked, checkedFetch, esc, toast, fmtBytes} from './shared.js';
 export function setupCoupons(ctx) {
   const {sb,state}=ctx;
@@ -70,7 +71,7 @@ async function toggleCoupon(id, active) {
 }
 
 async function deleteCoupon(id) {
-  if (!confirm('Delete this coupon?')) return;
+  if (!await confirmChange('Delete this coupon?')) return;
   await checked(sb.from('coupons').delete().eq('id', id));
   await loadCoupons(); toast('Coupon deleted');
 }

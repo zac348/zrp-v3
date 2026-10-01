@@ -1,3 +1,4 @@
+import {confirmChange} from './dialog.js';
 import {checked, checkedFetch, esc, toast, fmtBytes} from './shared.js';
 export function setupAvailability(ctx) {
   const {sb,state}=ctx;
@@ -27,7 +28,7 @@ function updateCalBulkBar() {
 
 async function applyBulk(type) {
   if (!selectedDates.size) { toast('No days selected'); return; }
-  if(!confirm('Replace availability for '+selectedDates.size+' selected day(s)?'))return;
+  if(!await confirmChange('Replace availability for '+selectedDates.size+' selected day(s)?'))return;
   const dates = [...selectedDates];
   for (const date of dates) {
     await checked(sb.from('availability').delete().eq('date', date));
@@ -150,7 +151,7 @@ function setBlockType(type) {
 
 async function saveBlock() {
   if (!selectedDate || !blockType) { toast('Pick a type first'); return; }
-  if (!confirm('Replace availability for '+selectedDate+'?'))return;
+  if (!await confirmChange('Replace availability for '+selectedDate+'?'))return;
   if(blockType==='partial'&&document.getElementById('block-start').value>=document.getElementById('block-end').value){toast('End time must be after start time');return;}
   if (blockType === 'clear') {
     await checked(sb.from('availability').delete().eq('date', selectedDate));
@@ -175,7 +176,7 @@ async function saveBlock() {
 }
 
 async function deleteBlock(id) {
-  if(!confirm('Remove this availability block?'))return;
+  if(!await confirmChange('Remove this availability block?'))return;
   await checked(sb.from('availability').delete().eq('id', id));
   const { data } = await checked(sb.from('availability').select('*').order('date'));
   state.blocks = data || [];

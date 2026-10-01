@@ -1,3 +1,4 @@
+import {confirmChange} from './admin/dialog.js';
 import {delivery,copyPrivateLink} from './delivery-api.js';
 import {calendarMessage} from './calendar-message.js';
 import {groupBookings} from './booking-groups.js';
@@ -25,7 +26,7 @@ export function setupDeliveryAdmin(sb, options = {}) {
       if(!entries.length)list.append(node('p',key==='new'?'No new enquiries.':key==='active'?'No active bookings.':'No completed or declined bookings.','no-data'));
       for(const {row,source} of entries) {
 
-      const article=node('article',null,'delivery-row');
+      const article=node('article',null,'delivery-row');article.id='delivery-'+row.id;
       const head=node('div',null,'delivery-row-head');
       const title=node('h3',row.details?.name || row.name);
       head.append(title,node('span',labels[row.status] || row.status,'delivery-state'));
@@ -43,9 +44,14 @@ export function setupDeliveryAdmin(sb, options = {}) {
       function button(label,fn) {
         const b=node('button',label,'btn-sm');b.type='button';b.disabled=busy;
         b.addEventListener('click',async()=>{
-          if(busy)return;busy=true;render();show('Working…');
+          if(busy)return;busy=true;b.disabled=true;show('Working…');
           try {const message=await fn();await load();if(message)show(message);}
-          catch(e){show(e.message);}finally{busy=false;render();}
+          catch(e){show(e.message);}finally{
+            busy=false;render();
+            const next=[...document.querySelectorAll('#delivery-'+row.id+' button')].find(button=>button.textContent===label);
+            if(next&&next.getClientRects().length)next.focus({preventScroll:true});
+            else {status.tabIndex=-1;status.focus({preventScroll:true});}
+          }
         }); actions.append(b);
       }
       function link(label,url) {const a=node('a',label,'btn-sm');a.href=url;a.target='_blank';a.rel='noopener noreferrer';actions.append(a);}
@@ -55,11 +61,11 @@ export function setupDeliveryAdmin(sb, options = {}) {
         if(!expired) button('Copy client form link',async()=>{await copyPrivateLink(`${location.origin}/client-details#${row.details_token}`);return 'Private form link copied. It expires in 30 days from acceptance.';});
         link('Fill in details',`/client-details?id=${row.id}`);
         button(expired?'Renew expired link':'Replace form link',async()=>{
-          if(!confirm('Replace the private form link? The previous link will stop working.'))return;
+          if(!await confirmChange('Replace the private form link? The previous link will stop working.'))return;
           await act('renew',{id:row.id});return 'New form link created. Use Copy client form link.';
         });
       }
-      if(['pending','accepted'].includes(row.status)) button('Decline',async()=>{if(confirm('Decline this enquiry? Its private form will become unavailable.')){const result=await act('decline',{id:row.id});return calendarMessage(result.calendar,'Declined')||'Enquiry declined.';}});
+      if(['pending','accepted'].includes(row.status)) button('Decline',async()=>{if(await confirmChange('Decline this enquiry? Its private form will become unavailable.')){const result=await act('decline',{id:row.id});return calendarMessage(result.calendar,'Declined')||'Enquiry declined.';}});
       if(row.status==='folder_error' || row.status==='processing') button('Retry folder',async()=>{const r=await act('retry',{id:row.id});return r.status==='ready'?(calendarMessage(r.calendar,'Details saved')||'Drive folder is ready.'):r.status==='processing'?'Still creating the folder. Refresh shortly.':r.message;});
       if(['ready','published'].includes(row.status)) {
         link('Open photo folder',`https://drive.google.com/drive/folders/${encodeURIComponent(row.drive_folder_id)}`);
@@ -68,7 +74,7 @@ export function setupDeliveryAdmin(sb, options = {}) {
           const url=`${location.origin}/client-gallery#${row.gallery_token}`;
           button('Copy gallery link',async()=>{await copyPrivateLink(url);return 'Private gallery link copied.';});
           link('View gallery',url);
-          button('Unpublish',async()=>{if(!confirm('Unpublish this gallery? Its private link will stop showing photographs until you publish it again.'))return;await act('unpublish',{id:row.id});return 'Gallery hidden from clients.';});
+          button('Unpublish',async()=>{if(!await confirmChange('Unpublish this gallery? Its private link will stop showing photographs until you publish it again.'))return;await act('unpublish',{id:row.id});return 'Gallery hidden from clients.';});
         }
       }
       article.append(actions);list.append(article);

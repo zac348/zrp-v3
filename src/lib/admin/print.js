@@ -12,9 +12,9 @@ const envCanvas = document.getElementById('env-canvas');
     const msg     = document.getElementById('env-msg')?.value || '';
     const bg    = isDark ? '#202020' : '#f8f8f8';
     const ink   = isDark ? '#f8f8f8' : '#202020';
-    const text2 = isDark ? '#9A9997' : '#6B6967';
-    const text3 = isDark ? '#5A5957' : '#AEADA9';
-    const bdr   = isDark ? '#2E2D2C' : '#E5E5E0';
+    const text2 = isDark ? '#b8b8b8' : '#5e5e5e';
+    const text3 = isDark ? '#b8b8b8' : '#5e5e5e';
+    const bdr   = isDark ? '#505050' : '#d4d4d4';
 
     envCtx.clearRect(0,0,envCanvas.width,envCanvas.height);
     envCtx.fillStyle = bg; envCtx.fillRect(0,0,envCanvas.width,envCanvas.height);

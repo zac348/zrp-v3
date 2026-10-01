@@ -9,11 +9,12 @@ const coverOpen=document.getElementById('cover-open');
 const coverLoading=document.getElementById('cover-loading');
 let coverVersion=0;
 function coverPhoto(index) {
+  if(!featured.length)return;
   coverIndex=(index+featured.length)%featured.length;
   const photo=featured[coverIndex];
   const version=++coverVersion;
   coverImage.alt=photoAlt(photo);coverImage.hidden=false;
-  coverImage.onload=()=>{if(version===coverVersion){coverLoading.hidden=true;document.querySelector('.cover-stage').setAttribute('aria-busy','false');}};
+  coverImage.onload=()=>{if(version===coverVersion){coverLoading.hidden=true;if(!matchMedia('(prefers-reduced-motion: reduce)').matches)coverImage.animate([{opacity:.15},{opacity:1}],{duration:version===1?400:180,easing:'cubic-bezier(.2,0,.2,1)'});document.querySelector('.cover-stage').setAttribute('aria-busy','false');}};
   coverImage.onerror=()=>{if(version===coverVersion){coverImage.hidden=true;coverLoading.hidden=false;coverLoading.textContent='This photograph couldn’t load. Try the next one.';document.querySelector('.cover-stage').setAttribute('aria-busy','false');}};
   coverImage.width=photo.width||2200;coverImage.height=photo.height||1467;
   coverImage.sizes='100vw';coverImage.srcset=photo.thumb_url&&photo.web_url?`${photo.thumb_url} 700w, ${photo.web_url} 2200w`:'';
@@ -73,8 +74,8 @@ let touchX=null;
 cover.addEventListener('touchstart',e=>touchX=e.changedTouches[0].clientX,{passive:true});
 cover.addEventListener('touchend',e=>{const delta=e.changedTouches[0].clientX-touchX;if(touchX!==null&&Math.abs(delta)>50&&featured.length)coverPhoto(coverIndex+(delta<0?1:-1));touchX=null;},{passive:true});
 const header=document.querySelector('.site-header'),cta=document.getElementById('mobile-cta');
-let pastCover=false,contactVisible=false;
-const updateCTA=()=>cta.hidden=!pastCover||contactVisible;
+let pastCover=false,contactVisible=false,footerVisible=false;
+const updateCTA=()=>cta.hidden=!pastCover||contactVisible||footerVisible;
 new IntersectionObserver(([entry])=>{pastCover=!entry.isIntersecting;header.classList.toggle('over-photo',entry.isIntersecting);updateCTA();},{threshold:0}).observe(cover);
 new IntersectionObserver(([entry])=>{contactVisible=entry.isIntersecting;updateCTA();},{threshold:0}).observe(document.getElementById('contact'));
 
@@ -97,3 +98,5 @@ form.addEventListener('submit',async event=>{
   }catch(_){status.classList.add('err');status.textContent='Your message didn’t go through. Please try again, or text 229–300–1006.';button.disabled=false;button.firstElementChild.textContent='Send enquiry';}
   finally{submitting=false;}
 });
+
+new IntersectionObserver(([entry])=>{footerVisible=entry.isIntersecting;updateCTA();},{threshold:0}).observe(document.querySelector('.site-footer'));

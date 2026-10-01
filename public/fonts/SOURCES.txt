@@ -1,0 +1,5 @@
+Bodoni Moda and Public Sans: Google Fonts, OFL 1.1.
+Downloaded 2026-10-01 from fonts.gstatic.com; licensed under the adjacent license files.
+Variable WOFF2, normal style; Latin and extended Latin subsets.
+Bodoni Moda weights 400–500; Public Sans weights 400–600.
+No third-party font request is made by the website.

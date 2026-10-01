@@ -124,7 +124,7 @@ function render() {
   // Client name
   if (client) {
     ctx.fillStyle = text2;
-    ctx.font = '300 32px "Public Sans", sans-serif';
+    ctx.font = '400 32px "Public Sans", sans-serif';
     ctx.fillText('For: ' + client, 60, 180);
   }
 
@@ -141,7 +141,7 @@ function render() {
   ctx.letterSpacing = '0px';
 
   ctx.fillStyle = text1;
-  ctx.font = '700 80px "Public Sans", sans-serif';
+  ctx.font = '600 80px "Public Sans", sans-serif';
   ctx.letterSpacing = '6px';
   ctx.fillText(code, 60, client ? 630 : 610);
   ctx.letterSpacing = '0px';

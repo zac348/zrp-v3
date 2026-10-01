@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import FormField from '../components/FormField.astro';
 import StatusMessage from '../components/StatusMessage.astro';
 import { BOOKING_OPEN } from '../config.js';
 import '../styles/book.css';
@@ -11,10 +12,10 @@ import '../styles/book.css';
     <section aria-labelledby="package-heading"><h2 class="step-heading" id="package-heading">1. Package</h2><div class="pkg-grid" id="pkg-grid"><StatusMessage>Loading packages…</StatusMessage></div></section>
     <div class="booking-columns"><form id="book-form"><h2 class="step-heading">2. Your details</h2><div class="hp-field" aria-hidden="true"><label for="f-website">Website</label><input type="text" id="f-website" name="website" tabindex="-1" autocomplete="off"/></div>
     <div class="form-grid">
-      <div class="field"><label for="f-first">First name</label><input type="text" id="f-first" placeholder="Jordan" required/></div>
-      <div class="field"><label for="f-last">Last name</label><input type="text"  id="f-last"  placeholder="Smith"  required/></div>
-      <div class="field"><label for="f-email">Email</label><input type="email" id="f-email" placeholder="you@email.com" required/></div>
-      <div class="field"><label for="f-phone">Phone</label><input type="tel" id="f-phone" placeholder="(229) 555-0100"/></div>
+      <FormField id="f-first" label="First name" type="text" placeholder="Jordan" required/>
+      <FormField id="f-last" label="Last name" type="text" placeholder="Smith" required/>
+      <FormField id="f-email" label="Email" type="email" placeholder="you@email.com" required/>
+      <FormField id="f-phone" label="Phone" type="tel" placeholder="(229) 555-0100"/>
 
       <hr class="divider"/>
 

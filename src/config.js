@@ -6,8 +6,8 @@
 //          on the homepage. Old /book and /quick-book links redirect there too.
 //   true   Buttons say "Book a session" and go to /book, like before.
 //
-// Either way, clients already mid-booking can still finish at their /confirm
-// link, invoices and client galleries keep working, and admin is unaffected.
+// Either way, private client-details links and galleries keep working.
+// Old confirmation and invoice links explain how to contact Zachary.
 //
 // To change it: flip the value below, commit, and push. Live in ~2 minutes.
 export const BOOKING_OPEN = true;

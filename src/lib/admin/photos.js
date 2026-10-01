@@ -31,12 +31,12 @@ function renderPhotos() {
       <img src="${esc(p.thumb_url || p.web_url || p.url)}" alt="" loading="lazy" decoding="async"
         data-action="photoCardClick" data-args="${esc(JSON.stringify([p.id]))}"/>
       <div class="photo-card-info">
-        <div class="photo-sport">${esc(p.sport || 'No category')}${p.location ? ' · ' + esc(p.location) : ''}${p.on_portfolio ? ' · <span>◆ Portfolio</span>' : ''}</div>
+        <div class="photo-sport">${esc(p.sport || 'No category')}${p.location ? ' · ' + esc(p.location) : ''}${p.on_portfolio ? ' · <span>Portfolio</span>' : ''}</div>
         <div class="photo-name">${esc(p.title || p.file_name)}</div>
       </div>
       <div class="photo-actions">
         <button class="btn-sm" data-action="editPhotoMeta" data-args="${esc(JSON.stringify([p.id]))}">Edit</button>
-        <button class="btn-sm red" data-action="delPhoto" data-args="${esc(JSON.stringify([p.id, p.storage_path]))}">Del</button>
+        <button class="btn-sm red" data-action="delPhoto" data-args="${esc(JSON.stringify([p.id, p.storage_path]))}">Delete</button>
       </div>
     </div>`).join('');
   updateBulkBar();

@@ -76,7 +76,6 @@ Online self-service booking remains off. The older Bookings tab, confirmation li
 - Edge Function: `delivery`; JWT gateway verification is disabled because enquiries and private-link forms are public routes. Every admin action independently verifies the Supabase session and the `delivery_admins` allowlist.
 - Secret: `GOOGLE_SERVICE_ACCOUNT_JSON`, held only by Supabase.
 - Parent Shared drive: `0AHwV0eI44SAaUk9PVA`; optionally override with `GOOGLE_DRIVE_PARENT_ID`.
-- `scripts/setup-delivery.py` applies the migration using the existing Supabase CLI login without printing the token.
 - Deploy with `npx --yes supabase@2.118.0 functions deploy delivery --project-ref jrowfpgezkfeyzfyzfps --use-api`.
 - Grant another trusted studio admin access by adding their existing `auth.users.id` to `delivery_admins` through an authorized database administrator.
 - Album listing currently loads the most recent 500 enquiries. Gallery files are paged from Drive and displayed 24 at a time.

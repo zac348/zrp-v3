@@ -128,6 +128,7 @@ function ownerEmail(f, senderEmail) {
     ${rows.map(([k, v]) => `<div style="display:flex;justify-content:space-between;gap:16px;padding:6px 0;border-bottom:1px solid #e8e7e6;font-size:12px"><span style="color:#999;flex-shrink:0">${k}</span><span style="font-weight:500;text-align:right">${esc(v)}</span></div>`).join('')}
   </div>
   <p style="font-size:14px;line-height:1.7;white-space:pre-wrap;margin:0 0 24px">${esc(f.message)}</p>
+  <p style="font-size:13px;margin:0 0 20px"><a href="https://zrphotos.net/admin#enquiries">Review this enquiry in the admin panel</a></p>
   <p style="font-size:11px;color:#bbb;line-height:1.7;margin:0">${senderEmail
     ? 'Reply to this email to answer them directly.'
     : 'They left a phone number — text or call them.'}</p>`);

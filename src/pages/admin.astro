@@ -376,7 +376,7 @@ html,body { height: 100% }
     <button class="sb-link" onclick="switchTab('upload',this)">
       <svg viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/></svg>Photos
     </button>
-    <button class="sb-link" onclick="switchTab('galleries',this)">
+    <button class="sb-link" id="gallery-nav" onclick="switchTab('galleries',this)">
       <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Galleries
     </button>
     <button class="sb-link" onclick="switchTab('bookings',this)">
@@ -413,6 +413,7 @@ html,body { height: 100% }
   <div class="tab active" id="tab-overview">
     <h1 class="main-title">Dashboard</h1>
     <p class="main-sub">Welcome back, Zachary.</p>
+    <p style="margin-bottom:24px"><a href="#enquiries" onclick="switchTab('galleries',document.getElementById('gallery-nav'))">Review contact enquiries and client albums</a></p>
     <div class="stats-row">
       <div class="stat"><div class="stat-n" id="st-photos">—</div><div class="stat-l">Photos</div></div>
       <div class="stat"><div class="stat-n" id="st-galleries">—</div><div class="stat-l">Galleries</div></div>
@@ -696,7 +697,7 @@ const sb = createClient(
 const loadDeliveries = setupDeliveryAdmin(sb);
 sb.auth.getSession().then(({ data }) => {
   if (!data.session) window.location.href = '/login';
-  else loadAll();
+  else { loadAll(); if(location.hash==='#enquiries') switchTab('galleries',document.getElementById('gallery-nav')); }
 });
 
 async function doLogout() { await sb.auth.signOut(); window.location.href = '/login'; }

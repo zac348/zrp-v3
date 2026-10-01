@@ -117,7 +117,7 @@ export class Drive {
       const result = await this.json(`files?${q}`); all.push(...(result.files || [])); next = result.nextPageToken;
       if (all.length > 10000) throw new Problem('This album is too large to display. Please split it into smaller albums.', 413);
     } while(next);
-    return all;
+    return all.filter(f=>!f.mimeType.startsWith('application/vnd.google-apps.'));
   }
   async file(folder, id, preview = false) {
     if (!FILE.test(id || '')) throw new Problem('File not found.', 404);

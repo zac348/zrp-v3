@@ -68,7 +68,7 @@ The client-details link and gallery link are separate random secrets. Completed 
 
 The **Check Drive connection** button verifies that the service account can add children in the configured Shared drive. It does not create a folder.
 
-Online self-service booking remains off. The older Bookings tab, confirmation links, invoices, and existing R2 galleries continue to work independently. New contact enquiries are managed in Galleries, not the older Bookings tab.
+Package booking is enabled at `/book`. Requests use current server-verified package, add-on, and promo pricing and appear as draft albums in Galleries. `/quick-book` redirects to this same form. Accepting does not create a Drive folder; completing the private details form does. Dates and totals remain requests/estimates until Zachary confirms them. The older Bookings tab, confirmation links, invoices, and existing R2 galleries continue to work independently. New contact enquiries are managed in Galleries, not the older Bookings tab.
 
 ### Delivery service deployment
 

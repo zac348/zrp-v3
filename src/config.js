@@ -10,7 +10,7 @@
 // link, invoices and client galleries keep working, and admin is unaffected.
 //
 // To change it: flip the value below, commit, and push. Live in ~2 minutes.
-export const BOOKING_OPEN = false;
+export const BOOKING_OPEN = true;
 
 export const PRIMARY_CTA = BOOKING_OPEN
   ? { href: '/book',      label: 'Book a session' }

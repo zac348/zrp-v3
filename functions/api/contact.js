@@ -4,8 +4,7 @@
  *
  * The homepage "Get in touch" form. Emails the message to the owner and, if the
  * sender left an email address, sends them a short "got your message" reply.
- * Nothing is stored in the database — the email is the record — so this keeps
- * working even if Supabase is down.
+ * Saves a private delivery draft before sending email notifications.
  *
  * Env: RESEND_API_KEY, ZACHARY_EMAIL (comma-separate to notify several people),
  *      FROM_EMAIL (optional; must be on the Resend-verified domain)

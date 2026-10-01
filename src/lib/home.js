@@ -58,9 +58,6 @@ loadPublicPhotos().then(photos=>{
   const second=wide.find(p=>p.location?.includes('Thorncrown')&&p!==first);
   const third=wide.find(p=>p.location?.includes('Sarasota')&&p!==first);
   featured=[...new Set([first,second,third,...wide].filter(Boolean))].slice(0,4);
-  const inline=photos.find(p=>p.location?.includes('Sarasota'))||first;
-  const link=document.getElementById('statement-photo-link'),img=document.getElementById('statement-photo');
-  if(inline.web_url||inline.thumb_url){link.href='/portfolio?cat='+encodeURIComponent(inline.sport||'');link.hidden=false;img.src=inline.thumb_url||inline.web_url;img.alt=photoAlt(inline);img.width=inline.width||400;img.height=inline.height||267;img.addEventListener('error',()=>link.hidden=true);}
   coverPhoto(0);renderCategoryFilters(photos,filter);filter(null);
 }).catch(()=>showUnavailable()).finally(()=>{
   grid.setAttribute('aria-busy','false');
@@ -76,7 +73,9 @@ cover.addEventListener('touchend',e=>{const delta=e.changedTouches[0].clientX-to
 const header=document.querySelector('.site-header'),cta=document.getElementById('mobile-cta');
 let pastCover=false,contactVisible=false,footerVisible=false;
 const updateCTA=()=>cta.hidden=!pastCover||contactVisible||footerVisible;
-new IntersectionObserver(([entry])=>{pastCover=!entry.isIntersecting;header.classList.toggle('over-photo',entry.isIntersecting);updateCTA();},{threshold:0}).observe(cover);
+new IntersectionObserver(([entry])=>{pastCover=!entry.isIntersecting;updateCTA();},{threshold:0}).observe(cover);
+// Solid header as soon as the name starts to pass under it, so nothing on the cover collides with the nav.
+new IntersectionObserver(([entry])=>header.classList.toggle('over-photo',entry.intersectionRatio>.99),{rootMargin:`-${header.offsetHeight}px 0px 100% 0px`,threshold:[0,.99,1]}).observe(document.querySelector('.cover-name h1'));
 new IntersectionObserver(([entry])=>{contactVisible=entry.isIntersecting;updateCTA();},{threshold:0}).observe(document.getElementById('contact'));
 
 // Form handling stays independent of the photo service.

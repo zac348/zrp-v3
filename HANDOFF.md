@@ -1,202 +1,158 @@
-# ZRP Website — Owner's Guide
+# ZR Photos — Owner’s guide
 
-Everything you need to run **zrphotos.net** day to day. No coding required for any of it.
+The site is at **zrphotos.net**. The Studio manages photographs, enquiries, availability, prices, coupons, and print materials. New requests use one booking workflow; existing website galleries still work alongside Google Drive galleries.
 
----
+## Login and password reset
 
-## Logging in
+Open `/login` to reach `/admin`. **Forgot password?** sends a link to `/reset`. The Supabase Authentication redirect allowlist must include `https://zrphotos.net/reset`.
 
-- Admin dashboard: **zrphotos.net/login** → then you land on `/admin`
-- Forgot your password? Click **"Forgot password?"** on the login page — it emails you a reset link that opens `zrphotos.net/reset`.
-- To change your email/password or add another admin: **supabase.com/dashboard** → your project → **Authentication → Users**. Anyone in that list can access the admin panel, so only add people you trust.
-- One-time setup check: in Supabase → **Authentication → URL Configuration → Redirect URLs**, make sure `https://zrphotos.net/reset` is listed — the password-reset email needs it.
+Manage trusted accounts in Supabase → Authentication → Users. Website-photo administration uses the existing signed-in database permissions. Delivery administration also requires the account’s user ID in `delivery_admins`; an authorized database administrator manages that allowlist. Use **Sign out** when finished on a shared computer.
 
-## Uploading photos (Photos tab)
+## How the site looks
 
-1. Pick a **Category** (Portraits, Family, Sports…) — this powers the category filters.
-2. Tick **"Add to the public Portfolio page"** if these photos should be public. Leave it off for client work.
-3. Click the drop zone (or drag files in). Photos are stored in Cloudflare R2.
-4. Scroll down on the same tab to see **all photos**: select several (click photos or checkboxes) to bulk-change category, add to a client gallery, add/remove from the Portfolio, or delete.
-5. **Photos are automatically resized on upload.** Each one is saved three ways: your untouched original (what clients download), a ~2200px web version (used when someone opens a photo), and a ~700px thumbnail (used in the grids). Visitors never download the full-size file — that's the difference between a 3 MB page and a 30 MB one.
-6. **You no longer pick what's on the homepage.** It shows up to 6 photos from your Portfolio, alternating categories for a balanced selection. Newer photos appear first within each category. Nothing to manage.
-7. **Titles & locations:** the upload form has optional Title and Location fields (they apply to the whole batch). Fix individual photos anytime with the **Edit** button on a photo card, or select several and use **Set location**. Titles/locations appear below each photograph, and they double as the photo's description for screen readers and Google. With no title, the category + location is used (e.g. "Soccer, Valwood School") — so filling in locations is worth it.
+The opening is a full-screen public photograph with Zachary’s name. It selects up to four landscape photos, prioritizing Biloxi, Thorncrown, and Sarasota. Visitors change them by buttons, arrow keys, or a swipe; there is no autoplay. Below it are the photography statement, selected work, booking steps, about, and contact.
 
-## What's public: one Portfolio, one switch
+Bodoni Moda supplies the large type; Public Sans handles body text and controls. Licensed WOFF2 fonts are hosted on the site. Light is neutral near-white; dark is neutral charcoal. The appearance control offers **System**, **Light**, and **Dark**. System is the default and follows device changes while the page is open. The same themes cover client galleries and Studio.
 
-There's a single public set of photos — your **Portfolio** — and one way in or out of it:
+Motion is limited to short fades: the opening, loading photographs, filters, viewer, and supported page navigation. Reduced motion turns these off. Captions stay visible. Photographs retain their proportions in collections and are never tinted for dark mode. The opening alone uses a crop and contrast overlay.
 
-- **The `/portfolio` page** shows all of it, filterable by category, 24 at a time behind a "Load more" button.
-- **The homepage** shows **up to 6 photographs**, alternating categories, with newer photographs first within each category. No picking, no toggle, nothing to maintain.
+## Photos and Portfolio
 
-**To add or remove photos:** in the Photos tab's photo grid, tick the ones you want → in the bulk bar choose **Portfolio page… → Add to Portfolio** (or Remove) → **Apply**. You can also tick the box on the upload form to add a whole batch as you upload. Photos on the Portfolio show a gold **◆ Portfolio** marker on their card.
+In **Photos**, choose Category, optional Title and Location, an optional Client gallery, and whether to **Add to the public Portfolio page**. Choose files or drag them onto the upload area. A batch uses the same chosen metadata.
 
-The redesigned homepage selects up to four landscape photographs from the public Portfolio for its opening feature. Visitors can browse them with the arrow controls. No additional uploads or admin steps are needed.
+Each upload saves the untouched original in Cloudflare R2, a JPEG web version up to 2200px at quality 0.82, and a thumbnail up to 700px at quality 0.78. If resizing fails, the original still saves. Client original downloads use the original file. Public pages use only the smaller versions; optimize old photos that lack them.
 
-Client-gallery photos can be in the Portfolio too — delivering a photo to a client doesn't stop you showing it off (just check they're OK with it; the booking form asks).
+The photo grid pages at 24. Select individual photos, multiple photos, or all, then apply category, gallery, Portfolio visibility, or location changes. **Edit** changes one photo’s title/location. **Delete** asks for confirmation and removes its original, web, thumbnail, and database record. It is permanent.
 
-## Optimizing older photos (one-time)
+**Optimize existing photos** appears while photos lack thumbnails. It generates missing previews without replacing originals. It reports progress and can be rerun after interruption. Use a laptop with a reliable connection.
 
-Photos uploaded before automatic resizing existed are still full-size — some are 10–20 MB, which is brutal on a phone. In the Photos tab, above the photo grid, click **"Optimize existing photos."** (The button only appears while there are photos that still need it — once everything's done, it disappears.)
+The Portfolio marker identifies public photos. `/portfolio` filters by category and shows 24 at a time. The home page takes up to six public photos, alternating categories, with newer photos first within a category. There is no separate home-page switch. Titles and locations provide captions and accessible descriptions. Only put client work in the Portfolio with their permission.
 
-It walks every photo that doesn't have a web version yet, builds the smaller versions, and saves them. Originals are never touched, it shows progress as it goes, and it's safe to stop and re-run later — it skips anything already done. Do it once, on a laptop, on wifi.
+## Website galleries
 
-## Client galleries (Galleries tab)
+In **Galleries**, create a named gallery, then add photographs through upload or the Photos bulk controls. Each row shows its photo count, watermark switch, link-copy button, and preview. Deleting a gallery asks for confirmation, unlinks its photos, and keeps all photo files.
 
-- Create a gallery, add photos to it (from the Photos tab's bulk actions), and share the link with your client.
-- **Privacy model: the link IS the password.** Gallery links are long random URLs — anyone who has one can view and download. Don't post gallery links publicly; send them directly to the client.
-- Galleries created automatically when a booking is confirmed get a random link too.
+Existing galleries from the retired booking system remain ordinary working galleries. Their `/gallery?g=...` URLs still work. Gallery pages offer individual originals and Download all; watermarked galleries retain the browser-generated watermark download behavior.
 
-## Enquiries → client albums (Bookings tab)
+Share gallery links privately. Anyone with a link can access it. These website galleries use the existing public database permissions; the links are not a substitute for authenticated access, and the current database may expose gallery metadata to direct queries. Tightening that requires a separate database change.
 
-The homepage contact form now saves an **admin-only draft album** and sends the existing email notifications. Saved enquiries remain available even if notification email fails.
+## Requests, acceptance, and Drive delivery
 
-1. Open **Admin → Bookings → New enquiries**. Each contact submission appears as **New enquiry**.
-2. Click **Accept** or **Decline**. Accepting does not create a Google Drive folder and does not automatically email the client.
-3. Under **Awaiting details**, choose **Copy client form link** (send it by text or email yourself) or **Fill in details** to enter the agreed session information yourself. The private form expires 30 days after acceptance; **Replace form link** invalidates the previous one.
-4. Completing the required details saves them, then creates exactly one client folder in the **cli_delivery Shared drive**. The folder is named using the session date, client name, and session type. Both client and admin use the same completion process.
-5. If Google fails, the details remain saved and the album displays **Folder needs attention**. Fix the stated access problem, then click **Retry folder**. The reserved folder ID is reused; retrying does not make duplicates.
-6. Use **Open photo folder** to upload finished files directly to that folder (not into nested subfolders). Click **Publish gallery** when ready, then **Copy gallery link**. Empty folders cannot be published.
-7. The gallery shows Drive previews and streams the exact original uploaded file for downloads. Clients do not need Google accounts. **Unpublish** disables gallery access again. Anyone holding a published gallery link can view/download it; send it privately.
+Both `/book` and the home contact form create private draft enquiries in **Bookings**. New enquiries appear above Active bookings. Published and declined requests appear in History. `/admin#enquiries` and `/admin#bookings` open this same tab.
 
-The client-details link and gallery link are separate random secrets. Completed forms show only a receipt, not the submitted private details. New enquiry records have no public database permissions. Only explicitly allowed studio admins can manage them.
+1. **Review.** Open a new request. Package requests include the selected package, add-ons, answers, coupon, estimate, and portfolio permission in their notes. Dates and totals are requests until agreed with Zachary.
+2. **Accept or Decline.** Decline asks for confirmation. Accept does not create a folder or email the client. With the updated delivery service deployed, an exact future/today date is blocked automatically.
+3. **Confirm details.** Use **Copy client form link** and send it yourself, or **Fill in details** to enter the agreed information. The private form expires 30 days after acceptance. **Replace form link** or renew invalidates the old link and asks for confirmation.
+4. **Create the folder.** Saving final details creates one client folder in the configured `cli_delivery` Shared drive parent. Its name includes session date, client name, and session type. The same process works whether Zachary or the client fills in the form. No folder is created just by receiving or accepting an enquiry.
+5. **Recover if needed.** If Drive fails, details remain saved and the request says **Folder needs attention**. Fix the reported access problem and use **Retry folder**. The reserved folder ID is reused to avoid duplicates.
+6. **Upload and publish.** **Open photo folder** opens Drive. Upload finished files directly into that folder, not nested folders. **Publish gallery** requires at least one supported file. Then **Copy gallery link** and send it yourself. **View gallery** opens the client view. **Unpublish** asks for confirmation and disables client access.
 
-The **Check Drive connection** button verifies that the service account can add children in the configured Shared drive. It does not create a folder.
+The details link and gallery link are separate private secrets stored in URL fragments (`#...`). Completed client forms show a receipt without exposing submitted details. Clients do not need Google accounts. The gallery uses small Drive preview images and streams the original uploaded file for **Download original**.
 
-Package booking is enabled at `/book`. Requests use current server-verified package, add-on, and promo pricing and appear as draft albums in Bookings. `/quick-book` redirects to this same form. Accepting does not create a Drive folder; completing the private details form does. Dates and totals remain requests/estimates until Zachary confirms them. The older Bookings tab, confirmation links, invoices, and existing R2 galleries continue to work independently. New and existing requests share the Bookings tab: New enquiries at the top, Active bookings below, and completed/declined records in the collapsed history.
+**Refresh** reloads requests; returning focus to the window also refreshes. **Check Drive connection** checks whether the service account can create children in the parent, without creating a test folder. Studio loads the latest 500 enquiries; Drive galleries load 24 files per page.
 
-### Delivery service deployment
+Galleries remain available until the client asks for removal. Clients should still keep their own downloaded copies. Removal is a manual studio action; there is no scheduled expiration job.
 
-- Database migration: `supabase/migrations/202609300001_delivery_workflow.sql` (additive, private tables only).
-- Edge Function: `delivery`; JWT gateway verification is disabled because enquiries and private-link forms are public routes. Every admin action independently verifies the Supabase session and the `delivery_admins` allowlist.
-- Secret: `GOOGLE_SERVICE_ACCOUNT_JSON`, held only by Supabase.
-- Parent Shared drive: `0AHwV0eI44SAaUk9PVA`; optionally override with `GOOGLE_DRIVE_PARENT_ID`.
-- Deploy with `npx --yes supabase@2.118.0 functions deploy delivery --project-ref jrowfpgezkfeyzfyzfps --use-api`.
-- Grant another trusted studio admin access by adding their existing `auth.users.id` to `delivery_admins` through an authorized database administrator.
-- Album listing currently loads the most recent 500 enquiries. Gallery files are paged from Drive and displayed 24 at a time.
+Old `/confirm` and `/invoice` links now explain that they belong to the retired system and direct clients to text Zachary or the contact form. Old booking records remain in the database as an archive. No table, gallery, or photograph was deleted by this redesign.
 
-## Bookings (Bookings tab) — the flow
+## Availability
 
-1. Client submits a request on `/book` or `/quick-book` → shows up as **pending**, **you get a "New booking request" email**, and **the client instantly gets a "got your request" acknowledgment**.
-2. You click **Accept** → the client gets an email with a private link to finalize (location, add-ons, travel check), and **the session date is automatically blocked** on the availability calendar so nobody else can book it. (Cancelling a booking does *not* auto-unblock — remove the block in the Availability tab if the date frees up.)
-3. Client finishes → status becomes **confirmed**, a gallery is auto-created, and both of you get confirmation emails with the invoice link.
-4. After you deliver the photos, click **Mark delivered**.
-5. **Deleting old bookings:** finished bookings (delivered, cancelled, or the session date has passed) get a red **Delete** button. The **Past** filter shows just those. Clicking Delete asks you to **type the client's name** before the button unlocks — so it can't happen by a stray click. Upcoming bookings never show a Delete button; cancel them first if you really want them gone. Deleting removes the booking record for good (their gallery and photos stay, but their invoice link stops working).
+This tab appears while `BOOKING_OPEN` is true. Navigate months, choose a day, then save **Unavailable**, **Partial** (with start/end times), **Available**, or **Clear**, optionally with a note. Bulk selection updates several days. Replacing or removing availability asks for confirmation. The month’s blocks are listed below the calendar.
 
-Booking notes contain everything the client entered: session-type answers (e.g. "Sport & team: …"), coupon used, **whether they approved portfolio use of their photos**, and their free-text notes.
+The client calendar disables past days and full-day unavailable dates. Partial days can be requested, with a limited-availability message; the final time must be agreed. Available days are explicitly marked. Unmarked days remain requestable.
 
-## Terms & photo permission
+After the new delivery function is deployed:
 
-- The site has a **Terms of Service** at `/terms` — clients agree to it when booking. **Read it once and make sure the policies match how you actually work** (it currently says: 50% deposit, 48-hour reschedule/cancellation notice, 5–7 day delivery, 90-day galleries, you keep copyright, clients get personal-use rights). Edit the page if any of that isn't right.
-- Every booking form has an **optional checkbox** asking permission to feature the client's photos in your portfolio/social media. Their answer is recorded in the booking's notes ("Portfolio use: approved / not approved"). **Only post photos from sessions that approved it.**
+- Accepting a request with an exact date blocks the full day. Free text such as “October” waits for final details.
+- Saving session details blocks the agreed date before Drive work begins. If the date changed, only that enquiry’s old automatic block is removed.
+- Declining removes that enquiry’s automatic block. Other bookings or manual entries remain.
+- Automatic notes say `Booked (ref XXXXXXXX)`. They contain no client name, email, phone, or address because this calendar is public.
+- Zachary can replace a full-day block with Partial or Available. Explicit manual entries win. If he clears a date completely, saving final session details may block it again, as approved.
+- Repeated accepts/completions cannot create duplicate blocks for the same enquiry. Past dates are skipped, using the America/New_York calendar date.
+- A calendar failure never cancels acceptance or saving details. Studio reports it and tells Zachary to block the date manually.
 
-## Spam protection
+A block is an availability aid, not a guarantee against two already-submitted requests for the same day. Review the “already blocked or manually marked” message before accepting overlapping work.
 
-The booking forms have an invisible bot trap (honeypot + a minimum fill-time check) — automated spam gets silently discarded without ever reaching your bookings list or email. If real spam ever becomes a problem anyway, the upgrade path is Cloudflare Turnstile (free) — any developer can wire it in quickly.
+## Pricing and coupons
 
-## Emails — how they work
+**Pricing:** edit each package’s base price, sale price, On sale setting, and availability, then Save. Available packages appear on `/book`, ordered by base price; the home starting price uses live available pricing. Add-ons are selected on `/book`. Create or delete an add-on, change its availability, or load the eight-item starter pack.
 
-Every email on the site (new-booking alerts to you, accept links, confirmations) goes through **Resend** (resend.com). There is no Formspree anymore.
+**Coupons:** this tab appears while booking is enabled. Create percent, fixed-dollar, or travel-waiver codes, optionally with an expiry and use limit. The list supports the existing enable/disable, delete, copy-code, and copy-booking-link actions. A `/book?coupon=CODE` link prefills the code. Percent/fixed discounts apply to the package; selected add-ons are listed separately. Travel is quoted separately.
 
-- **You'll always be notified of new bookings** as long as `RESEND_API_KEY` and `ZACHARY_EMAIL` are set (below). Even without them, the booking still lands in your admin panel — you just won't get the email.
-- **Clients get an instant acknowledgment** when they submit a request ("got it, you'll hear back within 24 hours — nothing confirmed yet"). Replies to it go to your `ZACHARY_EMAIL`.
-- **Emailing clients needs a verified domain.** Resend's default sender can only email *your own* address. To send accept/confirmation emails to *clients*, verify your domain (e.g. `zrphotos.net`) in the Resend dashboard and set `FROM_EMAIL` to an address on it (e.g. `bookings@zrphotos.net`). Until then, client emails may not deliver.
-- **If an accept email fails, the admin now tells you** — you'll get a popup saying the client didn't get their link, so it never fails silently.
+The existing uses counter does not increment on redemption. A code and its effect are recorded with the request. If a valid active code cannot be read by visitors, ask the database administrator to check the existing public read policy on `coupons`; do not change policies casually.
 
-## Availability (Availability tab)
+## Print
 
-*Hidden from the admin while online booking is off — it comes back automatically when you flip the switch.*
+The **Print** tab generates an envelope PNG. `/coupon-card` generates coupon-card PNGs. Fill the fields, select the design, and Download. Both wait for local fonts before export. No files are uploaded by these tools.
 
-Whatever you mark here is what clients see on the `/book` calendar:
+## Terms and photo permission
 
-- **Unavailable (full day)** → the date is struck out and unclickable for clients.
-- **Partial** → clients can pick it but see "limited availability — time will be confirmed."
-- **Available** → shows a green dot (a little "I'm open" signal).
-- Days you haven't touched look like normal bookable days. **Keep this tab current** — it's your only calendar defense.
-- "Bulk select" lets you mark many days at once.
+The current terms retain the existing 50% deposit, 48-hour notice, 5–7 day delivery, copyright, and personal-use policies. The gallery rule is now availability until requested removal. Zachary should review the unchanged business policies and decide whether the existing effective dates should be updated before merging the legal wording changes.
 
-## Pricing (Pricing tab)
+The package form asks for agreement to Terms and offers optional portfolio permission. The permission is recorded in the request notes. Only publish client photographs with permission.
 
-- **Packages:** edit base price, set a sale price + "On sale" toggle, or mark a package unavailable (it disappears from the booking page).
-- **Add-ons:** these appear on the client's booking-confirmation page automatically when marked Available. Use **"Add starter pack"** to load 8 standard ones (rush delivery, extra hour, second photographer, video reel, social crops, unedited photos, album, canvas). Add your own with the name + price form; delete ones you don't offer.
+## Email and spam protection
 
-## Coupons (Coupons tab)
+The contact and package forms save the enquiry before sending notifications through **Resend**. The owner receives the existing enquiry email; when a valid email was supplied and the owner notification succeeds, the client receives the existing acknowledgment. Acceptance, final details, and publication do not automatically send client links. Send those yourself from Studio.
 
-*Hidden from the admin while online booking is off — it comes back automatically when you flip the switch.*
+If email fails after a save, the request is still in Studio. If saving fails, the form reports failure and allows retry; there is no fallback email-only booking record. The hidden `website` field, minimum three-second fill time, and unique submission ID remain in both forms. Retries reuse the same ID to prevent duplicate enquiries.
 
-- Create a code (percent off, fixed $ off, or travel-fee waiver), optionally with an expiry date or max uses.
-- Share it directly or via the **copy link** button — links look like `zrphotos.net/book?coupon=CODE` and pre-fill the code for the client.
-- Clients enter codes in the **Promo code** box on the booking page; the discount shows in their estimate and carries through to the invoice.
-- ⚠️ **If a known-good code says "Invalid code":** the coupons table needs a read policy for visitors. In Supabase → SQL Editor, run:
-  ```sql
-  create policy "public can read active coupons"
-  on coupons for select to anon using (active = true);
-  ```
-- Note: the "uses" counter is informational — the site doesn't auto-increment it when a client redeems (you'll see the code in the booking's notes instead).
+For missing emails, check the `ZACHARY_EMAIL` destination, spam folder, then Resend’s Emails log. Check `RESEND_API_KEY` and verify the sender domain and `FROM_EMAIL`. Resend’s default sender cannot deliver to arbitrary client addresses. Comma-separated `ZACHARY_EMAIL` recipients remain supported.
 
-## Envelopes & coupon cards
+## Required settings — keep all of these
 
-The **Envelopes** tab and `/coupon-card` page generate print-ready PNGs (photo-delivery envelopes and physical coupon cards). Fill in the fields, click Download.
-
-## How the website gets updated (deploys)
-
-- The site's code lives at **github.com/zac348/zrp-v3**. Any push to `master` makes **Cloudflare Pages** rebuild and publish the live site automatically (~1–2 minutes).
-- Content changes (photos, prices, availability, coupons, bookings) happen in the **admin panel** and are live instantly — no deploy needed.
-
-## Required settings (already configured — don't delete!)
-
-These live in the **Cloudflare Pages dashboard** → your project → Settings:
-
-| Setting | Where | What breaks without it |
+| Setting | Where | Purpose |
 |---|---|---|
-| `PUBLIC_SUPABASE_URL` | Environment variables | The whole site's data |
-| `PUBLIC_SUPABASE_ANON_KEY` | Environment variables | The whole site's data |
-| `RESEND_API_KEY` | Environment variables | **All emails** (new-booking alerts, accept links, confirmations) |
-| `ZACHARY_EMAIL` | Environment variables | Where new-booking, contact-form, and confirmation notices go. Comma-separate to notify more than one person, e.g. `zac@zrphotos.net, someone@gmail.com` |
-| `SITE_URL` (`https://zrphotos.net`) | Environment variables | Links inside emails |
-| `FROM_EMAIL` (verified domain) | Environment variables | Emails **to clients** (needs Resend domain verification) |
-| `PHOTOS` → your R2 bucket | Functions → R2 bucket bindings | Photo upload/delete |
-| `R2_BASE_URL` | Environment variables | Photo URLs |
+| `PUBLIC_SUPABASE_URL` | Cloudflare Pages build/runtime environment | Public database and delivery connection |
+| `PUBLIC_SUPABASE_ANON_KEY` | Cloudflare Pages build/runtime environment | Existing public database access |
+| `RESEND_API_KEY` | Cloudflare Pages runtime | Enquiry notification and acknowledgment emails |
+| `ZACHARY_EMAIL` | Cloudflare Pages runtime | Owner notification destination(s) |
+| `SITE_URL` | Cloudflare Pages runtime | Public site links; `https://zrphotos.net` |
+| `FROM_EMAIL` | Cloudflare Pages runtime | Verified Resend sender |
+| `R2_BASE_URL` | Cloudflare Pages runtime | Uploaded photo URLs |
+| `PHOTOS` | Cloudflare Pages R2 binding | Photo upload, original download, and deletion |
+| `GOOGLE_SERVICE_ACCOUNT_JSON` | Supabase Edge Function secret only | Drive credentials; never commit or expose in the browser |
+| `GOOGLE_DRIVE_PARENT_ID` | Supabase Edge Function secret | Optional configured Shared drive parent override |
+| `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` | Supabase function environment | Existing service connection and admin authorization |
 
-If an email seems missing, check in this order: **(1)** it went to the address in `ZACHARY_EMAIL`, not whoever tested; **(2)** the spam folder; **(3)** the **Emails** page in the Resend dashboard, which shows every message and whether it was *Delivered*, *Bounced*, or never sent. After that, check `RESEND_API_KEY` and `ZACHARY_EMAIL` — bookings still save without them, but you won't get notified. For client emails specifically, confirm your domain is verified in Resend and `FROM_EMAIL` uses it.
+The existing default Shared drive parent is `0AHwV0eI44SAaUk9PVA`. Keep the service account’s Editor access on the configured parent. Do not put its JSON key in the repository.
 
-## Getting found (the stuff the website can't do for you)
+## Site and delivery deployment
 
-- **Google Business Profile** — free, and it's how you show up when parents search "photographer near me." Set one up at google.com/business with the same name, phone (229-300-1006), and site link. This is the single biggest thing on this list.
-- **Ask for reviews** — after every happy client, text them your Google review link directly. Reviews compound; five good ones changes how the profile ranks.
-- **Instagram** — keep the handle (@zacharyroutsongphotos) matching the business name, keep the site link in bio, and link back to the site when you post galleries. During season, 2–3 posts a week; short video clips of game highlights tend to do the best numbers.
-- **Phones first** — most parents will open this site from a link in a group chat. It's built to load fast on mobile; keep it that way by curating the homepage photos (see Uploading).
+The code is at `github.com/zac348/zrp-v3`. A push to **master** automatically deploys Cloudflare Pages. This redesign is isolated on **redesign-v4** and has not been merged or pushed to master. Review the preview, verification gaps, and policy wording before merging. Admin content edits take effect directly without a site deploy.
 
-## If the site ever loses its photos (Supabase pausing)
+`src/config.js` retains `BOOKING_OPEN` and `PRIMARY_CTA`. True enables package booking. False changes public actions to Get in touch, redirects `/book` and `/quick-book` to contact, and hides Availability/Coupons in Studio. Existing private details and galleries still work.
 
-Every photo, booking, price, and the admin login live in **Supabase**. On the free plan, Supabase pauses a project after about a week of inactivity — the site still loads, but it's empty. That happened in September 2026.
+The delivery function’s calendar feature is separate from the static site. **The existing function must be redeployed for auto-blocking to begin.** No new migration or secret is required. From the repository, the owner runs:
 
-**Two guards are in place now:**
+```sh
+npx --yes supabase@2.118.0 functions deploy delivery --project-ref jrowfpgezkfeyzfyzfps --use-api
+```
 
-- **Daily keepalive.** A GitHub Action (`Keep Supabase awake`, in the repo's Actions tab) runs one tiny database query every day so the project never looks idle. If the database ever fails to answer, the run fails and **GitHub emails the repo owner** — so it's also your early-warning alarm. It uses two repo secrets, `SUPABASE_URL` and `SUPABASE_ANON_KEY` (Settings → Secrets and variables → Actions); if you ever rotate the Supabase keys, update those too.
-- **Bookings can't silently vanish.** If the database is down when someone books, the booking still gets emailed to you with a red **"⚠️ NOT SAVED — add manually"** subject and banner. That email is the only record — add it to admin by hand or reply to the client. If the email *also* fails, the client is told it didn't go through and asked to try again or call.
+This redesign did not run that command. The site works with the older function, which omits calendar results; the new function also works with the old site. Do not rerun the existing workflow migration as part of this update.
 
-**If it happens anyway:** your photo files are safe in Cloudflare R2 regardless — only the database pauses. Go to **supabase.com/dashboard**, open the project, click **Restore**, and wait a few minutes. Nothing on the site needs changing. Don't sit on it: Supabase only keeps paused projects restorable for a limited time.
+The function keeps JWT gateway verification disabled for public enquiry/private-link routes. Its admin actions still verify the session and `delivery_admins` allowlist internally. Keep that protection intact.
 
-**The permanent fix** is Supabase Pro ($25/month) — it never pauses and includes daily backups.
+## Supabase pausing guard
 
-## How the site looks (so future changes stay consistent)
+The existing **Keep Supabase awake** GitHub Action makes a small daily query. Failed runs use GitHub’s existing notification settings to alert the repository owner. It needs the repository secrets `SUPABASE_URL` and `SUPABASE_ANON_KEY`; update them if keys are rotated. The workflow was not changed.
 
-- **Two fonts:** Bodoni Moda for headings and the name, Public Sans for body text and controls. Fonts are served locally.
-- **Photo layouts:** the homepage uses cropped previews in a staggered grid; the archive and opened viewer preserve the full photograph. The first few photos load right away; the rest load as you scroll.
-- **No decorative motion.** No decorative glows or zooms; captions remain visible below the photographs. Everything works with a keyboard (Tab to a photo, Enter to open, Esc to close).
-- Plain wording in Zachary's voice. If a claim isn't true yet (e.g. a type of shoot with no photos to back it up), leave it out.
+If database data disappears, check the Supabase dashboard for a paused project and restore it promptly. Photo files remain in R2/Drive even if the database is paused. Requests cannot save while the database is unavailable; visitors receive a retry message. For a permanent plan change or current restore limits/pricing, check the Supabase dashboard.
 
-The header appearance icon offers **System**, **Light**, and **Dark**. System follows the device setting automatically; manual choices are saved.
+## Getting found
 
-## Quick troubleshooting
+Keep the Google Business Profile, Instagram `@zacharyroutsongphotos`, phone `229-300-1006`, and website information consistent. Share the site link in the Instagram bio. Ask willing clients for reviews directly. Add useful photo titles/locations and keep the public Portfolio current. There are no tracking pixels or analytics installed on the website.
 
-- **Page looks broken/unstyled right after an update** → mid-deploy hiccup; hard-refresh (Cmd+Shift+R).
-- **Can't log in** → reset the password via "Forgot password?", or directly in Supabase → Authentication → Users.
-- **A date clients shouldn't book is selectable** → mark it Unavailable in the Availability tab.
-- **Coupon says invalid** → see the SQL note in the Coupons section above.
-- **"The database blocked the delete" when deleting a booking** → the bookings table needs permission for signed-in admins to delete. In Supabase → SQL Editor, run once:
-  ```sql
-  create policy "admin can delete bookings"
-  on bookings for delete to authenticated using (true);
-  ```
-- **Admin on your phone** → the tabs run across the top; swipe that strip sideways to reach them all.
+## Troubleshooting
+
+- **Unstyled after a deploy:** hard-refresh once the deployment finishes.
+- **Cannot log in:** use Forgot password; check the `/reset` redirect allowlist.
+- **Delivery action denied:** check the signed-in account and `delivery_admins` allowlist.
+- **No photos:** check Supabase status, public Portfolio selections, and missing preview optimization.
+- **Wrong calendar availability:** edit the date in Availability. Calendar warnings do not undo accepted requests; correct them manually.
+- **Drive folder error:** read the message, check the service account/Shared drive access with Check Drive connection, then Retry folder.
+- **Small Drive previews:** expected; Download original returns the original. Increasing preview resolution is outside this redesign.
+- **Old confirmation/invoice link:** ask the client to text Zachary or use Contact.
+- **Studio on a phone:** swipe the horizontal tab strip to reach every tab.
+
+Known limitations kept unchanged: coupon uses are not incremented; watermarked website downloads fetch the original before watermarking it locally; website-gallery database permissions need a separate privacy review. No redesign can change these without the separate work they require.

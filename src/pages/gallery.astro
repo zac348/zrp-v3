@@ -33,7 +33,7 @@ import Layout from '../layouts/Layout.astro';
 <dialog class="lightbox" id="lb" aria-label="Client photograph viewer" >
   <button type="button" class="lb-close" aria-label="Close photograph viewer" >×</button>
   <div class="album-viewer-image">
-    <img id="lb-img" alt=""/>
+    <img id="lb-img" width="2200" height="1467" alt=""/>
     <div id="lb-wm" hidden></div>
   </div>
   <button type="button" class="lb-dl" id="lb-dl">Download original</button>
@@ -108,7 +108,7 @@ function renderGallery() {
     const button = document.createElement('button'); button.type = 'button'; button.className = 'gal-open';
     button.setAttribute('aria-label', 'View ' + (p.title || p.file_name || 'photograph ' + (i + 1)));
     const img = document.createElement('img'); img.src = p.thumb_url || p.web_url || p.url; img.alt = p.title || ('Photograph ' + (i + 1)); img.loading = i < 3 ? 'eager' : 'lazy'; img.decoding = 'async';
-    if (p.width && p.height) { img.width = p.width; img.height = p.height; }
+    img.width = p.width || 700; img.height = p.height || 467;
     img.addEventListener('error',()=>{img.hidden=true;button.textContent='Preview unavailable. Open photograph';});
     button.append(img); button.addEventListener('click', () => openLB(i, button));
     const overlay = document.createElement('div'); overlay.className = 'gal-item-overlay';
@@ -125,6 +125,7 @@ function openLB(index, trigger) {
   const photo = galleryPhotos[activeIndex];
   const viewer = document.getElementById('lb');
   const image = document.getElementById('lb-img');
+  image.width = photo.width || 2200; image.height = photo.height || 1467;
   image.src = photo.web_url || photo.url;
   image.alt = photo.title || ('Photograph ' + (activeIndex + 1));
   document.getElementById('lb-dl').textContent = isWatermarked ? 'Download preview' : 'Download original';

@@ -28,7 +28,7 @@ function renderPhotos() {
         <input type="checkbox" class="photo-cb" aria-label="Select photograph" ${selectedPhotoIds.has(p.id) ? 'checked' : ''}
           data-change="togglePhotoSelect" data-args="${esc(JSON.stringify([p.id, "$checked"]))}"/>
       </div>
-      <img src="${esc(p.thumb_url || p.web_url || p.url)}" alt="" loading="lazy" decoding="async"
+      <img src="${esc(p.thumb_url || p.web_url || p.url)}" alt="" width="${Number(p.width)||700}" height="${Number(p.height)||467}" loading="lazy" decoding="async"
         data-action="photoCardClick" data-args="${esc(JSON.stringify([p.id]))}"/>
       <div class="photo-card-info">
         <div class="photo-sport">${esc(p.sport || 'No category')}${p.location ? ' · ' + esc(p.location) : ''}${p.on_portfolio ? ' · <span>Portfolio</span>' : ''}</div>

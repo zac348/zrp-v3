@@ -1,0 +1,6 @@
+---
+const {id, title, level = 2} = Astro.props;
+const Tag = `h${level}`;
+---
+<header class="section-heading"><Tag id={id}>{title}</Tag><slot/></header>
+<style>.section-heading{display:flex;justify-content:space-between;align-items:baseline;gap:24px;flex-wrap:wrap;margin-bottom:32px}</style>

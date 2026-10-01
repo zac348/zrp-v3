@@ -1,0 +1,4 @@
+---
+const {id, label, ...props} = Astro.props;
+---
+<div class="field"><label for={id}>{label}</label><input id={id} {...props}/></div>

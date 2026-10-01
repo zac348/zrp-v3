@@ -18,7 +18,7 @@ import Layout from '../layouts/Layout.astro';
   font-family: var(--font-sans);
   font-size: 12px;
   letter-spacing: .01em;
-  color: var(--text-3);
+  color: var(--muted);
   margin-bottom: 36px;
 }
 .priv-page h2 {
@@ -26,12 +26,12 @@ import Layout from '../layouts/Layout.astro';
   font-weight: 500;
   margin-top: 36px;
   margin-bottom: 8px;
-  color: var(--text);
+  color: var(--ink);
 }
 .priv-page p {
   font-size: 13px;
   line-height: 1.85;
-  color: var(--text-2);
+  color: var(--muted);
   margin-bottom: 12px;
 }
 .priv-page ul {
@@ -41,19 +41,19 @@ import Layout from '../layouts/Layout.astro';
 .priv-page ul li {
   font-size: 13px;
   line-height: 1.85;
-  color: var(--text-2);
+  color: var(--muted);
   margin-bottom: 3px;
 }
-.priv-page a { color: var(--text); text-decoration: underline; }
+.priv-page a { color: var(--ink); text-decoration: underline; }
 .priv-page a:hover { opacity: .7; }
 .priv-divider {
   border: none;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--rule);
   margin: 28px 0;
 }
 .priv-callout {
-  background: var(--surface-dim);
-  border: 1px solid var(--border);
+  background: var(--surface);
+  border: 1px solid var(--rule);
   border-radius: var(--radius-lg);
   padding: 14px 18px;
   margin-bottom: 28px;
@@ -180,6 +180,6 @@ import Layout from '../layouts/Layout.astro';
 
   <hr class="priv-divider"/>
 
-  <p style="font-size:12px;color:var(--text-3);line-height:1.8">If I make any meaningful changes to this policy, I'll update the date at the top. Questions? Just reach out.</p>
+  <p style="font-size:12px;color:var(--muted);line-height:1.8">If I make any meaningful changes to this policy, I'll update the date at the top. Questions? Just reach out.</p>
 </div>
 </Layout>

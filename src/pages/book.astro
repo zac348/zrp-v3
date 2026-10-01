@@ -17,7 +17,7 @@ import { BOOKING_OPEN } from '../config.js';
 @media (max-width: 500px) { .pkg-grid { grid-template-columns: 1fr } }
 
 .pkg-card {
-  border: 1px solid var(--border);
+  border: 1px solid var(--rule);
   border-radius: var(--radius-lg);
   padding: 16px;
   cursor: pointer;
@@ -27,10 +27,10 @@ import { BOOKING_OPEN } from '../config.js';
   animation: rise-in .6s cubic-bezier(.16,1,.3,1) both;
   animation-delay: var(--d, 0s);
 }
-.pkg-card:hover { border-color: var(--border-2);   }
+.pkg-card:hover { border-color: var(--control);   }
 .pkg-card.sel {
-  border-color: var(--text);
-  background: var(--surface-dim);
+  border-color: var(--ink);
+  background: var(--surface);
 
 
 }
@@ -39,8 +39,8 @@ import { BOOKING_OPEN } from '../config.js';
   font-family: var(--font-sans);
   font-size: 12px;
   letter-spacing: .01em;
-  background: var(--text);
-  color: var(--bg);
+  background: var(--ink);
+  color: var(--canvas);
   padding: 2px 7px;
   position: absolute;
   top: -1px; right: 12px;
@@ -50,9 +50,9 @@ import { BOOKING_OPEN } from '../config.js';
   font-family: var(--font-sans);
   font-size: 12px;
   letter-spacing: .01em;
-  color: var(--red);
-  background: var(--red-bg);
-  border: 1px solid var(--red-border);
+  color: var(--error);
+  background: var(--surface);
+  border: 1px solid var(--error);
   padding: 2px 7px;
   display: inline-block;
   margin-bottom: 4px;
@@ -61,16 +61,16 @@ import { BOOKING_OPEN } from '../config.js';
   font-family: var(--font-sans);
   font-size: 12px;
   letter-spacing: .01em;
-  color: var(--text-3);
+  color: var(--muted);
   margin-bottom: 6px;
 }
-.pkg-orig { font-size: 12px; color: var(--text-3); text-decoration: line-through; line-height: 1; margin-bottom: 1px }
+.pkg-orig { font-size: 12px; color: var(--muted); text-decoration: line-through; line-height: 1; margin-bottom: 1px }
 .pkg-price { font-size: 26px; font-weight: 300; letter-spacing: -.02em; margin-bottom: 10px }
-.pkg-price small { font-size: 12px; color: var(--text-3); font-weight: 400 }
-.pkg-price.sale { color: var(--green) }
+.pkg-price small { font-size: 12px; color: var(--muted); font-weight: 400 }
+.pkg-price.sale { color: var(--success) }
 .pkg-features { list-style: none; display: flex; flex-direction: column; gap: 5px }
-.pkg-features li { font-size: 12px; color: var(--text-2); display: flex; align-items: center; gap: 6px }
-.pkg-features li::before { content: '—'; color: var(--text-3); font-size: 12px; flex-shrink: 0 }
+.pkg-features li { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px }
+.pkg-features li::before { content: '—'; color: var(--muted); font-size: 12px; flex-shrink: 0 }
 
 /* FORM */
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px }
@@ -78,32 +78,32 @@ import { BOOKING_OPEN } from '../config.js';
 .field.full { grid-column: 1/-1 }
 
 /* AVAILABILITY CALENDAR */
-.cal { border: 1px solid var(--border); padding: 14px; background: var(--surface) }
+.cal { border: 1px solid var(--rule); padding: 14px; background: var(--surface) }
 .cal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px }
 .cal-title {
   font-family: var(--font-sans);
   font-size: 12px;
   letter-spacing: .01em;
-  color: var(--text);
+  color: var(--ink);
 }
 .cal-nav {
   background: none;
-  border: 1px solid var(--border);
+  border: 1px solid var(--rule);
   width: 26px; height: 26px;
   cursor: pointer;
-  color: var(--text-2);
+  color: var(--muted);
   font-size: 13px;
   line-height: 1;
   transition: border-color .15s, color .15s;
 }
-.cal-nav:hover:not(:disabled) { border-color: var(--text); color: var(--text) }
+.cal-nav:hover:not(:disabled) { border-color: var(--ink); color: var(--ink) }
 .cal-nav:disabled { opacity: .3; cursor: default }
 .cal-dow, .cal-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px }
 .cal-dow span {
   font-family: var(--font-sans);
   font-size: 12px;
   letter-spacing: .01em;
-  color: var(--text-3);
+  color: var(--muted);
   text-align: center;
   padding: 3px 0 6px;
 }
@@ -114,17 +114,17 @@ import { BOOKING_OPEN } from '../config.js';
   justify-content: center;
   font-family: var(--font-sans);
   font-size: 12px;
-  color: var(--text-2);
+  color: var(--muted);
   background: none;
   border: 1px solid transparent;
   cursor: pointer;
   position: relative;
   transition: border-color .15s, color .15s, background .15s;
 }
-.cal-d:hover:not(:disabled) { border-color: var(--border-2); color: var(--text) }
-.cal-d:disabled { cursor: default; color: var(--text-3); opacity: .4 }
+.cal-d:hover:not(:disabled) { border-color: var(--control); color: var(--ink) }
+.cal-d:disabled { cursor: default; color: var(--muted); opacity: .4 }
 .cal-d.blocked { text-decoration: line-through }
-.cal-d.sel { border-color: var(--accent); color: var(--text); background: var(--surface-dim) }
+.cal-d.sel { border-color: var(--ink); color: var(--ink); background: var(--surface) }
 .cal-d.empty { visibility: hidden }
 .cal-d .availability-mark {
   position: absolute;
@@ -138,11 +138,11 @@ import { BOOKING_OPEN } from '../config.js';
   gap: 12px;
   margin-top: 12px;
   padding-top: 10px;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--rule);
   font-family: var(--font-sans);
   font-size: 12px;
   letter-spacing: .01em;
-  color: var(--text-3);
+  color: var(--muted);
 }
 .cal-legend span { display: flex; align-items: center; gap: 5px }
 .cal-legend i { width: 4px; height: 4px; border-radius: 50%; display: inline-block }
@@ -151,17 +151,17 @@ import { BOOKING_OPEN } from '../config.js';
   font-family: var(--font-sans);
   font-size: 12px;
   letter-spacing: .01em;
-  color: var(--text-2);
+  color: var(--muted);
   margin-top: 8px;
   min-height: 15px;
 }
-.cal-picked b { color: var(--accent); font-weight: 500 }
+.cal-picked b { color: var(--ink); font-weight: 500 }
 
 /* COST BOX */
 .cost-box {
   grid-column: 1/-1;
-  background: var(--surface-dim);
-  border: 1px solid var(--border);
+  background: var(--surface);
+  border: 1px solid var(--rule);
   border-radius: var(--radius-lg);
   padding: 16px;
 }
@@ -169,22 +169,22 @@ import { BOOKING_OPEN } from '../config.js';
   font-family: var(--font-sans);
   font-size: 12px;
   letter-spacing: .01em;
-  color: var(--text-3);
+  color: var(--muted);
   margin-bottom: 10px;
 }
-.cost-line { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-2); padding: 2px 0 }
-.cost-line.total { border-top: 1px solid var(--border); margin-top: 8px; padding-top: 9px; font-size: 13px; font-weight: 500; color: var(--text) }
-.cost-line.note { font-size: 12px; color: var(--text-3); padding-top: 6px; font-style: italic }
-.cost-empty { font-size: 12px; color: var(--text-3); font-style: italic }
+.cost-line { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); padding: 2px 0 }
+.cost-line.total { border-top: 1px solid var(--rule); margin-top: 8px; padding-top: 9px; font-size: 13px; font-weight: 500; color: var(--ink) }
+.cost-line.note { font-size: 12px; color: var(--muted); padding-top: 6px; font-style: italic }
+.cost-empty { font-size: 12px; color: var(--muted); font-style: italic }
 
 /* SUBMIT */
 .submit-btn {
-  width: 100%; background: none; color: var(--text);
-  border: 1px solid var(--text); padding: 14px;
+  width: 100%; background: none; color: var(--ink);
+  border: 1px solid var(--ink); padding: 14px;
   font-family: var(--font-sans); font-size: 12px; font-weight: 500;
   letter-spacing: .01em; cursor: pointer; transition: background .2s, color .2s; grid-column: 1/-1; margin-top: 4px;
 }
-.submit-btn:hover:not(:disabled) { background: var(--text); color: var(--bg) }
+.submit-btn:hover:not(:disabled) { background: var(--ink); color: var(--canvas) }
 .submit-btn:disabled { opacity: .45; cursor: not-allowed }
 
 /* SUCCESS */
@@ -192,19 +192,19 @@ import { BOOKING_OPEN } from '../config.js';
   display: none;
   text-align: center;
   padding: 48px 24px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--rule);
   border-radius: var(--radius-lg);
   margin-top: 32px;
 }
 .success-icon {
   width: 48px; height: 48px;
-  background: var(--green-bg);
-  border: 1px solid var(--green-border);
+  background: var(--surface);
+  border: 1px solid var(--success);
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   margin: 0 auto 16px;
 }
-.success-icon svg { width: 20px; height: 20px; stroke: var(--green); fill: none; stroke-width: 2 }
+.success-icon svg { width: 20px; height: 20px; stroke: var(--success); fill: none; stroke-width: 2 }
 .success-state.show { display: block; animation: scale-in .5s cubic-bezier(.16,1,.3,1) both }
 .success-state.show .success-icon svg polyline {
   stroke-dasharray: 30;
@@ -215,7 +215,7 @@ import { BOOKING_OPEN } from '../config.js';
 <div class="page">
   <div class="sec-label" style="margin-bottom:6px">book a session</div>
   <h1  style="font-size:24px;font-weight:300;letter-spacing:-.02em;margin-bottom:4px">Request a session</h1>
-  <p  style="font-size:13px;color:var(--text-3);margin-bottom:32px">Choose a package, any add-ons, and a preferred date. Zachary will review your request before you complete the session details.</p>
+  <p  style="font-size:13px;color:var(--muted);margin-bottom:32px">Choose a package, any add-ons, and a preferred date. Zachary will review your request before you complete the session details.</p>
 
   <!-- PACKAGES -->
   <div class="sec-label">choose a package</div>
@@ -285,7 +285,7 @@ import { BOOKING_OPEN } from '../config.js';
         <div id="cost-empty" class="cost-empty">Select a package above to see pricing.</div>
         <div id="cost-lines" style="display:none">
           <div class="cost-line"><span id="cl-pkg-n"></span><span id="cl-pkg-p"></span></div>
-          <div class="cost-line" id="cl-coupon" style="display:none;color:var(--green)"><span id="cl-coupon-n"></span><span id="cl-coupon-v"></span></div>
+          <div class="cost-line" id="cl-coupon" style="display:none;color:var(--success)"><span id="cl-coupon-n"></span><span id="cl-coupon-v"></span></div>
           <div class="cost-line total"><span>Estimated total</span><span id="cl-total"></span></div>
           <div class="cost-line note"><span>Package and selected add-ons. Travel is quoted separately; Zachary confirms the final price.</span></div>
         </div>
@@ -293,7 +293,7 @@ import { BOOKING_OPEN } from '../config.js';
           <input type="text" id="f-coupon" placeholder="Promo code (optional)" style="flex:1;min-width:0" oninput="this.value=this.value.toUpperCase()"/>
           <button type="button" class="btn" id="coupon-btn" onclick="applyCoupon()" style="flex-shrink:0">Apply</button>
         </div>
-        <div id="coupon-status" style="font-size: 12px;margin-top:6px;min-height:14px;color:var(--text-3)"></div>
+        <div id="coupon-status" style="font-size: 12px;margin-top:6px;min-height:14px;color:var(--muted)"></div>
       </div>
 
       <hr class="divider" style="grid-column:1/-1"/>
@@ -319,7 +319,7 @@ import { BOOKING_OPEN } from '../config.js';
   <div class="success-state" id="success-state">
     <div class="success-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
     <h2 style="font-size:18px;font-weight:400;margin-bottom:8px">Request sent!</h2>
-    <p style="font-size:13px;color:var(--text-3);line-height:1.7;max-width:340px;margin:0 auto">Your request is saved. Zachary will review it and contact you. After acceptance, you can complete the final session details.</p>
+    <p style="font-size:13px;color:var(--muted);line-height:1.7;max-width:340px;margin:0 auto">Your request is saved. Zachary will review it and contact you. After acceptance, you can complete the final session details.</p>
   </div>
 </div>
 
@@ -409,11 +409,11 @@ async function applyCoupon() {
   if (err) {
     appliedCoupon = null;
     status.textContent = err;
-    status.style.color = 'var(--red)';
+    status.style.color = 'var(--error)';
   } else {
     appliedCoupon = coupon;
     status.textContent = '✓ ' + code + ' applied';
-    status.style.color = 'var(--green)';
+    status.style.color = 'var(--success)';
   }
   updateCostBox();
 }
@@ -518,7 +518,7 @@ function renderCal() {
     if (!isPast && (status === 'partial' || status === 'available')) {
       const dot = document.createElement('span');
       dot.className = 'availability-mark';
-      dot.style.background = status === 'partial' ? 'var(--amber)' : 'var(--green)';
+      dot.style.background = status === 'partial' ? 'var(--warning)' : 'var(--success)';
       el.appendChild(dot);
     }
     if (!el.disabled) el.addEventListener('click', () => pickDate(ds, status === 'partial'));

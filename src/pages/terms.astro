@@ -18,7 +18,7 @@ import Layout from '../layouts/Layout.astro';
   font-family: var(--font-sans);
   font-size: 12px;
   letter-spacing: .01em;
-  color: var(--text-3);
+  color: var(--muted);
   margin-bottom: 36px;
 }
 .terms-page h2 {
@@ -26,12 +26,12 @@ import Layout from '../layouts/Layout.astro';
   font-weight: 500;
   margin-top: 36px;
   margin-bottom: 8px;
-  color: var(--text);
+  color: var(--ink);
 }
 .terms-page p {
   font-size: 13px;
   line-height: 1.85;
-  color: var(--text-2);
+  color: var(--muted);
   margin-bottom: 12px;
 }
 .terms-page ul {
@@ -41,14 +41,14 @@ import Layout from '../layouts/Layout.astro';
 .terms-page ul li {
   font-size: 13px;
   line-height: 1.85;
-  color: var(--text-2);
+  color: var(--muted);
   margin-bottom: 3px;
 }
-.terms-page a { color: var(--text); text-decoration: underline; }
+.terms-page a { color: var(--ink); text-decoration: underline; }
 .terms-page a:hover { opacity: .7; }
 .terms-divider {
   border: none;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--rule);
   margin: 28px 0;
 }
 </style>
@@ -100,6 +100,6 @@ import Layout from '../layouts/Layout.astro';
 
   <hr class="terms-divider"/>
 
-  <p style="font-size:12px;color:var(--text-3);line-height:1.8">If these terms change meaningfully, the date at the top gets updated. See also the <a href="/privacy">Privacy Policy</a>.</p>
+  <p style="font-size:12px;color:var(--muted);line-height:1.8">If these terms change meaningfully, the date at the top gets updated. See also the <a href="/privacy">Privacy Policy</a>.</p>
 </div>
 </Layout>

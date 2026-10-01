@@ -1,0 +1,4 @@
+---
+const {id, ...props} = Astro.props;
+---
+<p class="status" id={id} role="status" aria-live="polite" {...props}><slot/></p>

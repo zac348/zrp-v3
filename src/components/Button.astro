@@ -1,0 +1,5 @@
+---
+const {href, secondary = false, ...props} = Astro.props;
+const Tag = href ? 'a' : 'button';
+---
+<Tag href={href} class={secondary ? 'btn-sm' : 'btn'} {...props}><slot/></Tag>

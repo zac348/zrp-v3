@@ -114,9 +114,9 @@ async function savePkg(id) {
   await loadPricing(); toast('Package saved');
 }
 
-async function toggleAvail(id, checked, type) {
+async function toggleAvail(id, available, type) {
   const table = type === 'pkg' ? 'package_pricing' : 'addon_pricing';
-  await checked(sb.from(table).update({ available: checked }).eq('id', id));
+  await checked(sb.from(table).update({ available }).eq('id', id));
   await loadPricing(); toast('Availability updated');
 }
 

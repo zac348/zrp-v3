@@ -1,6 +1,6 @@
 # ZR Photos v4
 
-Implemented on `redesign-v4`, based on the approved design plan. No master merge/push, database mutation, schema change, or Supabase deployment was performed.
+Implemented on `redesign-v4`, based on the approved design plan. Published to master with explicit approval on October 1, 2026. No production data mutation, schema change, or Supabase deployment was performed.
 
 ## Design
 
@@ -18,7 +18,7 @@ The optional Calendar service blocks accepted exact dates and agreed session dat
 
 ## Verification
 
-Baseline: 17 pages and 36 tests. Final implementation: 16 pages (obsolete `/thanks` removed), 68 passing tests. Builds pass with booking on/off; protected API, migration, workflow, dependency, and existing non-legacy test files are unchanged. Original-download byte preservation remains covered by the existing tests.
+Baseline: 17 pages and 36 tests. Final implementation: 16 pages (obsolete `/thanks` removed), 69 passing tests. Builds pass with booking on/off; protected API, migration, workflow, dependency, and existing non-legacy test files are unchanged. Original-download byte preservation remains covered by the existing tests.
 
 Local mock browser checks covered phone booking submission with the correct payload and discounted estimate, calendar disabled/partial days, query coupon prefill, photo selection/bulk edits, acceptance moving an enquiry into Active with its calendar message, and Drive connection status. Screenshots were captured for home, Portfolio, booking, both client galleries, and Studio in light/dark at 390/1440. Chrome additionally verified Portfolio pagination, category/Back behavior, viewer arrows/Escape, and focus return. Responsive DOM checks found no horizontal overflow across 15 routes, both themes, and all five requested widths (150 combinations). A browser popup initially stalled controls; it cleared on retry. Browser confirmation Cancel/Continue, gallery create/watermark/delete, booking publish/unpublish, contact failure/retry, both client-details modes, and a Drive download event now pass. Website-gallery original delivery was requested successfully, but a saved-file event was not confirmed. The final report distinguishes source inspection from executed browser checks; do not interpret this document as full end-to-end certification.
 
@@ -31,3 +31,7 @@ Known issues remain: small Drive previews, coupon uses not incremented, browser 
 ## Policies
 
 A separate commit makes only the requested factual Privacy/Terms corrections, including galleries available until the client requests removal. Existing effective dates and deposit/cancellation/business terms are unchanged for Zachary’s review.
+
+## Local-session confirmation
+
+The subsequent approved booking update requires a local-area checkbox in the browser and `local: true` on the booking endpoint, and records that confirmation in the saved enquiry. This deliberately changes the previously protected booking API for the new requirement. The unchecked/checked browser paths pass, and the server test rejects missing, false, and non-boolean confirmations before network calls.

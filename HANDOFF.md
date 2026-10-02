@@ -89,7 +89,7 @@ The **Print** tab generates an envelope PNG. `/coupon-card` generates coupon-car
 
 The current terms retain the existing 50% deposit, 48-hour notice, 5–7 day delivery, copyright, and personal-use policies. The gallery rule is now availability until requested removal. Zachary should review the unchanged business policies and decide whether the existing effective dates should be updated before merging the legal wording changes.
 
-The package form asks for agreement to Terms and offers optional portfolio permission. The permission is recorded in the request notes. Only publish client photographs with permission.
+The package form requires confirmation that the session is in Valdosta, Georgia, or a nearby community, asks for agreement to Terms, and offers optional portfolio permission. The server rejects requests without local-area confirmation and records it in the request. The permission is recorded in the request notes. Only publish client photographs with permission.
 
 ## Email and spam protection
 
@@ -119,7 +119,7 @@ The existing default Shared drive parent is `0AHwV0eI44SAaUk9PVA`. Keep the serv
 
 ## Site and delivery deployment
 
-The code is at `github.com/zac348/zrp-v3`. A push to **master** automatically deploys Cloudflare Pages. This redesign is isolated on **redesign-v4** and has not been merged or pushed to master. Review the preview, verification gaps, and policy wording before merging. Admin content edits take effect directly without a site deploy.
+The code is at `github.com/zac348/zrp-v3`. A push to **master** automatically deploys Cloudflare Pages. The approved redesign was published from **redesign-v4** to **master** on October 1, 2026. The delivery calendar function is a separate deployment described below. Admin content edits take effect directly without a site deploy.
 
 `src/config.js` retains `BOOKING_OPEN` and `PRIMARY_CTA`. True enables package booking. False changes public actions to Get in touch, redirects `/book` and `/quick-book` to contact, and hides Availability/Coupons in Studio. Existing private details and galleries still work.
 

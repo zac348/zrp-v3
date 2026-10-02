@@ -18,6 +18,7 @@ export async function onRequestPost({request,env}) {
   if(b.date<today)return fail('Choose a future session date.');
   if(b.time && !/^([01]\d|2[0-3]):[0-5]\d$/.test(b.time))return fail('Choose a valid time.');
   if(b.agreed!==true)return fail('Please accept the terms before submitting.');
+  if(b.local!==true)return fail('Please confirm your session is in Valdosta or a nearby community.');
   if(!Array.isArray(b.addon_ids) || b.addon_ids.length>30 || b.addon_ids.some(v=>typeof v!=='string'))return fail('Please check the add-ons.');
   if(typeof b.package_id!=='string')return fail('Choose a package.');
   if(!env.PUBLIC_SUPABASE_URL || !env.PUBLIC_SUPABASE_ANON_KEY)return fail('Booking is temporarily unavailable.',503);
@@ -58,6 +59,7 @@ export async function onRequestPost({request,env}) {
       `Package and add-ons estimate: ${money(total)} (subject to Zachary’s confirmation; travel quoted separately)`,
       `Session: ${b.session_type}`,`Preferred date: ${b.date}${b.time?' at '+b.time:''}`,
       b.phone?'Phone: '+b.phone:'',`Portfolio use: ${b.portfolio===true?'approved':'not approved'}`,
+      'Session area: Valdosta or nearby community — confirmed',
       'Terms and privacy: accepted',b.notes,
     ].filter(Boolean).join('\n');
     if(message.length>3000)return fail('Please shorten the session notes.');

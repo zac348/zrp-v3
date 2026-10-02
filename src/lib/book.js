@@ -302,6 +302,7 @@ document.getElementById('book-form').addEventListener('submit', async function(e
   e.preventDefault();
   if (!selPkg) { inlineError('Please select a package first.'); return; }
   if (!document.getElementById('f-date').value) { inlineError('Pick an open date on the calendar first.'); return; }
+  if (!document.getElementById('f-local').checked) { inlineError('Please confirm your session is in Valdosta or a nearby community.'); document.getElementById('f-local').focus(); return; }
 
   // Anti-spam: honeypot filled or form completed inhumanly fast → fake success, save nothing
   if (document.getElementById('f-website').value || Date.now() - PAGE_LOADED < 3000) {
@@ -333,6 +334,7 @@ document.getElementById('book-form').addEventListener('submit', async function(e
       date:document.getElementById('f-date').value,time:document.getElementById('f-time').value,
       session_type:sessionType,package_id:selPkg.id,addon_ids:[...selectedAddons],
       coupon:appliedCoupon?.code || '',notes:combinedNotes || '',agreed:document.getElementById('f-agree').checked,
+      local:document.getElementById('f-local').checked,
       portfolio:document.getElementById('f-portfolio').checked,website:'',elapsed:Date.now()-PAGE_LOADED
     }),signal:AbortSignal.timeout(45000)});
     const result=await response.json();

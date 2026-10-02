@@ -93,7 +93,7 @@ Open **Studio → Blog** and choose **New post**. Add a title, post text, and an
 
 Paragraphs need no formatting. Optional shortcuts: `## Heading`, `**bold**`, `*italics*`, `- list item`, and `[link text](https://example.com)`. HTML and embedded code are displayed as text.
 
-Initial setup requires applying `supabase/migrations/202610010001_blog_posts.sql` once to the existing Supabase project before deploying the site changes. It creates only the blog table, its access policies, and helper functions. Published posts are public; drafts and all writing actions are restricted to the existing Studio delivery-admin allowlist. It does not change bookings, photos, or existing delivery policies. A new site build is not needed each time Zac publishes a post.
+Blog storage was set up in the existing Supabase project on October 2, 2026 using `supabase/migrations/202610010001_blog_posts.sql`. Do not rerun that SQL on this project. It creates only the blog table, its access policies, and helper functions. Published posts are public; drafts and all writing actions are restricted to the existing Studio delivery-admin allowlist. It does not change bookings, photos, or existing delivery policies. A new site build is not needed each time Zac publishes a post.
 
 ## Terms and photo permission
 
@@ -133,13 +133,13 @@ The code is at `github.com/zac348/zrp-v3`. A push to **master** automatically de
 
 `src/config.js` retains `BOOKING_OPEN` and `PRIMARY_CTA`. True enables package booking. False changes public actions to Get in touch, redirects `/book` and `/quick-book` to contact, and hides Availability/Coupons in Studio. Existing private details and galleries still work.
 
-The delivery function’s calendar feature is separate from the static site. **The existing function must be redeployed for auto-blocking to begin.** No new migration or secret is required. From the repository, the owner runs:
+The delivery function’s calendar feature is separate from the static site. **The calendar-enabled function was deployed and is active as of October 2, 2026.** No new migration or secret is required. For future delivery-service updates, run from the repository:
 
 ```sh
 npx --yes supabase@2.118.0 functions deploy delivery --project-ref jrowfpgezkfeyzfyzfps --use-api
 ```
 
-This redesign did not run that command. The site works with the older function, which omits calendar results; the new function also works with the old site. Do not rerun the existing workflow migration as part of this update.
+The October 2 setup ran that command successfully. The site works with the older function, which omits calendar results; the new function also works with the old site. Do not rerun the existing workflow migration as part of this update.
 
 The function keeps JWT gateway verification disabled for public enquiry/private-link routes. Its admin actions still verify the session and `delivery_admins` allowlist internally. Keep that protection intact.
 

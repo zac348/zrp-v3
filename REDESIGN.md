@@ -1,6 +1,6 @@
 # ZR Photos v4
 
-Implemented on `redesign-v4`, based on the approved design plan. Published to master with explicit approval on October 1, 2026. No production data mutation, schema change, or Supabase deployment was performed.
+Implemented on `redesign-v4`, based on the approved design plan. Published to master with explicit approval on October 1, 2026. The later blog setup added its dedicated table and access policies, and the calendar-enabled Supabase delivery function was deployed on October 2, 2026. Existing client records were not changed.
 
 ## Design
 
@@ -24,7 +24,7 @@ Local mock browser checks covered phone booking submission with the correct payl
 
 Thirteen additional action-level regression tests cover admin confirmations, gallery unlink/delete safety, coupon types, pricing, upload failures and original preservation, availability changes, and the delivery action cycle. These use a DOM/database double, not browser end-to-end automation. Booking failure/retry preserved the submission UUID and user inputs in the browser; percent/fixed/travel/expired/invalid coupons and empty/error/broken preview gallery states were also checked. Upload database failures now continue the batch and clean up controls; HTML dialogs replace native admin prompts.
 
-Lighthouse scores were not measured: the tool is not installed. A complete keyboard-only pass, live OS appearance changes, reduced-motion emulation, every admin interaction, and the full download/error matrix are not fully verified. Real emails, real Drive actions, and production calendar writes were deliberately not exercised. The updated Supabase function is not deployed; the owner command is in HANDOFF.md.
+Lighthouse scores were not measured: the tool is not installed. A complete keyboard-only pass, live OS appearance changes, reduced-motion emulation, every admin interaction, and the full download/error matrix are not fully verified. Real emails, real Drive actions, and production calendar writes were deliberately not exercised. The updated Supabase function was deployed on October 2, 2026; the future-update command remains in HANDOFF.md.
 
 Known issues remain: small Drive previews, coupon uses not incremented, browser watermarking leaves originals reachable, and public-key website-gallery metadata access. No dependency was added. Optional authentication-helper consolidation was left alone because a Cloudflare function bundle was not validated.
 

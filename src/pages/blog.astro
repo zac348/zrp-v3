@@ -1,0 +1,15 @@
+---
+import Layout from '../layouts/Layout.astro';
+import '../styles/blog.css';
+---
+<Layout title="Blog — Zachary Routsong" description="Posts and photographs by Zachary Routsong in Valdosta, Georgia.">
+  <div class="blog-page" id="blog-content"><h1>Blog</h1><p class="no-data" role="status">Loading posts…</p></div>
+  <script>
+    const content=document.getElementById('blog-content');
+    if(content.dataset.rendered!=='true'){
+      const query=new URLSearchParams(location.search);
+      const slug=location.pathname.replace(/^\/blog\/?/,'').replace(/\/$/,'');if(slug)query.set('slug',slug);
+      fetch('/api/blog?'+query,{signal:AbortSignal.timeout(12000)}).then(async response=>{const result=await response.json();if(typeof result.html!=='string')throw new Error();content.innerHTML=result.html;document.title=result.title;}).catch(()=>{content.textContent='Posts could not load. Please refresh to try again.';});
+    }
+  </script>
+</Layout>

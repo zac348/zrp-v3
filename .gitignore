@@ -9,3 +9,8 @@ work/
 *-key.json
 *service-account*.json
 zrphotos-drive*.json
+
+# Cloudflare local development files
+.wrangler/
+.dev.vars
+.dev.vars.*

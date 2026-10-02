@@ -12,6 +12,8 @@ import Availability from '../components/admin/Availability.astro';
 import Pricing from '../components/admin/Pricing.astro';
 import Coupons from '../components/admin/Coupons.astro';
 import Print from '../components/admin/Print.astro';
+import Blog from '../components/admin/Blog.astro';
+import '../styles/blog.css';
 ---
 <Layout title="Studio — Zachary Routsong" noNav={true} noFooter={true}>
   <div class="studio">
@@ -25,6 +27,7 @@ import Print from '../components/admin/Print.astro';
       <Pricing/>
       <Coupons/>
       <Print/>
+      <Blog/>
     </div>
   </div>
   <script src="../lib/admin/index.js"></script>

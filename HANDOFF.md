@@ -85,6 +85,16 @@ The existing uses counter does not increment on redemption. A code and its effec
 
 The **Print** tab generates an envelope PNG. `/coupon-card` generates coupon-card PNGs. Fill the fields, select the design, and Download. Both wait for local fonts before export. No files are uploaded by these tools.
 
+## Blog
+
+Open **Studio → Blog** and choose **New post**. Add a title, post text, and an optional short description. The post link is filled from the title and stays fixed after the first save. A cover photograph can be chosen from Photos; describe it for readers using screen readers. Only choose a photograph you want to publish.
+
+**Save draft** keeps a post private. **Preview** shows your current text without publishing it. **Publish** makes it appear on `/blog` with its own shareable link. For a published post, **Save changes** updates the live post immediately. **Unpublish** hides it and keeps it as a draft. **Delete post** permanently removes the post, but keeps the photograph in Photos. Unsaved changes prompt before switching posts or leaving the page; keep the tab open if a save fails. If another window changed the same post, copy your text before refreshing.
+
+Paragraphs need no formatting. Optional shortcuts: `## Heading`, `**bold**`, `*italics*`, `- list item`, and `[link text](https://example.com)`. HTML and embedded code are displayed as text.
+
+Initial setup requires applying `supabase/migrations/202610010001_blog_posts.sql` once to the existing Supabase project before deploying the site changes. It creates only the blog table, its access policies, and helper functions. Published posts are public; drafts and all writing actions are restricted to the existing Studio delivery-admin allowlist. It does not change bookings, photos, or existing delivery policies. A new site build is not needed each time Zac publishes a post.
+
 ## Terms and photo permission
 
 The current terms retain the existing 50% deposit, 48-hour notice, 5–7 day delivery, copyright, and personal-use policies. The gallery rule is now availability until requested removal. Zachary should review the unchanged business policies and decide whether the existing effective dates should be updated before merging the legal wording changes.

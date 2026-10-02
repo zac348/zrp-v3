@@ -1,0 +1,25 @@
+<section class="tab" id="tab-blog">
+  <h1 class="main-title">Blog</h1>
+  <p class="main-sub">Write a post, save it as a draft, then publish when it’s ready.</p>
+  <div class="actions"><button class="btn" type="button" id="blog-new">New post</button><button class="btn-sm" type="button" id="blog-refresh">Refresh posts</button><a href="/blog" target="_blank" rel="noopener" class="btn-sm">View blog</a></div>
+  <p id="blog-load-status" role="status" class="status"></p>
+  <div class="blog-workspace">
+    <div class="blog-post-list" id="blog-post-list" aria-label="Your blog posts"></div>
+    <div class="blog-editor">
+      <form id="blog-form">
+        <fieldset id="blog-fields">
+          <p class="blog-editor-note" id="blog-state">New draft</p>
+          <div class="field"><label for="blog-title">Title</label><input id="blog-title" required maxlength="160" autocomplete="off"/></div>
+          <div class="field"><label for="blog-slug">Post link</label><input id="blog-slug" required maxlength="100" pattern="[a-z0-9]+(-[a-z0-9]+)*" aria-describedby="blog-slug-help" autocomplete="off"/><small id="blog-slug-help">Lowercase words separated by hyphens. The link stays the same after the first save.</small></div>
+          <div class="field"><label for="blog-excerpt">Short description (optional)</label><textarea id="blog-excerpt" maxlength="300" rows="2"></textarea></div>
+          <div class="field"><label for="blog-cover">Cover photograph (optional)</label><select id="blog-cover"><option value="">No cover photograph</option></select><small>Choose an uploaded photograph from Photos. Publishing makes the chosen photograph visible on this post.</small></div>
+          <div class="field"><label for="blog-alt">Describe the cover photograph</label><input id="blog-alt" maxlength="180"/><small>A short description for people using a screen reader.</small></div>
+          <div class="field"><label for="blog-body">Post</label><textarea id="blog-body" required maxlength="30000" aria-describedby="blog-format-help"></textarea><small id="blog-format-help">Separate paragraphs with a blank line. Use ## for a heading, **bold**, *italics*, - for a list, or [link text](https://example.com).</small></div>
+          <div class="editor-actions"><button class="btn" type="submit" id="blog-save">Save draft</button><button class="btn-sm" type="button" id="blog-preview-button">Preview</button><button class="btn-sm" type="button" id="blog-publish">Publish</button><button class="btn-sm" type="button" id="blog-unpublish" hidden>Unpublish</button><a class="btn-sm" id="blog-live-link" target="_blank" rel="noopener" hidden>View post</a><button class="btn-sm red" type="button" id="blog-delete" hidden>Delete post</button></div>
+        </fieldset>
+        <p class="status" id="blog-status" role="status" tabindex="-1"></p>
+      </form>
+      <section class="blog-preview" id="blog-preview" aria-label="Post preview" hidden><h2 class="blog-preview-title">Preview</h2><div id="blog-preview-content"></div></section>
+    </div>
+  </div>
+</section>

@@ -14,7 +14,7 @@ interface Props {
 }
 const { title, description = 'Zachary Routsong is a photographer in Valdosta, Georgia. Portraits, families, events, sports, and landscapes.', noNav = false, noFooter = false, redirectTo } = Astro.props;
 const path = Astro.url.pathname.replace(/\/$/, '') || '/';
-const publicPage = path === '/' || path === '/portfolio';
+const publicPage = path === '/' || path === '/portfolio' || path === '/blog';
 const authPage = path === '/login' || path === '/reset';
 ---
 <!doctype html>
@@ -78,6 +78,7 @@ const authPage = path === '/login' || path === '/reset';
       <a class="wordmark" href="/" aria-label="Zachary Routsong — home"><span class="monogram">zr.</span></a>
       <nav class="site-nav" aria-label="Main navigation">
         <a href="/portfolio" aria-current={path === '/portfolio' ? 'page' : undefined}>Work</a>
+        <a href="/blog" aria-current={path === '/blog' ? 'page' : undefined}>Blog</a>
         <a href="/#about">About</a>
         <a href={PRIMARY_CTA.href}>{PRIMARY_CTA.label === 'Get in touch' ? 'Contact' : PRIMARY_CTA.label}</a>
         <Appearance/>
@@ -85,7 +86,7 @@ const authPage = path === '/login' || path === '/reset';
     </header>}
     <main id="main-content" tabindex="-1"><slot/></main>
     {!noFooter && <footer class="site-footer">
-      <div class="footer-top"><a href="/" class="footer-name">Zachary Routsong</a><div class="footer-contact"><p>Valdosta, Georgia &amp; nearby</p><a href="mailto:zac@zrphotos.net">zac@zrphotos.net</a><a href="tel:+12293001006">229–300–1006</a></div><div class="footer-directory"><a href="/portfolio">Photographs</a><a href="/#about">About Zachary</a><a href={PRIMARY_CTA.href}>{PRIMARY_CTA.label}</a><a href="https://instagram.com/zacharyroutsongphotos" target="_blank" rel="noopener">Instagram</a></div></div>
+      <div class="footer-top"><a href="/" class="footer-name">Zachary Routsong</a><div class="footer-contact"><p>Valdosta, Georgia &amp; nearby</p><a href="mailto:zac@zrphotos.net">zac@zrphotos.net</a><a href="tel:+12293001006">229–300–1006</a></div><div class="footer-directory"><a href="/portfolio">Photographs</a><a href="/#about">About Zachary</a><a href="/blog">Blog</a><a href={PRIMARY_CTA.href}>{PRIMARY_CTA.label}</a><a href="https://instagram.com/zacharyroutsongphotos" target="_blank" rel="noopener">Instagram</a></div></div>
       <div class="footer-bottom"><span>© {new Date().getFullYear()} Zachary Routsong</span><span>All photographs by Zachary.</span><div><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/login">Studio login</a></div></div>
     </footer>}
     <div class="toast" id="toast" role="status" aria-live="polite"></div>

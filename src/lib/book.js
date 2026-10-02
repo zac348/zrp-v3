@@ -1,4 +1,5 @@
 import { packageFeatures } from './packages.js';
+import { pauseState, resumeLabel, countdown } from './booking-pause.js';
 import { createClient } from '@supabase/supabase-js';
 const sb = createClient(
   import.meta.env.PUBLIC_SUPABASE_URL,
@@ -19,7 +20,6 @@ async function loadAddons(){
   if(!availableAddons.length){wrap.textContent="No add-ons currently offered.";return;}
   availableAddons.forEach(a=>{const label=document.createElement("label");label.className="addon-choice";const input=document.createElement("input");input.type="checkbox";input.addEventListener("change",()=>{input.checked?selectedAddons.add(String(a.id)):selectedAddons.delete(String(a.id));updateCostBox();});label.append(input,document.createTextNode(a.addon_name+" — $"+Number(a.price).toFixed(2)));wrap.append(label);});
 }
-loadAddons();
 async function loadPackages() {
   const { data, error } = await sb.from('package_pricing').select('*').eq('available', true).order('base_price');
   if(error || !data?.length){document.getElementById("pkg-grid").textContent="Packages are unavailable right now. Please contact Zachary.";return;}
@@ -344,15 +344,44 @@ document.getElementById('book-form').addEventListener('submit', async function(e
   finally{bookingSubmitting=false;}
 });
 
-const _now = new Date();
-calY = _now.getFullYear();
-calM = _now.getMonth();
-renderCal();
-loadAvailability();
-loadPackages();
-// Prefill promo code from admin share links: /book?coupon=CODE
-const urlCoupon = new URLSearchParams(window.location.search).get('coupon');
-if (urlCoupon) {
-  document.getElementById('f-coupon').value = urlCoupon.toUpperCase();
-  applyCoupon();
+function startBooking() {
+  const now = new Date();
+  calY = now.getFullYear();
+  calM = now.getMonth();
+  renderCal();
+  loadAvailability();
+  loadPackages();
+  loadAddons();
+  // Prefill promo code from admin share links: /book?coupon=CODE
+  const urlCoupon = new URLSearchParams(window.location.search).get('coupon');
+  if (urlCoupon) {
+    document.getElementById('f-coupon').value = urlCoupon.toUpperCase();
+    applyCoupon();
+  }
 }
+
+// Studio can pause booking until a resume date. Show a countdown instead of the
+// form; when it reaches zero the page reloads and the form is back. A slow or
+// missing setting never blocks booking.
+function showPause(resumeAt) {
+  document.getElementById('booking-intro').hidden = true;
+  document.getElementById('booking-content').hidden = true;
+  const panel = document.getElementById('booking-paused');
+  panel.hidden = false;
+  document.getElementById('paused-date').textContent = 'Bookings open ' + resumeLabel(resumeAt) + '.';
+  const units = [...panel.querySelectorAll('[data-unit]')];
+  let timer;
+  const tick = () => {
+    const left = resumeAt - Date.now();
+    if (left <= 0) { clearInterval(timer); location.reload(); return; }
+    const parts = countdown(left);
+    units.forEach(el => { el.textContent = String(parts[el.dataset.unit]).padStart(2, '0'); });
+  };
+  tick();
+  timer = setInterval(tick, 1000);
+}
+const settingsTimeout = new Promise(resolve => setTimeout(() => resolve({}), 4000));
+Promise.race([sb.from('site_settings').select('booking_paused,booking_resume_at').eq('id', 1).maybeSingle(), settingsTimeout])
+  .then(({ data }) => pauseState(data), () => pauseState(null))
+  .then(pause => { if (pause.paused) showPause(pause.resumeAt); else startBooking(); })
+  .finally(() => document.querySelector('.booking-page').removeAttribute('data-pause-check'));

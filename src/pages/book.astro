@@ -6,7 +6,18 @@ import { BOOKING_OPEN } from '../config.js';
 import '../styles/book.css';
 ---
 <Layout title="Book a session — Zachary Routsong" redirectTo={BOOKING_OPEN ? undefined : '/#contact'}>
-<div class="booking-page">
+<div class="booking-page" data-pause-check>
+  <section class="booking-paused" id="booking-paused" hidden aria-labelledby="paused-heading">
+    <h1 id="paused-heading">Zachary will be accepting bookings soon.</h1>
+    <p class="paused-date" id="paused-date"></p>
+    <div class="countdown" role="timer" aria-label="Time until bookings open">
+      <div><span data-unit="days">00</span><small>days</small></div>
+      <div><span data-unit="hours">00</span><small>hours</small></div>
+      <div><span data-unit="minutes">00</span><small>minutes</small></div>
+      <div><span data-unit="seconds">00</span><small>seconds</small></div>
+    </div>
+    <p class="paused-note">Questions before then? <a href="sms:+12293001006">Text 229-300-1006</a> or <a href="/#contact">send a message</a>.</p>
+  </section>
   <header id="booking-intro"><h1>Request a session</h1><p>Choose a package, any add-ons, and a preferred date. Zachary will review your request before you complete the session details.</p></header>
   <div id="booking-content">
     <section aria-labelledby="package-heading"><h2 class="step-heading" id="package-heading">1. Package</h2><div class="pkg-grid" id="pkg-grid"><StatusMessage>Loading packages…</StatusMessage></div></section>

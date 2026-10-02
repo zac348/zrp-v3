@@ -5,3 +5,7 @@
 @media(max-width:900px){.booking-columns{grid-template-columns:1fr;gap:0}.estimate{grid-row:1;position:static;padding:16px 0;margin-bottom:16px;display:flex;gap:16px;align-items:center;flex-wrap:wrap}.estimate strong{font-size:20px;margin:0}.estimate p:last-child{margin:0}.booking-page{max-width:740px}.cal{max-width:520px}}
 @media(max-width:500px){.booking-page{padding-block:40px 64px}.form-grid{grid-template-columns:1fr}.pkg-card{grid-template-columns:1fr}.pkg-price{font-size:16px}.pkg-features{font-size:13px}.cal{padding:12px 0}.cal-head,.cal-legend{padding-inline:8px}.coupon-row{gap:8px}.coupon-row .btn{padding-inline:12px}}
 @media(max-width:350px){.cal{margin-inline:-10px;border-inline:0}.cal-d{min-width:44px}.cal-head{padding-inline:0}}
+.booking-page[data-pause-check]>#booking-intro,.booking-page[data-pause-check]>#booking-content{visibility:hidden}
+.booking-paused{max-width:760px;padding-block:32px 48px}.booking-paused h1{max-width:14em}.paused-date{color:var(--muted);margin-top:20px}
+.countdown{display:flex;flex-wrap:wrap;gap:24px clamp(24px,6vw,56px);margin:48px 0;padding-top:24px;border-top:1px solid var(--rule)}.countdown div{display:flex;flex-direction:column;gap:8px}.countdown span{font:400 clamp(44px,7vw,72px)/1 var(--font-serif);font-variant-numeric:tabular-nums;min-width:1.4em}.countdown small{font-size:13px;color:var(--muted)}
+.paused-note{font-size:14px;color:var(--muted)}.paused-note a{color:var(--ink)}

@@ -55,6 +55,21 @@ Galleries remain available until the client asks for removal. Clients should sti
 
 Old `/confirm` and `/invoice` links now explain that they belong to the retired system and direct clients to text Zachary or the contact form. Old booking records remain in the database as an archive. No table, gallery, or photograph was deleted by this redesign.
 
+## Pausing online booking
+
+Studio → **Bookings** → **Online booking**. Pick a **Resume bookings on** date and click **Pause bookings**. While paused:
+
+- `/book` (and every "Book a session" button, which leads there) shows “Zachary will be accepting bookings soon.”, the reopening date, and a live countdown instead of the form.
+- The booking endpoint refuses new requests too, so the pause can't be skipped by sending the form directly.
+- The homepage contact form stays open.
+- Booking reopens **by itself at 12:00 AM Eastern** on the chosen date. Visitors already on the page see the form come back when the countdown ends. Nothing has to run on a schedule.
+
+**Update date** moves the reopening date; **Resume now** ends the pause immediately. If the setting can't be read (database outage), booking stays open rather than breaking.
+
+One-time setup: run `supabase/migrations/202610020001_booking_pause.sql` in Supabase → SQL Editor. Until then the panel says "Setup needed" and booking works as before. The setting lives in the `site_settings` table: anyone can read it, and only accounts in `delivery_admins` can change it.
+
+This is separate from `BOOKING_OPEN` in `src/config.js`, which turns online booking off entirely (buttons become "Get in touch").
+
 ## Availability
 
 This tab appears while `BOOKING_OPEN` is true. Navigate months, choose a day, then save **Unavailable**, **Partial** (with start/end times), **Available**, or **Clear**, optionally with a note. Bulk selection updates several days. Replacing or removing availability asks for confirmation. The month’s blocks are listed below the calendar.

@@ -1,7 +1,22 @@
+---
+import { BOOKING_OPEN } from '../../config.js';
+---
 <!-- BOOKINGS -->
   <div class="tab" id="tab-bookings">
     <h1 class="main-title">Bookings</h1>
     <p class="main-sub">Review new enquiries above. Accepted requests move into Active bookings below.</p>
+    {BOOKING_OPEN && (
+    <section class="booking-pause" id="booking-pause" aria-labelledby="booking-pause-heading">
+      <div class="booking-pause-head"><h2 id="booking-pause-heading">Online booking</h2><p id="booking-pause-state" role="status">Checking…</p></div>
+      <p class="booking-pause-timer" id="booking-pause-timer" hidden></p>
+      <form class="booking-pause-form" id="booking-pause-form">
+        <div class="field"><label for="booking-resume-date">Resume bookings on</label><input type="date" id="booking-resume-date" required/></div>
+        <button type="submit" class="btn" id="booking-pause-save">Pause bookings</button>
+        <button type="button" class="btn-sm" id="booking-resume-now" hidden>Resume now</button>
+      </form>
+      <p class="booking-pause-note">While paused, the booking page says “Zachary will be accepting bookings soon” with a countdown, and new requests are refused. Booking reopens by itself at 12:00 AM Eastern on the date you pick. The contact form stays open.</p>
+    </section>
+    )}
     <div class="delivery-controls">
       <button class="btn-sm" id="delivery-refresh" type="button">Refresh</button>
       <button class="btn-sm" id="delivery-check" type="button">Check Drive connection</button>

@@ -1,4 +1,5 @@
 import {onRequestPost as saveEnquiry} from './contact.js';
+import {SETTINGS_QUERY,pauseState,resumeLabel} from '../../src/lib/booking-pause.js';
 const fail=(error,status=400)=>Response.json({ok:false,error},{status});
 const money=n=>'$'+(n/100).toFixed(2);
 export async function onRequestPost({request,env}) {
@@ -26,6 +27,10 @@ export async function onRequestPost({request,env}) {
     const r=await fetch(env.PUBLIC_SUPABASE_URL.replace(/\/$/,'')+'/rest/v1/'+table+'?'+query,{headers:{apikey:env.PUBLIC_SUPABASE_ANON_KEY,Authorization:'Bearer '+env.PUBLIC_SUPABASE_ANON_KEY},signal:AbortSignal.timeout(12000)});
     if(!r.ok)throw new Error('Pricing could not be checked. Please try again.');return r.json();
   }
+  // Studio can pause new requests until a resume date. An unreadable setting never blocks booking.
+  let pause={paused:false};
+  try{pause=pauseState((await rows('site_settings',SETTINGS_QUERY))[0]);}catch{}
+  if(pause.paused)return fail(`Zachary isn’t taking new bookings until ${resumeLabel(pause.resumeAt)}. Text 229-300-1006 with any questions.`,409);
   try{
     const [packages,addons,blocks]=await Promise.all([
       rows('package_pricing','select=*&available=eq.true'),

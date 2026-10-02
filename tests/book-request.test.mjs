@@ -4,9 +4,10 @@ import {onRequestPost} from '../functions/api/book-request.js';
 const env={PUBLIC_SUPABASE_URL:'https://db.test',PUBLIC_SUPABASE_ANON_KEY:'anon-test'};
 const b={name:'Test Client',email:'test@example.test',phone:'',date:'2099-10-15',time:'14:30',session_type:'Portraits',notes:'Test request',agreed:true,local:true,package_id:'pkg',addon_ids:['addon'],submission_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',elapsed:5000};
 function ctx(body=b){return {env,request:new Request('https://site.test/api/book-request',{method:'POST',headers:{'Content-Type':'application/json',origin:'https://site.test'},body:JSON.stringify(body)})};}
-function mock(t,{blocked=false,coupon=null,available=true,saveStatus=200}={}){
+function mock(t,{blocked=false,coupon=null,available=true,saveStatus=200,settings=null}={}){
  const saved=[];
  t.mock.method(globalThis,'fetch',async(url,opt)=>{
+ if(url.includes('site_settings'))return settings==='error'?new Response('',{status:404}):Response.json(settings?[settings]:[]);
  if(url.includes('package_pricing'))return Response.json(available?[{id:'pkg',package_name:'Standard',base_price:100,on_sale:true,sale_price:75}]:[]);
  if(url.includes('addon_pricing'))return Response.json([{id:'addon',addon_name:'Extra hour',price:25}]);
  if(url.includes('availability'))return Response.json(blocked?[{status:'unavailable',start_time:null}]:[]);
@@ -23,3 +24,7 @@ test('missing agreement or invalid date rejects before network calls',async t=>{
 test('storage failure is visible to the client',async t=>{mock(t,{saveStatus:503});assert.equal((await onRequestPost(ctx())).status,503);});
 
 test('local session confirmation is required before any network calls',async t=>{let calls=0;t.mock.method(globalThis,'fetch',async()=>{calls++;});for(const local of [undefined,false,'true',1]){const r=await onRequestPost(ctx({...b,local}));assert.equal(r.status,400);assert.match((await r.json()).error,/Valdosta or a nearby community/);}assert.equal(calls,0);});
+
+test('a booking pause refuses requests until the resume time and saves nothing',async t=>{const saved=mock(t,{settings:{booking_paused:true,booking_resume_at:'2099-01-01T05:00:00Z'}});const r=await onRequestPost(ctx());assert.equal(r.status,409);assert.match((await r.json()).error,/isn’t taking new bookings until/);assert.equal(saved.length,0);});
+test('a pause whose resume time has passed lets requests through',async t=>{const saved=mock(t,{settings:{booking_paused:true,booking_resume_at:'2000-01-01T05:00:00Z'}});assert.equal((await onRequestPost(ctx())).status,200);assert.equal(saved.length,1);});
+test('an unreadable pause setting never blocks booking',async t=>{const saved=mock(t,{settings:'error'});assert.equal((await onRequestPost(ctx())).status,200);assert.equal(saved.length,1);});

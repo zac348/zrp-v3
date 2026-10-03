@@ -147,6 +147,6 @@ test('Drive check reports whether the portfolio folder is readable',async()=>{
  const r=await drive.health(ROOT);assert.equal(r.portfolio.ok,false);assert.match(r.portfolio.message,/Share it with drive-bot@project\.iam\.gserviceaccount\.com/);
 });
 test('captions come from file names; camera names and dates get none',()=>{
- for(const [name,expected] of [['Thorncrown Chapel.jpg','Thorncrown Chapel'],['Biloxi,_Mississippi.JPG','Biloxi, Mississippi'],['IMG_4031.JPG',''],['_DSC1234.NEF',''],['DSCF0001.jpg',''],['PXL_20260101_123456.jpg',''],['20260920_181500.jpg',''],['Pine Lake 2.jpg','Pine Lake 2']])assert.equal(caption(name),expected,name);
+ for(const [name,expected] of [['Thorncrown Chapel.jpg','Thorncrown Chapel'],['Biloxi,_Mississippi.JPG','Biloxi, Mississippi'],['IMG_4031.JPG',''],['_DSC1234.NEF',''],['DSCF0001.jpg',''],['PXL_20260101_123456.jpg',''],['20260920_181500.jpg',''],['Pine Lake 2.jpg','Pine Lake 2'],['Sarasota, Florida (2).jpg','Sarasota, Florida'],['Senior Night 2026.jpg','Senior Night 2026']])assert.equal(caption(name),expected,name);
 });
 

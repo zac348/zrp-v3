@@ -32,11 +32,12 @@ export function folderName(d) {
   return `${d.date} — ${d.name} — ${d.session_type}`.replace(/[\x00-\x1f/\\]/g, ' ').slice(0, 220);
 }
 
-// Portfolio captions come from file names: "Thorncrown Chapel.jpg" → "Thorncrown Chapel".
-// Camera defaults (IMG_4031, DSC_0012, DJI_0007…) and date-only names get no caption.
+// Portfolio captions come from file names: "Thorncrown Chapel.jpg" → "Thorncrown Chapel",
+// and copies such as "Thorncrown Chapel (2).jpg" share it. Camera defaults
+// (IMG_4031, DSC_0012, DJI_0007…) and date-only names get no caption.
 const CAMERA_NAME = /^(img|dsc|dscn|dscf|dsc_|mg|dji|pxl|gopr|gp|mvimg|vid|photo|image|p)\s?\d+/i;
 export function caption(name = '') {
-  const base = String(name).replace(/\.[a-z0-9]{2,5}$/i, '').replace(/_+/g, ' ').replace(/\s+/g, ' ').trim();
+  const base = String(name).replace(/\.[a-z0-9]{2,5}$/i, '').replace(/\s*\(\d+\)$/, '').replace(/_+/g, ' ').replace(/\s+/g, ' ').trim();
   return !base || CAMERA_NAME.test(base) || /^[\d\s.-]+$/.test(base) ? '' : base.slice(0, 120);
 }
 const PORTFOLIO_SIZES = [700, 1400, 2200];

@@ -20,9 +20,9 @@ export function setupBlog({sb,state}) {
   const dirty=()=>baseline!==''&&baseline!==fingerprint();
   const status=message=>{$('blog-status').textContent=message;};
   function covers(saved=$('blog-cover').value) {
-    const photos=state.photos.filter(p=>safeImage(p.web_url||p.thumb_url||p.url));
-    const urls=new Set(photos.map(p=>p.web_url||p.thumb_url||p.url));
-    $('blog-cover').innerHTML='<option value="">No cover photograph</option>'+photos.map(p=>`<option value="${escapeHTML(p.web_url||p.thumb_url||p.url)}">${escapeHTML(p.title||p.file_name||p.category||'Photograph')}</option>`).join('')+(saved&&!urls.has(saved)?`<option value="${escapeHTML(saved)}">Current cover photograph</option>`:'');
+    const photos=state.portfolio.map(p=>({...p,src:new URL(p.web_url,location.origin).href})).filter(p=>safeImage(p.src));
+    const urls=new Set(photos.map(p=>p.src));
+    $('blog-cover').innerHTML='<option value="">No cover photograph</option>'+photos.map(p=>`<option value="${escapeHTML(p.src)}">${escapeHTML([p.location,p.sport].filter(Boolean).join(' — ')||'Photograph')}</option>`).join('')+(saved&&!urls.has(saved)?`<option value="${escapeHTML(saved)}">Current cover photograph</option>`:'');
     $('blog-cover').value=saved;
   }
   function controls() {

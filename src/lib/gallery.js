@@ -48,7 +48,7 @@ export function makeTile(photo,index,photos,eagerCount=0) {
   image.addEventListener('load',()=>image.classList.add('loaded'));
   button.append(image);button.addEventListener('click',()=>openPhoto(photos,index,button));
   const caption=document.createElement('figcaption');
-  const label=document.createElement('span');label.className='photo-label';label.textContent=photo.location||photo.title||photo.sport||'Untitled';
+  const label=document.createElement('span');label.className='photo-label';label.textContent=photo.location||photo.title||'';
   const category=document.createElement('span');category.className='photo-category';category.textContent=photo.sport||'Photograph';
   caption.append(label,category);figure.append(button,caption);return figure;
 }

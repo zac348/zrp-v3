@@ -16,25 +16,23 @@ Bodoni Moda supplies the large type; Public Sans handles body text and controls.
 
 Motion is limited to short fades: the opening, loading photographs, filters, viewer, and supported page navigation. Reduced motion turns these off. Captions stay visible. Photographs retain their proportions in collections and are never tinted for dark mode. The opening alone uses a crop and contrast overlay.
 
-## Photos and Portfolio
+## Portfolio (Google Drive)
 
-In **Photos**, choose Category, optional Title and Location, an optional Client gallery, and whether to **Add to the public Portfolio page**. Choose files or drag them onto the upload area. A batch uses the same chosen metadata.
+The public portfolio is a Google Drive folder: [portfolio folder](https://drive.google.com/drive/folders/1EQPwt4TABYTBQp2GxlneR3mBHfN2dupn). The homepage, `/portfolio`, the opening slideshow and the blog cover choices all read from it.
 
-Each upload saves the untouched original in Cloudflare R2, a JPEG web version up to 2200px at quality 0.82, and a thumbnail up to 700px at quality 0.78. If resizing fails, the original still saves. Client original downloads use the original file. Public pages use only the smaller versions; optimize old photos that lack them.
+- **Add a photo:** drop the finished JPEG into the folder. **Remove one:** delete it or move it out. The site picks up changes within about five minutes.
+- **Categories:** each subfolder is a category and gets its own filter button (`port/Soccer`, `port/Landscape`). Photos loose in the main folder show under "All work" only.
+- **Captions:** the file name, without the extension (`Thorncrown Chapel.jpg` → "Thorncrown Chapel"). Camera names like `IMG_4031` or `DSC_0012` get no caption, so rename the ones that should have one. The opening slideshow prefers wide photos whose names mention Biloxi, Thorncrown or Sarasota.
+- **Order:** newest first, by when the file was added to Drive.
+- **Sizes:** Google makes the 700px and 2200px versions. Cloudflare caches them, so visitors never download full-size files. Only images are shown; videos and documents in the folder are ignored.
+- **Privacy:** the site only ever serves files that sit in this folder or one of its direct subfolders. Nothing in client folders is reachable through it. Only put client work in the portfolio with their permission.
+- **Access:** the folder must be readable by the Drive service account. Studio → Bookings → **Check Drive connection** reports whether it is, and names the account to share it with if not.
 
-The photo grid pages at 24. Select individual photos, multiple photos, or all, then apply category, gallery, Portfolio visibility, or location changes. **Edit** changes one photo’s title/location. **Delete** asks for confirmation and removes its original, web, thumbnail, and database record. It is permanent.
+Studio no longer uploads photos. The Photos tab, "Add to portfolio", "Optimize existing photos", and the upload/delete endpoints were removed. If Drive can't be reached, the site falls back to the portfolio stored on the site before the switch.
 
-**Optimize existing photos** appears while photos lack thumbnails. It generates missing previews without replacing originals. It reports progress and can be rerun after interruption. Use a laptop with a reliable connection.
+## Old website galleries
 
-The Portfolio marker identifies public photos. `/portfolio` filters by category and shows 24 at a time. The home page takes up to six public photos, alternating categories, with newer photos first within a category. There is no separate home-page switch. Titles and locations provide captions and accessible descriptions. Only put client work in the Portfolio with their permission.
-
-## Website galleries
-
-In **Galleries**, create a named gallery, then add photographs through upload or the Photos bulk controls. Each row shows its photo count, watermark switch, link-copy button, and preview. Deleting a gallery asks for confirmation, unlinks its photos, and keeps all photo files.
-
-Existing galleries from the retired booking system remain ordinary working galleries. Their `/gallery?g=...` URLs still work. Gallery pages offer individual originals and Download all; watermarked galleries retain the browser-generated watermark download behavior.
-
-Share gallery links privately. Anyone with a link can access it. These website galleries use the existing public database permissions; the links are not a substitute for authenticated access, and the current database may expose gallery metadata to direct queries. Tightening that requires a separate database change.
+The Galleries tab is gone from Studio. The 5 galleries made with the old upload system still work at their `/gallery?g=...` links (view, individual originals, Download all, watermark), and their photos remain in Cloudflare R2. New client deliveries all go through the Drive workflow below. Once those clients have their photos, the old galleries and the R2 bucket can be retired.
 
 ## Requests, acceptance, and Drive delivery
 
@@ -154,7 +152,7 @@ The delivery function’s calendar feature is separate from the static site. **T
 npx --yes supabase@2.118.0 functions deploy delivery --project-ref jrowfpgezkfeyzfyzfps --use-api
 ```
 
-The October 2 setup ran that command successfully. The site works with the older function, which omits calendar results; the new function also works with the old site. Do not rerun the existing workflow migration as part of this update.
+The October 2 setup ran that command successfully. **The Google Drive portfolio (October 3) needs this deploy once more**: it adds the public `portfolio` and `portfolio-image` actions. Until then the site shows the portfolio stored before the switch. No new secret is needed; the portfolio folder ID is built in (override with a `PORTFOLIO_FOLDER_ID` function secret). The site works with the older function, which omits calendar results; the new function also works with the old site. Do not rerun the existing workflow migration as part of this update.
 
 The function keeps JWT gateway verification disabled for public enquiry/private-link routes. Its admin actions still verify the session and `delivery_admins` allowlist internally. Keep that protection intact.
 

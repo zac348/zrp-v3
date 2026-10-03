@@ -82,7 +82,7 @@ export function setupDeliveryAdmin(sb, options = {}) {
     }
   }
   document.getElementById('delivery-refresh').addEventListener('click',async()=>{if(!busy){await load();}});
-  document.getElementById('delivery-check').addEventListener('click',async()=>{show('Checking Drive access…');try{const r=await act('health');show(`Connected to ${r.name}. Folder creation is available.`);}catch(e){show(e.message);}});
+  document.getElementById('delivery-check').addEventListener('click',async()=>{show('Checking Drive access…');try{const r=await act('health');show(`Connected to ${r.name}. Folder creation is available.`+(r.portfolio?(r.portfolio.ok?` Portfolio folder “${r.portfolio.name}” is readable.`:` ${r.portfolio.message}`):''));}catch(e){show(e.message);}});
   window.addEventListener('focus',async()=>{if(!busy){await load();}});
   load.render=render;
   load.rows=()=>rows;

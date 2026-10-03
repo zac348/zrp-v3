@@ -9,7 +9,14 @@ async function publicRows(table, query) {
   if (!response.ok) throw new Error('The photo service is unavailable.');
   return response.json();
 }
-export function loadPublicPhotos() {
+// The portfolio is the Google Drive portfolio folder (see /api/portfolio). If that
+// service can't answer, show the photos stored on the site before the switch.
+export async function loadPublicPhotos() {
+  try {
+    const response = await fetch('/api/portfolio', { signal: AbortSignal.timeout(20000) });
+    const body = await response.json();
+    if (response.ok && Array.isArray(body.photos)) return body.photos;
+  } catch {}
   return publicRows('portfolio_photos', 'select=url,web_url,thumb_url,width,height,sport,title,location&on_portfolio=eq.true&order=created_at.desc&limit=500');
 }
 export async function loadStartingPackage() {

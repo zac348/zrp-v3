@@ -5,3 +5,4 @@
 @media(max-width:350px){.cal-wrap{margin-inline:-10px}.cal-header,.cal-legend{padding-inline:4px}.photo-actions button{font-size:12px}.pricing-row input{width:90px}}
 
 .studio-heading{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}.studio-heading .sidebar-logo{margin:0}@media(max-width:760px){.studio-heading{margin:0;justify-content:flex-start;gap:16px}.sidebar-footer{align-self:center}}
+.portfolio-source{font-size:14px;color:var(--muted);max-width:64ch;margin:0 0 32px}.portfolio-source a{color:var(--ink)}

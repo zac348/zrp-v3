@@ -32,6 +32,15 @@ export function folderName(d) {
   return `${d.date} — ${d.name} — ${d.session_type}`.replace(/[\x00-\x1f/\\]/g, ' ').slice(0, 220);
 }
 
+// Portfolio captions come from file names: "Thorncrown Chapel.jpg" → "Thorncrown Chapel".
+// Camera defaults (IMG_4031, DSC_0012, DJI_0007…) and date-only names get no caption.
+const CAMERA_NAME = /^(img|dsc|dscn|dscf|dsc_|mg|dji|pxl|gopr|gp|mvimg|vid|photo|image|p)\s?\d+/i;
+export function caption(name = '') {
+  const base = String(name).replace(/\.[a-z0-9]{2,5}$/i, '').replace(/_+/g, ' ').replace(/\s+/g, ' ').trim();
+  return !base || CAMERA_NAME.test(base) || /^[\d\s.-]+$/.test(base) ? '' : base.slice(0, 120);
+}
+const PORTFOLIO_SIZES = [700, 1400, 2200];
+
 export class Store {
   constructor(env, fetcher = fetch) { this.env = env; this.fetch = fetcher; }
   async db(path, method = 'GET', body) {
@@ -166,10 +175,21 @@ export class Drive {
     }
     return r.json();
   }
-  async health() {
+  async health(portfolioRoot) {
     const p = await this.json(`files/${this.parent}?supportsAllDrives=true&fields=id,name,mimeType,driveId,capabilities(canAddChildren)`);
     if (p.mimeType !== FOLDER || !p.driveId || !p.capabilities?.canAddChildren) throw new Problem('The service account needs permission to add folders in this Shared drive.', 503);
-    return {name:p.name, can_create:true};
+    const result = {name:p.name, can_create:true};
+    if (portfolioRoot) {
+      try {
+        const f = await this.json(`files/${portfolioRoot}?supportsAllDrives=true&fields=id,name,mimeType,trashed`);
+        result.portfolio = f.mimeType === FOLDER && !f.trashed ? {ok:true, name:f.name} : {ok:false, message:'The portfolio folder link points to something that is not a folder.'};
+      } catch (_) {
+        let account = 'the service account';
+        try { account = JSON.parse(this.key || '{}').client_email || account; } catch (_) {}
+        result.portfolio = {ok:false, message:`The portfolio folder can't be opened. Share it with ${account} (Viewer is enough).`};
+      }
+    }
+    return result;
   }
   async generateId() { return (await this.json('files/generateIds?count=1&space=drive&type=files')).ids[0]; }
   async ensureFolder(id, name, requestId) {
@@ -213,6 +233,58 @@ export class Drive {
     // No canvas, image encoder, resize, or byte conversion on original downloads.
     return new Response(r.body, {headers:h});
   }
+  // Public portfolio: images in the portfolio folder and its direct subfolders.
+  // Each subfolder is a category; loose images have none.
+  async children(folder) {
+    const all = []; let next;
+    do {
+      const q = new URLSearchParams({q:`'${folder}' in parents and trashed = false`,supportsAllDrives:'true',includeItemsFromAllDrives:'true',pageSize:'1000',fields:'nextPageToken,files(id,name,mimeType,createdTime,modifiedTime,imageMediaMetadata(width,height,rotation))'});
+      if (next) q.set('pageToken', next);
+      const result = await this.json(`files?${q}`); all.push(...(result.files || [])); next = result.nextPageToken;
+      if (all.length > 5000) throw new Problem('The portfolio folder is too large. Keep it under 5,000 items.', 413);
+    } while (next);
+    return all;
+  }
+  async portfolio(root) {
+    if (!FILE.test(root || '')) throw new Problem('The portfolio folder is not configured.', 503);
+    const top = await this.children(root);
+    const folders = top.filter(f => f.mimeType === FOLDER);
+    const nested = await Promise.all(folders.map(async folder => (await this.children(folder.id)).map(f => ({...f, category:folder.name.trim()}))));
+    return [...top.map(f => ({...f, category:''})), ...nested.flat()]
+      .filter(f => f.mimeType?.startsWith('image/'))
+      .map(f => {
+        const m = f.imageMediaMetadata || {}, turned = (m.rotation || 0) % 2 === 1;
+        return {id:f.id, caption:caption(f.name), category:f.category, width:(turned ? m.height : m.width) || null, height:(turned ? m.width : m.height) || null, created:f.createdTime, modified:f.modifiedTime};
+      })
+      .sort((a, b) => (Date.parse(b.created) || 0) - (Date.parse(a.created) || 0));
+  }
+  // The service account can see every client folder, so a file is served only
+  // when it sits directly in the portfolio folder or one of its subfolders.
+  async inPortfolio(root, parents = []) {
+    if (parents.includes(root)) return true;
+    for (const id of parents) {
+      if (!FILE.test(id)) continue;
+      const folder = await this.json(`files/${id}?supportsAllDrives=true&fields=id,mimeType,parents,trashed`).catch(() => null);
+      if (folder && folder.mimeType === FOLDER && !folder.trashed && folder.parents?.includes(root)) return true;
+    }
+    return false;
+  }
+  async portfolioImage(root, id, size) {
+    if (!FILE.test(id || '') || !FILE.test(root || '')) throw new Problem('Photo not found.', 404);
+    if (!PORTFOLIO_SIZES.includes(size)) throw new Problem('Unsupported size.', 400);
+    const f = await this.json(`files/${id}?supportsAllDrives=true&fields=id,mimeType,parents,trashed,thumbnailLink`);
+    if (f.trashed || !f.mimeType?.startsWith('image/') || !(await this.inPortfolio(root, f.parents))) throw new Problem('Photo not found.', 404);
+    if (!f.thumbnailLink) throw new Problem('Preview not ready yet. Try again shortly.', 404);
+    // Google resizes: the thumbnail link takes a longest-side size, e.g. =s2200.
+    const target = new URL(/=s\d+$/.test(f.thumbnailLink) ? f.thumbnailLink.replace(/=s\d+$/, `=s${size}`) : `${f.thumbnailLink}=s${size}`);
+    if (target.protocol !== 'https:' || !/(^|\.)(googleusercontent\.com|google\.com)$/.test(target.hostname)) throw new Problem('Photo not found.', 404);
+    const r = await this.fetch(target.href, {headers:{Authorization:`Bearer ${await this.token()}`}, signal:AbortSignal.timeout(30000)});
+    const type = r.headers.get('Content-Type') || '';
+    if (!r.ok || !type.startsWith('image/')) throw new Problem('The photo could not be loaded. Please try again.', 502);
+    const h = new Headers(safeHeaders);
+    h.set('Content-Type', type); h.set('Cache-Control', 'public, max-age=86400');
+    return new Response(r.body, {headers:h});
+  }
 }
 
 export async function finalize(store, drive, row, input, actor, calendar) {
@@ -245,7 +317,7 @@ export async function finalize(store, drive, row, input, actor, calendar) {
   }
 }
 
-export function createHandler({store,drive,calendar}) {
+export function createHandler({store,drive,calendar,portfolioFolder}) {
   return async request => {
     try {
       const url = new URL(request.url);
@@ -255,9 +327,9 @@ export function createHandler({store,drive,calendar}) {
       if(raw.length>16000) throw new Problem('Request too large.',413);
       let b; try { b = raw ? JSON.parse(raw) : Object.fromEntries(url.searchParams); } catch { throw new Problem('Invalid request.'); }
       const action = b.action;
-      const readActions = ['form','gallery','file','preview'];
+      const readActions = ['form','gallery','file','preview','portfolio','portfolio-image'];
       if (request.method === 'GET' && !readActions.includes(action)) throw new Problem('Use POST for this action.',405);
-      const publicActions = ['enquire','form','complete','gallery','file','preview'];
+      const publicActions = ['enquire','form','complete','gallery','file','preview','portfolio','portfolio-image'];
       const admin = publicActions.includes(action) && !b.id ? false : await store.isAdmin(request.headers.get('authorization'));
       const requireAdmin = () => { if(!admin) throw new Problem('Please sign in as the studio administrator.',403); };
       let result;
@@ -268,7 +340,9 @@ export function createHandler({store,drive,calendar}) {
           result={ok:true,...await store.enquire({submission_id:b.submission_id,name:text(b.name,100,'your name',true),contact:text(b.contact,200,'your contact details',true),message:text(b.message,3000,'your message',true),date:text(b.date,100,'the preferred date')})};
         }
       } else if (action === 'list') { requireAdmin(); result={requests:await store.list()}; }
-      else if (action === 'health') { requireAdmin(); result=await drive.health(); }
+      else if (action === 'health') { requireAdmin(); result=await drive.health(portfolioFolder); }
+      else if (action === 'portfolio') result={photos:await drive.portfolio(portfolioFolder)};
+      else if (action === 'portfolio-image') return await drive.portfolioImage(portfolioFolder,b.file,Number(b.size));
       else if (['accept','decline','renew','publish','unpublish','retry'].includes(action)) {
         requireAdmin(); if(!UUID.test(b.id || '')) throw new Problem('Invalid enquiry.');
         const row=await store.get('id',b.id); if(!row) throw new Problem('Enquiry not found.',404);

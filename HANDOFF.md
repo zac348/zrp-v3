@@ -12,7 +12,7 @@ Manage trusted accounts in Supabase → Authentication → Users. Website-photo 
 
 The opening is a full-screen public photograph with Zachary’s name. It selects up to four landscape photos, prioritizing Biloxi, Thorncrown, and Sarasota. Visitors change them by buttons, arrow keys, or a swipe; there is no autoplay. Below it are the photography statement, selected work, booking steps, about, and contact.
 
-Bodoni Moda supplies the large type; Public Sans handles body text and controls. Licensed WOFF2 fonts are hosted on the site. Light is neutral near-white; dark is neutral charcoal. The appearance control offers **System**, **Light**, and **Dark**. System is the default and follows device changes while the page is open. The same themes cover client galleries and Studio.
+Bodoni Moda supplies the large type; Public Sans handles body text and controls. Every date field opens the site’s own month calendar and every time field an iPhone-style hour/minute/AM-PM wheel (`src/lib/pickers.js`, loaded on every page by the layout). The browser’s input stays underneath, so form values, required fields, and min/max dates work as before. Licensed WOFF2 fonts are hosted on the site. Light is neutral near-white; dark is neutral charcoal. The appearance control offers **System**, **Light**, and **Dark**. System is the default and follows device changes while the page is open. The same themes cover client galleries and Studio.
 
 Motion is limited to short fades: the opening, loading photographs, filters, viewer, and supported page navigation. Reduced motion turns these off. Captions stay visible. Photographs retain their proportions in collections and are never tinted for dark mode. The opening alone uses a crop and contrast overlay.
 

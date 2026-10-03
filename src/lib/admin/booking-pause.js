@@ -1,6 +1,5 @@
 import {toast} from './shared.js';
 import {pauseState,easternMidnight,easternDay,resumeLabel,countdown} from '../booking-pause.js';
-import {createDatePicker} from './date-picker.js';
 
 // Online booking pause: stop new requests until a chosen date. Clients see a
 // countdown on /book and booking reopens by itself at midnight Eastern.
@@ -9,7 +8,6 @@ export function setupBookingPause(ctx) {
   const form=$('booking-pause-form');
   if(!form)return {load:async()=>{}};
   let state={paused:false,resumeAt:null},timer;
-  const picker=createDatePicker({input:$('booking-resume-date'),trigger:$('booking-resume-trigger'),pop:$('booking-resume-pop')});
   const setupMessage='Setup needed: run supabase/migrations/202610020001_booking_pause.sql in Supabase → SQL Editor.';
 
   function show(message,paused=false){const el=$('booking-pause-state');el.textContent=message;el.classList.toggle('paused',paused);}
@@ -21,17 +19,18 @@ export function setupBookingPause(ctx) {
   }
   function render(){
     clearInterval(timer);
-    picker.setMin(easternDay(new Date(Date.now()+86400000)));
+    const input=$('booking-resume-date');
+    input.min=easternDay(new Date(Date.now()+86400000));
     $('booking-pause-timer').hidden=!state.paused;
     $('booking-resume-now').hidden=!state.paused;
     $('booking-pause-save').textContent=state.paused?'Update date':'Pause bookings';
     if(state.paused){
       show('Paused until '+resumeLabel(state.resumeAt),true);
-      picker.set(easternDay(state.resumeAt));
+      input.value=easternDay(state.resumeAt);
       tick();timer=setInterval(tick,1000);
-    } else { show('Open — clients can request sessions.'); picker.set(''); }
+    } else { show('Open — clients can request sessions.'); input.value=''; }
   }
-  function disable(disabled){picker.close(false);for(const el of form.elements)if(!el.closest('.dp-pop'))el.disabled=disabled;}
+  function disable(disabled){for(const el of form.elements)if(!el.closest('.picker-pop'))el.disabled=disabled;}
   async function save(paused,resumeAt){
     const {data,error}=await ctx.sb.from('site_settings').update({booking_paused:paused,booking_resume_at:resumeAt?resumeAt.toISOString():null}).eq('id',1).select('booking_paused,booking_resume_at');
     if(error)throw new Error(error.message);

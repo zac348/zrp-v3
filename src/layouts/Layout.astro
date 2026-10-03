@@ -2,6 +2,7 @@
 import '../styles/fonts.css';
 import '../styles/global.css';
 import '../styles/site.css';
+import '../styles/pickers.css';
 import Appearance from '../components/Appearance.astro';
 import { PRIMARY_CTA } from '../config.js';
 interface Props {
@@ -124,5 +125,6 @@ const authPage = path === '/login' || path === '/reset';
         window.dismissConsent = dismiss;
       })();
     </script>
+      <script>import {enhancePickers} from '../lib/pickers.js'; enhancePickers();</script>
   </body>
 </html>

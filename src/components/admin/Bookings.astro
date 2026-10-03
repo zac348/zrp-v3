@@ -10,7 +10,7 @@ import { BOOKING_OPEN } from '../../config.js';
       <div class="booking-pause-head"><h2 id="booking-pause-heading">Online booking</h2><p id="booking-pause-state" role="status">Checking…</p></div>
       <p class="booking-pause-timer" id="booking-pause-timer" hidden></p>
       <form class="booking-pause-form" id="booking-pause-form">
-        <div class="field dp"><span id="booking-resume-label">Resume bookings on</span><input type="hidden" id="booking-resume-date"/><button type="button" class="dp-trigger" id="booking-resume-trigger" aria-haspopup="dialog" aria-expanded="false" aria-labelledby="booking-resume-label booking-resume-trigger">Choose a date</button><div class="dp-pop" id="booking-resume-pop" role="dialog" aria-label="Choose the date bookings resume" hidden></div></div>
+        <div class="field"><label for="booking-resume-date">Resume bookings on</label><input type="date" id="booking-resume-date" required/></div>
         <button type="submit" class="btn" id="booking-pause-save">Pause bookings</button>
         <button type="button" class="btn-sm" id="booking-resume-now" hidden>Resume now</button>
       </form>

@@ -61,8 +61,10 @@ let appliedCoupon = null; // row from `coupons` or null
 
 async function validateCoupon(code) {
   try {
-    const { data, error } = await sb.from('coupons')
-      .select('*').eq('code', code).eq('active', true).maybeSingle();
+    // One code at a time. Coupons can't be listed with the public key.
+    let { data, error } = await sb.rpc('check_coupon', { p_code: code });
+    // Database not yet updated with check_coupon: read the table as before.
+    if (error?.code === 'PGRST202') ({ data, error } = await sb.from('coupons').select('*').eq('code', code).eq('active', true).maybeSingle());
     if (error || !data) return { err: 'Invalid code' };
     if (data.expires_at && new Date(data.expires_at) < new Date()) return { err: 'This code has expired' };
     if (data.max_uses !== null && (data.uses || 0) >= data.max_uses) return { err: 'This code has been fully redeemed' };

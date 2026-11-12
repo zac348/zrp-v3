@@ -48,8 +48,13 @@ export async function onRequestPost({request,env}) {
     let discount=0,couponText='';
     if(b.coupon){
       if(typeof b.coupon!=='string'||b.coupon.length>80)return fail('Invalid promo code.');
-      const coupons=await rows('coupons',new URLSearchParams({select:'*',code:'eq.'+b.coupon.trim().toUpperCase(),active:'eq.true'}).toString());
-      const c=coupons[0];
+      // One code at a time through check_coupon; fall back to the table until the database is updated.
+      const code=b.coupon.trim().toUpperCase();
+      const checked=await fetch(env.PUBLIC_SUPABASE_URL.replace(/\/$/,'')+'/rest/v1/rpc/check_coupon',{method:'POST',headers:{apikey:env.PUBLIC_SUPABASE_ANON_KEY,Authorization:'Bearer '+env.PUBLIC_SUPABASE_ANON_KEY,'Content-Type':'application/json'},body:JSON.stringify({p_code:code}),signal:AbortSignal.timeout(12000)});
+      let c;
+      if(checked.ok)c=await checked.json();
+      else if(checked.status===404)c=(await rows('coupons',new URLSearchParams({select:'*',code:'eq.'+code,active:'eq.true'}).toString()))[0];
+      else throw new Error('The promo code could not be checked. Please try again.');
       if(!c || (c.expires_at && Date.parse(c.expires_at)<Date.now()) || (c.max_uses!=null && (c.uses||0)>=c.max_uses))return fail('That promo code is no longer available. Remove it or choose another.',409);
       if(c.type==='percent')discount=Math.min(base,Math.round(base*Math.min(100,Math.max(0,Number(c.value)||0))/100));
       else if(c.type==='fixed')discount=Math.min(base,cents(c.value));

@@ -15,11 +15,17 @@ export async function onRequestGet({ request, env }) {
     return response.json();
   };
   try {
-    const galleries = await rows('client_galleries', { select: 'id', slug: 'eq.' + slug, limit: '1' });
-    if (!galleries[0]) return fail('Gallery not found.', 404);
-    const photos = await rows('portfolio_photos', { select: 'storage_path,url,file_name', id: 'eq.' + photoId, gallery_id: 'eq.' + galleries[0].id, limit: '1' });
-    if (!photos[0]) return fail('Photograph not found in this gallery.', 404);
-    const photo = photos[0];
+    // The database answers only for this exact gallery link and a photo inside it.
+    const lookup = await fetch(base + 'rpc/get_gallery_file', { method: 'POST', headers: { ...headers, 'Content-Type': 'application/json' }, body: JSON.stringify({ p_slug: slug, p_photo: photoId }), signal: AbortSignal.timeout(12000) });
+    let photo;
+    if (lookup.ok) photo = await lookup.json();
+    else if (lookup.status === 404) {
+      // Database not yet updated with get_gallery_file: read the tables as before.
+      const galleries = await rows('client_galleries', { select: 'id', slug: 'eq.' + slug, limit: '1' });
+      if (!galleries[0]) return fail('Gallery not found.', 404);
+      photo = (await rows('portfolio_photos', { select: 'storage_path,url,file_name', id: 'eq.' + photoId, gallery_id: 'eq.' + galleries[0].id, limit: '1' }))[0];
+    } else throw new Error('Photo service unavailable');
+    if (!photo) return fail('Photograph not found in this gallery.', 404);
     const storagePath = photo.storage_path || decodeURIComponent(new URL(photo.url).pathname.slice(1));
     const object = await env.PHOTOS.get(storagePath);
     if (!object) return fail('Photograph not found.', 404);

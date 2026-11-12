@@ -54,22 +54,22 @@ async function loadGallery() {
   const slug = new URLSearchParams(window.location.search).get('g');
   if (!slug) { showNotFound(); return; }
 
-  const { data: gallery, error: galErr } = await sb
-    .from('client_galleries')
-    .select('*')
-    .eq('slug', slug)
-    .single();
+  // One gallery by its exact link. Galleries can't be listed with the public key.
+  let gallery, photos, photoError;
+  const found = await sb.rpc('get_gallery', { p_slug: slug });
+  if (!found.error) {
+    gallery = found.data?.gallery; photos = found.data?.photos;
+  } else if (found.error.code === 'PGRST202') {
+    // Database not yet updated with get_gallery: read the tables as before.
+    ({ data: gallery } = await sb.from('client_galleries').select('*').eq('slug', slug).maybeSingle());
+    if (gallery) ({ data: photos, error: photoError } = await sb.from('portfolio_photos').select('*').eq('gallery_id', gallery.id).order('created_at', { ascending: true }));
+  } else photoError = found.error;
 
-  if (galErr || !gallery) { showNotFound(); return; }
-
-  document.getElementById('gallery-title').textContent = gallery.name;
-  document.title = gallery.name + ' — ZRP';
-
-  const { data: photos, error: photoError } = await sb
-    .from('portfolio_photos')
-    .select('*')
-    .eq('gallery_id', gallery.id)
-    .order('created_at', { ascending: true });
+  if (!gallery && !photoError) { showNotFound(); return; }
+  if (gallery) {
+    document.getElementById('gallery-title').textContent = gallery.name;
+    document.title = gallery.name + ' — ZRP';
+  }
 
   if (photoError) {
     document.getElementById('not-found').querySelector('h2').textContent = 'Photographs are unavailable';

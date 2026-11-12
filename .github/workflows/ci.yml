@@ -1,0 +1,55 @@
+name: Test and build
+
+# Runs the test suite and builds both sites on every push, so a broken build is
+# caught before Cloudflare Pages tries to deploy it.
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  photos:
+    name: ZR Photos — test and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PUBLIC_SUPABASE_URL: https://example.supabase.co
+      PUBLIC_SUPABASE_ANON_KEY: build-check-only
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: photos-dist
+          path: dist
+          retention-days: 7
+
+  # Built on its own, the way Cloudflare Pages builds it (root directory:
+  # portfolio, nothing installed one folder up).
+  portfolio:
+    name: Portfolio — build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: portfolio
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
+      - run: npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: portfolio-dist
+          path: portfolio/dist
+          retention-days: 7

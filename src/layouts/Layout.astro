@@ -5,6 +5,9 @@ import '../styles/site.css';
 import '../styles/pickers.css';
 import Appearance from '../components/Appearance.astro';
 import { PRIMARY_CTA } from '../config.js';
+import sites from '../shared/sites.json';
+import themeInit from '../shared/theme-init.js?raw';
+import themeControls from '../shared/theme-controls.js?raw';
 interface Props {
   title: string;
   description?: string;
@@ -37,41 +40,10 @@ const authPage = path === '/login' || path === '/reset';
     <meta property="og:site_name" content="Zachary Routsong Photography"/>
     <meta property="og:title" content={title}/>
     <meta property="og:description" content={description}/>
-    <meta property="og:url" content={`https://zrphotos.net${path === '/' ? '' : path}`}/>
-    <meta property="og:image" content="https://zrphotos.net/og.png"/>
+    <meta property="og:url" content={`${sites.photos}${path === '/' ? '' : path}`}/>
+    <meta property="og:image" content={`${sites.photos}/og.png`}/>
     <meta name="twitter:card" content="summary_large_image"/>
-    <script is:inline>
-      (() => {
-        const root = document.documentElement;
-        const system = window.matchMedia('(prefers-color-scheme: dark)');
-        const normalize = value => value === 'light' || value === 'dark' ? value : 'system';
-        let preference = 'system';
-        try { preference = normalize(localStorage.getItem('zrp-theme')); } catch (_) {}
-        const apply = () => {
-          const dark = preference === 'dark' || (preference === 'system' && system.matches);
-          root.classList.toggle('dark', dark);
-          root.dataset.themePreference = preference;
-          root.style.colorScheme = dark ? 'dark' : 'light';
-          document.querySelector('meta[name="theme-color"]').content = dark ? '#202020' : '#f8f8f8';
-          window.dispatchEvent(new Event('zrp-theme-change'));
-        };
-        window.zrpTheme = {
-          set(value) {
-            preference = normalize(value);
-            try { localStorage.setItem('zrp-theme', preference); } catch (_) {}
-            apply();
-          }
-        };
-        system.addEventListener('change', apply);
-        window.addEventListener('storage', event => {
-          if (event.key === 'zrp-theme' || event.key === null) {
-            try { preference = normalize(localStorage.getItem('zrp-theme')); } catch (_) {}
-            apply();
-          }
-        });
-        apply();
-      })();
-    </script>
+    <script is:inline set:html={themeInit}></script>
   </head>
   <body class:list={{ 'public-page': publicPage, 'auth-page': authPage }}>
     <a class="skip-link" href="#main-content">Skip to content</a>
@@ -82,41 +54,20 @@ const authPage = path === '/login' || path === '/reset';
         <a href="/blog" aria-current={path === '/blog' ? 'page' : undefined}>Blog</a>
         <a href="/#about">About</a>
         <a href={PRIMARY_CTA.href}>{PRIMARY_CTA.label === 'Get in touch' ? 'Contact' : PRIMARY_CTA.label}</a>
+        <a href={sites.portfolio} data-other-site aria-label="Zachary’s portfolio at zrphotos.net">Zachary’s site</a>
         <Appearance/>
       </nav>
     </header>}
     <main id="main-content" tabindex="-1"><slot/></main>
     {!noFooter && <footer class="site-footer">
-      <div class="footer-top"><a href="/" class="footer-name">Zachary Routsong</a><div class="footer-contact"><p>Valdosta, Georgia &amp; nearby</p><a href="mailto:zac@zrphotos.net">zac@zrphotos.net</a><a href="tel:+12293001006">229–300–1006</a></div><div class="footer-directory"><a href="/portfolio">Photographs</a><a href="/#about">About Zachary</a><a href="/blog">Blog</a><a href={PRIMARY_CTA.href}>{PRIMARY_CTA.label}</a><a href="https://instagram.com/zacharyroutsongphotos" target="_blank" rel="noopener">Instagram</a></div></div>
+      <div class="footer-top"><a href="/" class="footer-name">Zachary Routsong</a><div class="footer-contact"><p>Valdosta, Georgia &amp; nearby</p><a href="mailto:zac@zrphotos.net">zac@zrphotos.net</a><a href="tel:+12293001006">229–300–1006</a></div><div class="footer-directory"><a href="/portfolio">Photographs</a><a href="/#about">About Zachary</a><a href="/blog">Blog</a><a href={PRIMARY_CTA.href}>{PRIMARY_CTA.label}</a><a href={sites.portfolio} data-other-site>Zachary’s portfolio</a><a href="https://instagram.com/zacharyroutsongphotos" target="_blank" rel="noopener">Instagram</a></div></div>
       <div class="footer-bottom"><span>© {new Date().getFullYear()} Zachary Routsong</span><span>All photographs by Zachary.</span><div><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/login">Studio login</a></div></div>
     </footer>}
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <div class="consent-bar" id="consent-bar"><span>We use your booking details to arrange your session. Read our <a href="/privacy">Privacy Policy</a>. You must be 13 or older, or a parent or guardian.</span><button type="button" id="dismiss-consent">Got it</button></div>
+    <script is:inline set:html={themeControls}></script>
     <script is:inline>
       (() => {
-        const root = document.documentElement;
-        const toggle = document.getElementById('theme-toggle');
-        const picker = document.getElementById('theme-picker');
-        const choices = picker?.querySelectorAll('input[name="theme"]') || [];
-        const syncTheme = () => {
-          const preference = root.dataset.themePreference;
-          const label = `Appearance: ${preference[0].toUpperCase()}${preference.slice(1)}`;
-          toggle?.setAttribute('aria-label', label);
-          toggle?.setAttribute('title', label);
-          choices.forEach(choice => { choice.checked = choice.value === preference; });
-        };
-        syncTheme();
-        window.addEventListener('zrp-theme-change', syncTheme);
-        choices.forEach(choice => choice.addEventListener('change', () => window.zrpTheme.set(choice.value)));
-        document.addEventListener('click', event => {
-          if (picker?.open && !picker.contains(event.target)) picker.open = false;
-        });
-        picker?.addEventListener('keydown', event => {
-          if (event.key === 'Escape') { picker.open = false; toggle.focus(); event.preventDefault(); }
-        });
-        picker?.addEventListener('focusout', event => {
-          if (!picker.contains(event.relatedTarget)) picker.open = false;
-        });
         const bar = document.getElementById('consent-bar');
         let accepted; try { accepted = localStorage.getItem('zrp-consent'); } catch (_) {}
         if (!accepted && /^\/(book|quick-book)\/?$/.test(location.pathname)) bar.classList.add('show');

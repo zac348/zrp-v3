@@ -2,6 +2,18 @@
 
 The site is at **zrphotos.net**. The Studio manages photographs, enquiries, availability, prices, coupons, and print materials. New requests use one booking workflow; existing website galleries still work alongside Google Drive galleries.
 
+## Two sites, one repository
+
+- **zrphotos.net** is Zachary's college portfolio. It is the Astro project in `portfolio/`, deployed as its own Cloudflare Pages project (root directory `portfolio`).
+- **photos.zrphotos.net** is ZR Photos: everything at the repository root, deployed by the original Pages project. Booking, coupons, galleries, Drive and Studio all live here.
+- **Shared look:** the portfolio imports ZR Photos' stylesheets (`src/styles/`), theme scripts and appearance switch (`src/shared/`), and copies its fonts and icons at build time. Change a color or font once and both sites change. Site addresses are in `src/shared/sites.json`.
+- **Portfolio content:** everything is in `portfolio/src/content/site.json`. Replace the `[PLACEHOLDERS]`. No home address, phone, birthday or student ID. The resume PDF goes in `portfolio/public/resume.pdf`.
+- **Portfolio contact form:** `portfolio/functions/api/portfolio-contact.js` emails Zachary through Resend. That Pages project needs `RESEND_API_KEY`, `ZACHARY_EMAIL` and `FROM_EMAIL`.
+- **Old links:** `portfolio/public/_redirects` sends every old photography address on zrphotos.net to the same page on photos.zrphotos.net.
+- **Appearance:** browser storage is per-site, so links between the two sites carry the light/dark choice in the address.
+- **Checks:** GitHub runs the tests and builds both sites on every push (`.github/workflows/ci.yml`).
+- **Database rules:** `supabase/migrations/202611110001_lock_down_public_reads.sql` stops the public key listing bookings, galleries, private photos and coupons. Run it once in Supabase → SQL Editor after the site code is live.
+
 ## Login and password reset
 
 Open `/login` to reach `/admin`. **Forgot password?** sends a link to `/reset`. The Supabase Authentication redirect allowlist must include `https://zrphotos.net/reset`.

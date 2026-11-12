@@ -1,0 +1,17 @@
+---
+import Base from '../layouts/Base.astro';
+import site from '../content/site.json';
+const r = site.resume;
+---
+<Base title={`Resume — ${site.name}`}>
+  <div class="page">
+    <header class="page-head"><h1>Resume</h1><p>{r.summary}</p>
+      <div class="actions no-print">
+        {r.pdf ? <a class="btn" href={r.pdf} download>Download PDF</a> : <p class="note">[RESUME PDF HERE — put the file at portfolio/public/resume.pdf and set "pdf": "/resume.pdf" in site.json]</p>}
+      </div>
+    </header>
+    {r.sections.map(s => <section class="block split"><h2>{s.heading}</h2>
+      <ul class="entries plain">{s.items.map(item => <li class="entry"><div><h3>{item.title}</h3>{item.meta && <p class="meta">{item.meta}</p>}</div><div class="body">{item.points.length > 0 && <ul>{item.points.map(point => <li>{point}</li>)}</ul>}</div></li>)}</ul>
+    </section>)}
+  </div>
+</Base>

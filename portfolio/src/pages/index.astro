@@ -1,0 +1,19 @@
+---
+import Base from '../layouts/Base.astro';
+import site from '../content/site.json';
+const a = site.about;
+---
+<Base title={`${site.name} — Portfolio`}>
+  <div class="page">
+    <section class="intro" aria-labelledby="name">
+      <div>
+        <h1 id="name">{site.name}</h1>
+        <p class="where">{site.location}</p>
+        <p class="tagline">{site.tagline}</p>
+        <div class="prose">{a.intro.map(p => <p>{p}</p>)}</div>
+        <div class="actions"><a class="btn" href="/projects">See projects</a><a class="line-link" href="/resume">Resume</a><a class="line-link" href="/contact">Contact</a></div>
+      </div>
+      {a.photo && <figure><img src={a.photo} srcset="/zachary-800.jpg 800w, /zachary.jpg 3240w" sizes="(max-width:760px) 92vw, 45vw" alt={a.photoAlt} width="3240" height="2160" fetchpriority="high"/><figcaption>{site.name}</figcaption></figure>}
+    </section>
+  </div>
+</Base>

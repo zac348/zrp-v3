@@ -1,0 +1,19 @@
+---
+import Base from '../layouts/Base.astro';
+import site from '../content/site.json';
+---
+<Base title={`Projects — ${site.name}`}>
+  <div class="page">
+    <header class="page-head"><h1>Projects</h1><p>Things I’ve built or worked on.</p></header>
+    <ul class="entries">
+      {site.projects.map(p => <li class="entry">
+        <div><h2>{p.title}</h2><p class="meta">{p.dates}</p></div>
+        <div class="body">
+          <p>{p.summary}</p>
+          {p.image && <img src={p.image} alt={p.imageAlt} loading="lazy"/>}
+          <div class="links">{p.links.filter(l => l.href).map(l => <a class="line-link" href={l.href} data-other-site={l.href.startsWith('https://photos.zrphotos.net') ? '' : undefined}>{l.label}</a>)}</div>
+        </div>
+      </li>)}
+    </ul>
+  </div>
+</Base>

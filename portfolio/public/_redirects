@@ -1,0 +1,38 @@
+# zrphotos.net used to be the ZR Photos site. Every old photography address
+# moves, permanently, to the same page on photos.zrphotos.net. Query strings
+# (?g=…, ?coupon=…) and the private #token part of client links carry over.
+/portfolio          https://photos.zrphotos.net/portfolio          301
+/portfolio/         https://photos.zrphotos.net/portfolio          301
+/blog               https://photos.zrphotos.net/blog               301
+/blog/*             https://photos.zrphotos.net/blog/:splat        301
+/book               https://photos.zrphotos.net/book               301
+/book/              https://photos.zrphotos.net/book               301
+/booking            https://photos.zrphotos.net/book               301
+/booking/           https://photos.zrphotos.net/book               301
+/quick-book         https://photos.zrphotos.net/book               301
+/quick-book/        https://photos.zrphotos.net/book               301
+/client-details     https://photos.zrphotos.net/client-details     301
+/client-details/    https://photos.zrphotos.net/client-details     301
+/client-gallery     https://photos.zrphotos.net/client-gallery     301
+/client-gallery/    https://photos.zrphotos.net/client-gallery     301
+/gallery            https://photos.zrphotos.net/gallery            301
+/gallery/           https://photos.zrphotos.net/gallery            301
+/confirm            https://photos.zrphotos.net/confirm            301
+/confirm/           https://photos.zrphotos.net/confirm            301
+/invoice            https://photos.zrphotos.net/invoice            301
+/invoice/           https://photos.zrphotos.net/invoice            301
+/coupon-card        https://photos.zrphotos.net/coupon-card        301
+/coupon-card/       https://photos.zrphotos.net/coupon-card        301
+/login              https://photos.zrphotos.net/login              301
+/login/             https://photos.zrphotos.net/login              301
+/reset              https://photos.zrphotos.net/reset              301
+/reset/             https://photos.zrphotos.net/reset              301
+/admin              https://photos.zrphotos.net/admin              301
+/admin/             https://photos.zrphotos.net/admin              301
+/privacy            https://photos.zrphotos.net/privacy            301
+/privacy/           https://photos.zrphotos.net/privacy            301
+/terms              https://photos.zrphotos.net/terms              301
+/terms/             https://photos.zrphotos.net/terms              301
+/og.png             https://photos.zrphotos.net/og.png             301
+# Old pages still open in a browser keep working: 308 keeps the request method.
+/api/*              https://photos.zrphotos.net/api/:splat         308

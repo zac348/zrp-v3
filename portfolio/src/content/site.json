@@ -1,0 +1,92 @@
+{
+  "_how_to_edit": "Everything the portfolio shows lives in this one file. Replace anything in [SQUARE BRACKETS]. Never add a home address, phone number, birthday or student ID. To remove an item, delete its whole { } block.",
+
+  "name": "Zachary Routsong",
+  "location": "Valdosta, Georgia",
+  "tagline": "[ONE LINE ABOUT YOU — e.g. what you want to study]",
+
+  "about": {
+    "photo": "/zachary-800.jpg",
+    "photoAlt": "Zachary Routsong",
+    "intro": [
+      "[SHORT INTRO — 2 or 3 sentences: who you are, what year you are in school, what you care about.]",
+      "[SECOND PARAGRAPH — what you are working toward and why.]"
+    ]
+  },
+
+  "academics": {
+    "school": "[SCHOOL NAME]",
+    "graduation": "[GRADUATION YEAR]",
+    "facts": [
+      { "label": "GPA (unweighted)", "value": "[GPA HERE]" },
+      { "label": "GPA (weighted)", "value": "[WEIGHTED GPA HERE]" },
+      { "label": "Class rank", "value": "[CLASS RANK HERE, or delete this line]" }
+    ],
+    "tests": [
+      { "name": "SAT", "score": "[SAT SCORE HERE]", "detail": "[SECTION SCORES / DATE]" },
+      { "name": "ACT", "score": "[ACT SCORE HERE]", "detail": "[SECTION SCORES / DATE]" }
+    ],
+    "courses": [
+      { "year": "[GRADE 9]", "classes": ["[CLASS]", "[CLASS]", "[CLASS]"] },
+      { "year": "[GRADE 10]", "classes": ["[CLASS]", "[CLASS]", "[CLASS]"] },
+      { "year": "[GRADE 11]", "classes": ["[CLASS]", "[CLASS]", "[CLASS]"] },
+      { "year": "[GRADE 12]", "classes": ["[CLASS]", "[CLASS]", "[CLASS]"] }
+    ],
+    "awards": [
+      { "title": "[AWARD NAME]", "year": "[YEAR]", "detail": "[WHAT IT WAS FOR]" },
+      { "title": "[AWARD NAME]", "year": "[YEAR]", "detail": "[WHAT IT WAS FOR]" }
+    ]
+  },
+
+  "projects": [
+    {
+      "title": "ZR Photos",
+      "dates": "[START YEAR] – present",
+      "summary": "Photography business in Valdosta, Georgia. [ADD 2–3 SENTENCES: what you shoot, how it started, what you have learned running it.]",
+      "image": "",
+      "imageAlt": "",
+      "links": [{ "label": "ZR Photos", "href": "https://photos.zrphotos.net" }]
+    },
+    {
+      "title": "[PROJECT NAME]",
+      "dates": "[DATES]",
+      "summary": "[SHORT WRITE-UP: what it is, what you did, what came of it.]",
+      "image": "",
+      "imageAlt": "",
+      "links": [{ "label": "[LINK LABEL]", "href": "" }]
+    }
+  ],
+
+  "interests": {
+    "sideProjects": [
+      { "title": "[SIDE PROJECT]", "summary": "[ONE OR TWO SENTENCES.]", "href": "" }
+    ],
+    "interests": ["Photography", "[INTEREST]", "[INTEREST]"]
+  },
+
+  "resume": {
+    "pdf": "",
+    "summary": "[ONE OR TWO SENTENCE SUMMARY.]",
+    "sections": [
+      {
+        "heading": "Education",
+        "items": [{ "title": "[SCHOOL NAME]", "meta": "[YEARS]", "points": ["[GPA / HONORS / RELEVANT COURSEWORK]"] }]
+      },
+      {
+        "heading": "Experience",
+        "items": [
+          { "title": "Photographer, ZR Photos", "meta": "[START YEAR] – present", "points": ["[WHAT YOU DO]", "[A RESULT OR NUMBER]"] },
+          { "title": "[ROLE, ORGANIZATION]", "meta": "[DATES]", "points": ["[WHAT YOU DID]"] }
+        ]
+      },
+      {
+        "heading": "Activities",
+        "items": [{ "title": "[ACTIVITY / CLUB / SPORT]", "meta": "[YEARS]", "points": ["[ROLE OR ACHIEVEMENT]"] }]
+      },
+      {
+        "heading": "Skills",
+        "items": [{ "title": "[SKILL, SKILL, SKILL]", "meta": "", "points": [] }]
+      }
+    ]
+  }
+}

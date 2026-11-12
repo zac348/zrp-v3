@@ -1,0 +1,26 @@
+/* Portfolio-only layout. Colors, type, buttons, forms, header and footer come
+   from ZR Photos' shared stylesheets (../../../src/styles). Tokens only here. */
+.nav-links{display:flex;gap:24px;align-items:center}.nav-links a{display:flex;align-items:center;min-height:44px;text-decoration:none}.nav-links a:hover,.nav-links a[aria-current=page]{text-decoration:underline}
+.nav-menu{display:none;position:relative}.nav-menu summary{list-style:none;display:flex;align-items:center;min-height:44px;padding:0 4px;font-size:14px}.nav-menu summary::-webkit-details-marker{display:none}.nav-menu[open] summary{text-decoration:underline}
+.nav-menu-panel{position:absolute;right:0;top:100%;z-index:60;display:flex;flex-direction:column;min-width:200px;padding:8px 16px;background:var(--surface);border:1px solid var(--control)}.nav-menu-panel a{display:flex;align-items:center;min-height:44px;font-size:15px;text-decoration:none}.nav-menu-panel a[aria-current=page]{text-decoration:underline}
+@media(max-width:900px){.nav-links{display:none}.nav-menu{display:block}.site-nav{gap:8px;font-size:14px}}
+
+.page{max-width:1120px;margin-inline:auto;padding:64px var(--gutter) 96px}
+.page-head{max-width:720px;margin-bottom:48px}.page-head p{color:var(--muted);margin-top:20px}
+.block{padding-block:40px;border-top:1px solid var(--rule)}.block>h2{margin-bottom:24px}
+.split{display:grid;grid-template-columns:1fr 2fr;gap:24px 48px}.split>h2{margin:0}
+
+.intro{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:8%;align-items:start}
+.intro h1{font-size:clamp(48px,7vw,88px);letter-spacing:-.03em;line-height:1.04}.intro .where{font-size:14px;color:var(--muted);margin-top:20px}.intro .tagline{font:400 clamp(22px,2.4vw,28px)/1.35 var(--font-serif);margin-top:32px}.intro .prose{margin-top:24px;max-width:46ch}
+.intro figure img{display:block;width:100%;height:auto}.intro figcaption{font-size:13px;color:var(--muted);margin-top:12px}
+.actions{display:flex;flex-wrap:wrap;gap:12px 24px;margin-top:32px}
+
+.facts>div{display:flex;justify-content:space-between;gap:16px;border-top:1px solid var(--rule);padding-block:12px;font-size:15px}.facts>div:last-child{border-bottom:1px solid var(--rule)}.facts dt{color:var(--muted)}.facts dd{text-align:right}.facts small{display:block;color:var(--muted);font-size:13px}
+.columns{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:32px}.columns h3{font:500 16px/1.5 var(--font-sans);margin-bottom:8px}.columns ul,.plain{list-style:none}.columns li{font-size:15px;padding-block:4px;color:var(--muted)}
+.entries{list-style:none}.entry{display:grid;grid-template-columns:1fr 2fr;gap:16px 48px;padding-block:32px;border-top:1px solid var(--rule)}.entry:last-child{border-bottom:1px solid var(--rule)}
+.entry h2,.entry h3{font-size:28px}.entry .meta{font-size:14px;color:var(--muted);margin-top:8px}.entry .body p{max-width:60ch}.entry img{display:block;width:100%;height:auto;margin-top:20px}.entry .links{display:flex;flex-wrap:wrap;gap:8px 24px;margin-top:16px}.entry ul{padding-left:18px;margin-top:8px}.entry li{font-size:15px;padding-block:2px}
+.tags{display:flex;flex-wrap:wrap;gap:8px 12px;list-style:none}.tags li{border:1px solid var(--control);padding:8px 14px;font-size:14px}
+.contact-form{display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:720px}.contact-form .full{grid-column:1/-1}.contact-form .btn{justify-self:start}.contact-form label span{color:var(--muted);font-size:12px}
+.note{font-size:14px;color:var(--muted);max-width:60ch}
+@media(max-width:760px){.page{padding-block:40px 64px}.intro{grid-template-columns:1fr;gap:32px}.intro figure{order:-1}.split,.entry{grid-template-columns:1fr;gap:12px}.contact-form{grid-template-columns:1fr}}
+@media print{.site-header,.site-footer,.skip-link,.no-print{display:none!important}.page{padding:0;max-width:none}body{background:#fff;color:#000}}

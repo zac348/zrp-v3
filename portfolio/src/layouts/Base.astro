@@ -1,0 +1,80 @@
+---
+// Same fonts, colors, header, footer and appearance switch as ZR Photos: the
+// stylesheets and theme scripts are imported from the photo site's source.
+import '../../../src/styles/fonts.css';
+import '../../../src/styles/global.css';
+import '../../../src/styles/site.css';
+import '../styles/portfolio.css';
+import sites from '../../../src/shared/sites.json';
+import themeInit from '../../../src/shared/theme-init.js?raw';
+import themeControls from '../../../src/shared/theme-controls.js?raw';
+import appearance from '../../../src/shared/appearance.html?raw';
+import site from '../content/site.json';
+interface Props { title: string; description?: string; }
+const { title, description = `${site.name} — student portfolio. ${site.location}.` } = Astro.props;
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+const links = [
+  ['/', 'Home'], ['/academics', 'Academics'], ['/projects', 'Projects'],
+  ['/interests', 'Interests'], ['/resume', 'Resume'], ['/contact', 'Contact'],
+];
+---
+<!doctype html>
+<html lang="en" class="zr-site" data-page={'portfolio-' + (path.slice(1) || 'home')}>
+  <head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>{title}</title>
+    <meta name="description" content={description}/>
+    <meta name="theme-color" content="#f8f8f8"/>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png"/>
+    <link rel="preload" href="/fonts/bodoni-moda-latin.woff2" as="font" type="font/woff2" crossorigin/>
+    <link rel="preload" href="/fonts/public-sans-latin.woff2" as="font" type="font/woff2" crossorigin/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content={site.name}/>
+    <meta property="og:title" content={title}/>
+    <meta property="og:description" content={description}/>
+    <meta property="og:url" content={`${sites.portfolio}${path === '/' ? '' : path}`}/>
+    <script is:inline set:html={themeInit}></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <header class="site-header">
+      <a class="wordmark" href="/" aria-label={`${site.name} — home`}><span class="monogram">zr.</span></a>
+      <nav class="site-nav" aria-label="Main navigation">
+        <div class="nav-links">
+          {links.slice(1).map(([href, label]) => <a href={href} aria-current={path === href ? 'page' : undefined}>{label}</a>)}
+          <a href={sites.photos} data-other-site>ZR Photos</a>
+        </div>
+        <details class="nav-menu">
+          <summary>Menu</summary>
+          <div class="nav-menu-panel">
+            {links.map(([href, label]) => <a href={href} aria-current={path === href ? 'page' : undefined}>{label}</a>)}
+            <a href={sites.photos} data-other-site>ZR Photos</a>
+          </div>
+        </details>
+        <Fragment set:html={appearance}/>
+      </nav>
+    </header>
+    <main id="main-content" tabindex="-1"><slot/></main>
+    <footer class="site-footer">
+      <div class="footer-top">
+        <a href="/" class="footer-name">{site.name}</a>
+        <div class="footer-contact"><p>{site.location}</p><a href="/contact">Send a message</a></div>
+        <div class="footer-directory">
+          {links.slice(1).map(([href, label]) => <a href={href}>{label}</a>)}
+          <a href={sites.photos} data-other-site>ZR Photos</a>
+        </div>
+      </div>
+      <div class="footer-bottom"><span>© {new Date().getFullYear()} {site.name}</span><div><a href={`${sites.photos}/privacy`}>Privacy</a></div></div>
+    </footer>
+    <script is:inline set:html={themeControls}></script>
+    <script is:inline>
+      (() => {
+        const menu = document.querySelector('.nav-menu');
+        document.addEventListener('click', event => { if (menu.open && !menu.contains(event.target)) menu.open = false; });
+        menu.addEventListener('keydown', event => { if (event.key === 'Escape') { menu.open = false; menu.querySelector('summary').focus(); } });
+      })();
+    </script>
+  </body>
+</html>

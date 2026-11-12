@@ -1,0 +1,16 @@
+---
+import Base from '../layouts/Base.astro';
+import site from '../content/site.json';
+const i = site.interests;
+---
+<Base title={`Side projects & interests — ${site.name}`}>
+  <div class="page">
+    <header class="page-head"><h1>Side projects &amp; interests</h1></header>
+    <section class="block" aria-labelledby="side"><h2 id="side">Side projects</h2>
+      <ul class="entries">{i.sideProjects.map(p => <li class="entry"><div><h3>{p.title}</h3></div><div class="body"><p>{p.summary}</p>{p.href && <div class="links"><a class="line-link" href={p.href}>View</a></div>}</div></li>)}</ul>
+    </section>
+    <section class="block split" aria-labelledby="interests"><h2 id="interests">Interests</h2>
+      <ul class="tags">{i.interests.map(name => <li>{name}</li>)}</ul>
+    </section>
+  </div>
+</Base>

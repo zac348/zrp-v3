@@ -1,0 +1,15 @@
+{
+  "name": "zr-portfolio",
+  "type": "module",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "shared": "node scripts/copy-shared.mjs",
+    "dev": "npm run shared && astro dev",
+    "build": "npm run shared && astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "astro": "^5.7.0"
+  }
+}

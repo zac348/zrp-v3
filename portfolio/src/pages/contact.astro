@@ -1,0 +1,39 @@
+---
+import Base from '../layouts/Base.astro';
+import site from '../content/site.json';
+import sites from '../../../src/shared/sites.json';
+---
+<Base title={`Contact — ${site.name}`}>
+  <div class="page">
+    <header class="page-head"><h1>Contact</h1><p>Send a message and I’ll reply by email.</p></header>
+    <form class="contact-form" id="contact-form">
+      <div class="hp-field" aria-hidden="true"><label for="c-website">Website</label><input type="text" id="c-website" name="website" tabindex="-1" autocomplete="off"/></div>
+      <div class="field"><label for="c-name">Your name <span>(required)</span></label><input type="text" id="c-name" name="name" autocomplete="name" required maxlength="100"/></div>
+      <div class="field"><label for="c-email">Your email <span>(required)</span></label><input type="email" id="c-email" name="email" autocomplete="email" required maxlength="200"/></div>
+      <div class="field full"><label for="c-message">Message <span>(required)</span></label><textarea id="c-message" name="message" rows="5" required maxlength="3000"></textarea></div>
+      <button type="submit" class="btn" id="c-submit">Send message</button>
+      <p class="contact-status full" id="c-status" role="status" aria-live="polite"></p>
+    </form>
+    <p class="note">Your name, email and message are used only to reply to you. For photo sessions, use <a href={sites.photos} data-other-site>ZR Photos</a>.</p>
+    <noscript><p class="note">This form needs JavaScript turned on.</p></noscript>
+  </div>
+  <script>
+    const form = document.getElementById('contact-form'), status = document.getElementById('c-status'), button = document.getElementById('c-submit');
+    const loaded = Date.now();
+    let sending = false;
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      if (sending) return;
+      sending = true; button.disabled = true; button.textContent = 'Sending…'; status.className = 'contact-status full'; status.textContent = '';
+      try {
+        const body = { ...Object.fromEntries(new FormData(form)), elapsed: Date.now() - loaded };
+        const response = await fetch('/api/portfolio-contact', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: AbortSignal.timeout(20000) });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || !result.ok) throw new Error(result.error || 'The message could not be sent. Please try again.');
+        form.reset(); status.classList.add('success'); status.textContent = 'Message sent. Thank you.';
+      } catch (error) {
+        status.classList.add('error'); status.textContent = error.name === 'TimeoutError' ? 'That took too long. Please try again.' : error.message;
+      } finally { sending = false; button.disabled = false; button.textContent = 'Send message'; }
+    });
+  </script>
+</Base>

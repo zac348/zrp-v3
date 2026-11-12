@@ -1,10 +1,5 @@
 /* Portfolio-only layout. Colors, type, buttons, forms, header and footer come
    from ZR Photos' shared stylesheets (../../../src/styles). Tokens only here. */
-.nav-links{display:flex;gap:24px;align-items:center}.nav-links a{display:flex;align-items:center;min-height:44px;text-decoration:none}.nav-links a:hover,.nav-links a[aria-current=page]{text-decoration:underline}
-.nav-menu{display:none;position:relative}.nav-menu summary{list-style:none;display:flex;align-items:center;min-height:44px;padding:0 4px;font-size:14px}.nav-menu summary::-webkit-details-marker{display:none}.nav-menu[open] summary{text-decoration:underline}
-.nav-menu-panel{position:absolute;right:0;top:100%;z-index:60;display:flex;flex-direction:column;min-width:200px;padding:8px 16px;background:var(--surface);border:1px solid var(--control)}.nav-menu-panel a{display:flex;align-items:center;min-height:44px;font-size:15px;text-decoration:none}.nav-menu-panel a[aria-current=page]{text-decoration:underline}
-@media(max-width:900px){.nav-links{display:none}.nav-menu{display:block}.site-nav{gap:8px;font-size:14px}}
-
 .page{max-width:1120px;margin-inline:auto;padding:64px var(--gutter) 96px}
 .page-head{max-width:720px;margin-bottom:48px}.page-head p{color:var(--muted);margin-top:20px}
 .block{padding-block:40px;border-top:1px solid var(--rule)}.block>h2{margin-bottom:24px}

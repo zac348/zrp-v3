@@ -50,11 +50,23 @@ const authPage = path === '/login' || path === '/reset';
     {!noNav && <header class:list={["site-header", {"over-photo": path === "/"}]}>
       <a class="wordmark" href="/" aria-label="Zachary Routsong — home"><span class="monogram">zr.</span></a>
       <nav class="site-nav" aria-label="Main navigation">
-        <a href="/portfolio" aria-current={path === '/portfolio' ? 'page' : undefined}>Work</a>
-        <a href="/blog" aria-current={path === '/blog' ? 'page' : undefined}>Blog</a>
-        <a href="/#about">About</a>
-        <a href={PRIMARY_CTA.href}>{PRIMARY_CTA.label === 'Get in touch' ? 'Contact' : PRIMARY_CTA.label}</a>
-        <a href={sites.portfolio} data-other-site aria-label="Zachary’s portfolio at zrphotos.net">Zachary’s site</a>
+        <div class="nav-links">
+          <a href="/portfolio" aria-current={path === '/portfolio' ? 'page' : undefined}>Work</a>
+          <a href="/blog" aria-current={path === '/blog' ? 'page' : undefined}>Blog</a>
+          <a href="/#about">About</a>
+          <a href={PRIMARY_CTA.href}>{PRIMARY_CTA.label === 'Get in touch' ? 'Contact' : PRIMARY_CTA.label}</a>
+          <a href={sites.portfolio} data-other-site>Zachary’s site</a>
+        </div>
+        <details class="nav-menu">
+          <summary>Menu</summary>
+          <div class="nav-menu-panel">
+            <a href="/portfolio" aria-current={path === '/portfolio' ? 'page' : undefined}>Work</a>
+            <a href="/blog" aria-current={path === '/blog' ? 'page' : undefined}>Blog</a>
+            <a href="/#about">About</a>
+            <a href={PRIMARY_CTA.href}>{PRIMARY_CTA.label === 'Get in touch' ? 'Contact' : PRIMARY_CTA.label}</a>
+            <a href={sites.portfolio} data-other-site>Zachary’s site</a>
+          </div>
+        </details>
         <Appearance/>
       </nav>
     </header>}

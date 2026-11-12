@@ -41,7 +41,7 @@ const links = [
     <a class="skip-link" href="#main-content">Skip to content</a>
     <header class="site-header">
       <a class="wordmark" href="/" aria-label={`${site.name} — home`}><span class="monogram">zr.</span></a>
-      <nav class="site-nav" aria-label="Main navigation">
+      <nav class="site-nav many" aria-label="Main navigation">
         <div class="nav-links">
           {links.slice(1).map(([href, label]) => <a href={href} aria-current={path === href ? 'page' : undefined}>{label}</a>)}
           <a href={sites.photos} data-other-site>ZR Photos</a>
@@ -69,12 +69,5 @@ const links = [
       <div class="footer-bottom"><span>© {new Date().getFullYear()} {site.name}</span><div><a href={`${sites.photos}/privacy`}>Privacy</a></div></div>
     </footer>
     <script is:inline set:html={themeControls}></script>
-    <script is:inline>
-      (() => {
-        const menu = document.querySelector('.nav-menu');
-        document.addEventListener('click', event => { if (menu.open && !menu.contains(event.target)) menu.open = false; });
-        menu.addEventListener('keydown', event => { if (event.key === 'Escape') { menu.open = false; menu.querySelector('summary').focus(); } });
-      })();
-    </script>
   </body>
 </html>

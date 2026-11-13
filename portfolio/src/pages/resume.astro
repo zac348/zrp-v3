@@ -7,7 +7,8 @@ const r = site.resume;
   <div class="page">
     <header class="page-head"><h1>Resume</h1><p>{r.summary}</p>
       <div class="actions no-print">
-        {r.pdf ? <a class="btn" href={r.pdf} download>Download PDF</a> : <p class="note">[RESUME PDF HERE — put the file at portfolio/public/resume.pdf and set "pdf": "/resume.pdf" in site.json]</p>}
+        <a class="btn" href="/resume-pdf?download">Download resume</a>
+        {r.pdf && <a class="line-link" href={r.pdf} download>Original PDF</a>}
       </div>
     </header>
     {r.sections.map(s => <section class="block split"><h2>{s.heading}</h2>

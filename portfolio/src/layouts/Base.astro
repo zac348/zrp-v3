@@ -35,6 +35,7 @@ const links = [
     <meta property="og:title" content={title}/>
     <meta property="og:description" content={description}/>
     <meta property="og:url" content={`${sites.portfolio}${path === '/' ? '' : path}`}/>
+    <slot name="head"/>
     <script is:inline set:html={themeInit}></script>
   </head>
   <body>

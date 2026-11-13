@@ -1,5 +1,5 @@
 {
-  "_how_to_edit": "Everything the portfolio shows lives in this one file. Replace anything in [SQUARE BRACKETS]. Never add a home address, phone number, birthday or student ID. To remove an item, delete its whole { } block.",
+  "_how_to_edit": "Everything the portfolio shows lives in this one file. The Download resume button builds its PDF from this same file, so there is nothing separate to update. Replace anything in [SQUARE BRACKETS]. Never add a home address, phone number, birthday or student ID. To remove an item, delete its whole { } block.",
 
   "name": "Zachary Routsong",
   "location": "Valdosta, Georgia",
@@ -65,6 +65,7 @@
   },
 
   "resume": {
+    "_pdf_note": "Leave pdf empty. Only set it (e.g. /resume.pdf, file in portfolio/public) to also offer a hand-made PDF.",
     "pdf": "",
     "summary": "[ONE OR TWO SENTENCE SUMMARY.]",
     "sections": [

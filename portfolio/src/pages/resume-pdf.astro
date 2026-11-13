@@ -1,0 +1,65 @@
+---
+// Print-ready resume, assembled from every section of site.json. The Resume
+// page's "Download resume" button opens this page, which opens the browser's
+// print dialog: choose "Save as PDF" to download, or print it directly.
+import Base from '../layouts/Base.astro';
+import site from '../content/site.json';
+import sites from '../../../src/shared/sites.json';
+const { academics: a, projects, interests: i, resume: r } = site;
+const host = new URL(sites.portfolio).host;
+const filled = (value: unknown) => typeof value === 'string' && value.trim() !== '';
+---
+<Base title={`${site.name} — Resume`}>
+  <meta slot="head" name="robots" content="noindex"/>
+  <div class="page pdf-page">
+    <div class="pdf-bar no-print">
+      <a class="line-link" href="/resume">Back to resume</a>
+      <div><button type="button" class="btn" id="save-pdf">Save as PDF or print</button><p class="note">In the print window, choose “Save as PDF” as the printer.</p></div>
+    </div>
+    <article class="sheet" aria-label="Printable resume">
+      <header class="sheet-head">
+        <h1>{site.name}</h1>
+        <p>{site.location} · <span>{host}</span> · <span>{host}/contact</span></p>
+        {filled(site.tagline) && <p class="sheet-tagline">{site.tagline}</p>}
+      </header>
+
+      {filled(r.summary) && <section><h2>Summary</h2><p>{r.summary}</p></section>}
+
+      <section><h2>Education</h2>
+        <div class="row"><h3>{a.school}</h3><span>Class of {a.graduation}</span></div>
+        <ul class="inline">
+          {a.facts.map(f => <li><b>{f.label}:</b> {f.value}</li>)}
+          {a.tests.map(t => <li><b>{t.name}:</b> {t.score}{filled(t.detail) && <> ({t.detail})</>}</li>)}
+        </ul>
+      </section>
+
+      {a.awards.length > 0 && <section><h2>Awards</h2>
+        {a.awards.map(w => <div class="row"><p><b>{w.title}</b>{filled(w.detail) && <> — {w.detail}</>}</p><span>{w.year}</span></div>)}
+      </section>}
+
+      {r.sections.filter(s => s.heading !== 'Education').map(s => <section><h2>{s.heading}</h2>
+        {s.items.map(item => <div class="item"><div class="row"><h3>{item.title}</h3>{filled(item.meta) && <span>{item.meta}</span>}</div>{item.points.length > 0 && <ul>{item.points.map(point => <li>{point}</li>)}</ul>}</div>)}
+      </section>)}
+
+      {projects.length > 0 && <section><h2>Projects</h2>
+        {projects.map(p => <div class="item"><div class="row"><h3>{p.title}</h3>{filled(p.dates) && <span>{p.dates}</span>}</div><p>{p.summary}</p>{p.links.filter(l => filled(l.href)).map(l => <p class="link">{l.href.replace(/^https?:\/\//, '')}</p>)}</div>)}
+      </section>}
+
+      {i.sideProjects.length > 0 && <section><h2>Side projects</h2>
+        {i.sideProjects.map(p => <div class="item"><h3>{p.title}</h3><p>{p.summary}</p></div>)}
+      </section>}
+
+      <section><h2>Coursework</h2>
+        <div class="courses">{a.courses.map(c => <p><b>{c.year}:</b> {c.classes.join(', ')}</p>)}</div>
+      </section>
+
+      {i.interests.length > 0 && <section><h2>Interests</h2><p>{i.interests.join(' · ')}</p></section>}
+    </article>
+  </div>
+  <script>
+    const open = () => window.print();
+    document.getElementById('save-pdf').addEventListener('click', open);
+    // Arriving from the Download button: open the print window once fonts are ready.
+    if (new URLSearchParams(location.search).has('download')) document.fonts.ready.then(() => setTimeout(open, 150));
+  </script>
+</Base>

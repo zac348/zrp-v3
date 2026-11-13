@@ -2,21 +2,21 @@
   "_how_to_edit": "Everything the portfolio shows lives in this one file. The Download resume button builds its PDF from this same file, so there is nothing separate to update. Replace anything in [SQUARE BRACKETS]. Never add a home address, phone number, birthday or student ID. To remove an item, delete its whole { } block.",
 
   "name": "Zachary Routsong",
-  "location": "Valdosta, Georgia",
-  "tagline": "[ONE LINE ABOUT YOU — e.g. what you want to study]",
+  "location": "South Georgia",
+  "tagline": "Class of 2029. Planning to study engineering.",
 
   "about": {
     "photo": "/zachary-800.jpg",
     "photoAlt": "Zachary Routsong",
     "intro": [
-      "[SHORT INTRO — 2 or 3 sentences: who you are, what year you are in school, what you care about.]",
-      "[SECOND PARAGRAPH — what you are working toward and why.]"
+      "I’m a 10th grader at Valwood School in South Georgia. I’ve always loved computers and drones, and I shoot photography.",
+      "I want to study engineering, and I’m looking to build FPV drones. I know my way around Mac and Windows, and parts of Linux (Ubuntu)."
     ]
   },
 
   "academics": {
-    "school": "[SCHOOL NAME]",
-    "graduation": "[GRADUATION YEAR]",
+    "school": "Valwood School",
+    "graduation": "2029",
     "facts": [
       { "label": "GPA (unweighted)", "value": "[GPA HERE]" },
       { "label": "GPA (weighted)", "value": "[WEIGHTED GPA HERE]" },
@@ -42,7 +42,7 @@
     {
       "title": "ZR Photos",
       "dates": "[START YEAR] – present",
-      "summary": "Photography business in Valdosta, Georgia. [ADD 2–3 SENTENCES: what you shoot, how it started, what you have learned running it.]",
+      "summary": "Photography business in South Georgia. [ADD 2–3 SENTENCES: what you shoot, how it started, what you have learned running it.]",
       "image": "",
       "imageAlt": "",
       "links": [{ "label": "ZR Photos", "href": "https://photos.zrphotos.net" }]
@@ -61,17 +61,17 @@
     "sideProjects": [
       { "title": "[SIDE PROJECT]", "summary": "[ONE OR TWO SENTENCES.]", "href": "" }
     ],
-    "interests": ["Photography", "[INTEREST]", "[INTEREST]"]
+    "interests": ["Photography", "Computers", "Drones"]
   },
 
   "resume": {
     "_pdf_note": "Leave pdf empty. Only set it (e.g. /resume.pdf, file in portfolio/public) to also offer a hand-made PDF.",
     "pdf": "",
-    "summary": "[ONE OR TWO SENTENCE SUMMARY.]",
+    "summary": "10th grader at Valwood School, class of 2029, planning to study engineering. Into computers, drones and photography.",
     "sections": [
       {
         "heading": "Education",
-        "items": [{ "title": "[SCHOOL NAME]", "meta": "[YEARS]", "points": ["[GPA / HONORS / RELEVANT COURSEWORK]"] }]
+        "items": [{ "title": "Valwood School", "meta": "Class of 2029", "points": ["[GPA / HONORS / RELEVANT COURSEWORK]"] }]
       },
       {
         "heading": "Experience",
@@ -86,7 +86,7 @@
       },
       {
         "heading": "Skills",
-        "items": [{ "title": "[SKILL, SKILL, SKILL]", "meta": "", "points": [] }]
+        "items": [{ "title": "Photography, macOS, Windows, some Linux (Ubuntu)", "meta": "", "points": [] }]
       }
     ]
   }

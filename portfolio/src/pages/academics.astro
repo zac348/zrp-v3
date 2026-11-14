@@ -9,9 +9,9 @@ const a = site.academics;
     <section class="block split" aria-labelledby="grades"><h2 id="grades">Grades</h2>
       <dl class="facts">{a.facts.map(f => <div><dt>{f.label}</dt><dd>{f.value}</dd></div>)}</dl>
     </section>
-    <section class="block split" aria-labelledby="tests"><h2 id="tests">Test scores</h2>
+    {a.tests.length > 0 && <section class="block split" aria-labelledby="tests"><h2 id="tests">Test scores</h2>
       <dl class="facts">{a.tests.map(t => <div><dt>{t.name}</dt><dd>{t.score}{t.detail && <small>{t.detail}</small>}</dd></div>)}</dl>
-    </section>
+    </section>}
     <section class="block" aria-labelledby="classes"><h2 id="classes">Classes</h2>
       <div class="columns">{a.courses.map(c => <div><h3>{c.year}</h3><ul>{c.classes.map(name => <li>{name}</li>)}</ul></div>)}</div>
     </section>

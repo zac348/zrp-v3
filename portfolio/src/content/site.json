@@ -18,23 +18,16 @@
     "school": "Valwood School",
     "graduation": "2029",
     "facts": [
-      { "label": "GPA (unweighted)", "value": "[GPA HERE]" },
-      { "label": "GPA (weighted)", "value": "[WEIGHTED GPA HERE]" },
-      { "label": "Class rank", "value": "[CLASS RANK HERE, or delete this line]" }
+      { "label": "GPA (cumulative)", "value": "4.33" },
+      { "label": "GPA (most recent term)", "value": "4.50" }
     ],
-    "tests": [
-      { "name": "SAT", "score": "[SAT SCORE HERE]", "detail": "[SECTION SCORES / DATE]" },
-      { "name": "ACT", "score": "[ACT SCORE HERE]", "detail": "[SECTION SCORES / DATE]" }
-    ],
+    "tests": [],
     "courses": [
-      { "year": "[GRADE 9]", "classes": ["[CLASS]", "[CLASS]", "[CLASS]"] },
-      { "year": "[GRADE 10]", "classes": ["[CLASS]", "[CLASS]", "[CLASS]"] },
-      { "year": "[GRADE 11]", "classes": ["[CLASS]", "[CLASS]", "[CLASS]"] },
-      { "year": "[GRADE 12]", "classes": ["[CLASS]", "[CLASS]", "[CLASS]"] }
+      { "year": "2025–2026", "classes": ["AP Human Geography"] },
+      { "year": "2026–2027", "classes": ["AP World History", "AP Biology"] }
     ],
     "awards": [
-      { "title": "[AWARD NAME]", "year": "[YEAR]", "detail": "[WHAT IT WAS FOR]" },
-      { "title": "[AWARD NAME]", "year": "[YEAR]", "detail": "[WHAT IT WAS FOR]" }
+      { "title": "Highest GPA", "year": "2025–2026", "detail": "" }
     ]
   },
 
@@ -71,7 +64,7 @@
     "sections": [
       {
         "heading": "Education",
-        "items": [{ "title": "Valwood School", "meta": "Class of 2029", "points": ["[GPA / HONORS / RELEVANT COURSEWORK]"] }]
+        "items": [{ "title": "Valwood School", "meta": "Class of 2029", "points": ["GPA 4.33 cumulative", "AP Human Geography, AP World History, AP Biology"] }]
       },
       {
         "heading": "Experience",

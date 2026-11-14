@@ -3,14 +3,14 @@
 
   "name": "Zachary Routsong",
   "location": "South Georgia",
-  "tagline": "Class of 2029. Planning to study engineering.",
+  "tagline": "Future engineer. Photographer. Top of his class at Valwood School.",
 
   "about": {
     "photo": "/zachary-800.jpg",
     "photoAlt": "Zachary Routsong",
     "intro": [
-      "I’m a 10th grader at Valwood School in South Georgia. I’ve always loved computers and drones, and I shoot photography.",
-      "I want to study engineering, and I’m looking to build FPV drones. I know my way around Mac and Windows, and parts of Linux (Ubuntu)."
+      "I’m a sophomore at Valwood School in South Georgia with a 4.33 GPA and the Highest GPA award for 2025–2026. I started AP classes as a freshman, and this year I’m taking AP World History and AP Biology.",
+      "Outside class I run ZR Photos, my own photography business. I’ve loved computers and drones for as long as I can remember, I work across Mac, Windows and Linux, and building FPV drones is next. I plan to study engineering."
     ]
   },
 
@@ -60,7 +60,7 @@
   "resume": {
     "_pdf_note": "Leave pdf empty. Only set it (e.g. /resume.pdf, file in portfolio/public) to also offer a hand-made PDF.",
     "pdf": "",
-    "summary": "10th grader at Valwood School, class of 2029, planning to study engineering. Into computers, drones and photography.",
+    "summary": "Sophomore at Valwood School with a 4.33 GPA, the Highest GPA award for 2025–2026 and three AP classes by the end of 10th grade. Runs his own photography business, ZR Photos. Planning to study engineering.",
     "sections": [
       {
         "heading": "Education",

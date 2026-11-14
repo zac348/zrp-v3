@@ -3,13 +3,13 @@
 
   "name": "Zachary Routsong",
   "location": "South Georgia",
-  "tagline": "Future engineer. Photographer. Top of his class at Valwood School.",
+  "tagline": "Future engineer. Photographer. Highest GPA award winner at Valwood School.",
 
   "about": {
     "photo": "/zachary-800.jpg",
     "photoAlt": "Zachary Routsong",
     "intro": [
-      "I’m a sophomore at Valwood School in South Georgia with a 4.33 GPA and the Highest GPA award for 2025–2026. I started AP classes as a freshman, and this year I’m taking AP World History and AP Biology.",
+      "I’m a sophomore at Valwood School in South Georgia with a 4.33 GPA and the Highest GPA award for 2025–2026. I started AP classes as a freshman and scored a 5 on the AP Human Geography exam, and this year I’m taking AP World History and AP Biology.",
       "Outside class I run ZR Photos, my own photography business. I’ve loved computers and drones for as long as I can remember, I work across Mac, Windows and Linux, and building FPV drones is next. I plan to study engineering."
     ]
   },
@@ -21,7 +21,9 @@
       { "label": "GPA (cumulative)", "value": "4.33" },
       { "label": "GPA (most recent term)", "value": "4.50" }
     ],
-    "tests": [],
+    "tests": [
+      { "name": "AP Human Geography exam", "score": "5", "detail": "Top score, out of 5" }
+    ],
     "courses": [
       { "year": "2025–2026", "classes": ["AP Human Geography"] },
       { "year": "2026–2027", "classes": ["AP World History", "AP Biology"] }
@@ -60,11 +62,11 @@
   "resume": {
     "_pdf_note": "Leave pdf empty. Only set it (e.g. /resume.pdf, file in portfolio/public) to also offer a hand-made PDF.",
     "pdf": "",
-    "summary": "Sophomore at Valwood School with a 4.33 GPA, the Highest GPA award for 2025–2026 and three AP classes by the end of 10th grade. Runs his own photography business, ZR Photos. Planning to study engineering.",
+    "summary": "Sophomore at Valwood School with a 4.33 GPA, the Highest GPA award for 2025–2026 and a 5 on the AP Human Geography exam. Three AP classes by the end of 10th grade. Runs his own photography business, ZR Photos. Planning to study engineering.",
     "sections": [
       {
         "heading": "Education",
-        "items": [{ "title": "Valwood School", "meta": "Class of 2029", "points": ["GPA 4.33 cumulative", "AP Human Geography, AP World History, AP Biology"] }]
+        "items": [{ "title": "Valwood School", "meta": "Class of 2029", "points": ["GPA 4.33 cumulative", "AP Human Geography (exam score 5), AP World History, AP Biology"] }]
       },
       {
         "heading": "Experience",

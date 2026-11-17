@@ -1,5 +1,5 @@
 {
-  "_how_to_edit": "Everything the portfolio shows lives in this one file. The Download resume button builds its PDF from this same file, so there is nothing separate to update. Replace anything in [SQUARE BRACKETS]. Never add a home address, phone number, birthday or student ID. To remove an item, delete its whole { } block.",
+  "_how_to_edit": "Everything the portfolio shows lives in this one file. The Download resume button builds its PDF from this same file, so there is nothing separate to update. Replace anything in [SQUARE BRACKETS]; items that still have brackets are hidden on the site until you do. Never add a home address, phone number, birthday or student ID. To remove an item, delete its whole { } block.",
 
   "name": "Zachary Routsong",
   "location": "South Georgia",
@@ -9,7 +9,7 @@
     "photo": "/zachary-800.jpg",
     "photoAlt": "Zachary Routsong",
     "intro": [
-      "I’m a sophomore at Valwood School in South Georgia with a 4.33 GPA and the Highest GPA award for 2025–2026. I started AP classes as a freshman and scored a 5 on the AP Human Geography exam, and this year I’m taking AP World History and AP Biology.",
+      "I’m a sophomore at Valwood School with a 4.33 GPA. I started AP classes as a freshman and scored a 5 on the AP Human Geography exam, and this year I’m taking AP World History and AP Biology.",
       "Outside class I run ZR Photos, my own photography business. I’ve loved computers and drones for as long as I can remember, I work across Mac, Windows and Linux, and building FPV drones is next. I plan to study engineering."
     ]
   },
@@ -62,7 +62,9 @@
   "resume": {
     "_pdf_note": "Leave pdf empty. Only set it (e.g. /resume.pdf, file in portfolio/public) to also offer a hand-made PDF.",
     "pdf": "",
-    "summary": "Sophomore at Valwood School with a 4.33 GPA, the Highest GPA award for 2025–2026 and a 5 on the AP Human Geography exam. Three AP classes by the end of 10th grade. Runs his own photography business, ZR Photos. Planning to study engineering.",
+    "summary": "I’m a sophomore at Valwood School with a 4.33 GPA, the Highest GPA award for 2025–2026 and a 5 on the AP Human Geography exam. I run my own photography business, ZR Photos, and I plan to study engineering.",
+    "_pdfSummary_note": "Same summary in resume style (no I/my), used only in the downloaded PDF.",
+    "pdfSummary": "Sophomore at Valwood School with a 4.33 GPA, the Highest GPA award for 2025–2026 and a 5 on the AP Human Geography exam. Three AP classes by the end of 10th grade. Runs ZR Photos, a photography business. Planning to study engineering.",
     "sections": [
       {
         "heading": "Education",

@@ -3,7 +3,7 @@
 // page's "Download resume" button opens this page, which opens the browser's
 // print dialog: choose "Save as PDF" to download, or print it directly.
 import Base from '../layouts/Base.astro';
-import site from '../content/site.json';
+import site from '../lib/content.js';
 import sites from '../../../src/shared/sites.json';
 const { academics: a, projects, interests: i, resume: r } = site;
 const host = new URL(sites.portfolio).host;
@@ -23,7 +23,7 @@ const filled = (value: unknown) => typeof value === 'string' && value.trim() !==
         {filled(site.tagline) && <p class="sheet-tagline">{site.tagline}</p>}
       </header>
 
-      {filled(r.summary) && <section><h2>Summary</h2><p>{r.summary}</p></section>}
+      {filled(r.pdfSummary || r.summary) && <section><h2>Summary</h2><p>{r.pdfSummary || r.summary}</p></section>}
 
       <section><h2>Education</h2>
         <div class="row"><h3>{a.school}</h3><span>Class of {a.graduation}</span></div>
@@ -49,11 +49,11 @@ const filled = (value: unknown) => typeof value === 'string' && value.trim() !==
         {i.sideProjects.map(p => <div class="item"><h3>{p.title}</h3><p>{p.summary}</p></div>)}
       </section>}
 
-      <section><h2>Coursework</h2>
+      {a.courses.length > 0 && <section><h2>Coursework</h2>
         <div class="courses">{a.courses.map(c => <p><b>{c.year}:</b> {c.classes.join(', ')}</p>)}</div>
-      </section>
+      </section>}
 
-      {i.interests.length > 0 && <section><h2>Interests</h2><p>{i.interests.join(' · ')}</p></section>}
+      {i.interests.length > 0 && <section><h2>Interests</h2><p>{i.interests.join(', ')}</p></section>}
     </article>
   </div>
   <script>

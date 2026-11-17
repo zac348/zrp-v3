@@ -7,7 +7,7 @@ button,input,select,textarea{font:inherit;color:inherit;border-radius:0}
 button,summary{cursor:pointer}button:disabled{cursor:not-allowed;color:var(--muted)}
 a{color:inherit;text-underline-offset:5px}a:hover{text-decoration-thickness:2px}
 img,svg,canvas{max-width:100%}img{height:auto}svg{flex-shrink:0}
-h1,h2,h3{font-family:var(--font-serif);font-weight:400;line-height:1.15}h1{font-size:clamp(36px,5vw,56px)}h2{font-size:clamp(28px,3vw,36px)}h3{font-size:24px}
+h1,h2,h3{font-family:var(--font-serif);font-weight:400;line-height:1.15}h1{font-size:clamp(36px,5vw,56px)}h2{font-size:clamp(28px,3vw,36px)}h3{font-size:24px}h1,h2,h3{text-wrap:balance}p,li,dd{text-wrap:pretty}
 p+p{margin-top:16px}em{font-style:normal}fieldset{min-width:0;border:0}summary{min-height:44px;padding-block:10px}
 [hidden],.hidden{display:none!important}
 ::selection{background:var(--ink);color:var(--canvas)}
@@ -16,6 +16,7 @@ p+p{margin-top:16px}em{font-style:normal}fieldset{min-width:0;border:0}summary{m
 .btn,.btn-sm,.line-link,.send-button,.submit-btn{display:inline-flex;align-items:center;justify-content:center;gap:12px;min-height:44px;padding:10px 18px;border:1px solid var(--control);background:transparent;color:var(--ink);text-decoration:none;font-size:14px;line-height:1.5}
 .btn,.send-button,.submit-btn{background:var(--ink);border-color:var(--ink);color:var(--canvas)}
 .btn:hover,.send-button:hover,.submit-btn:hover{background:var(--canvas);color:var(--ink)}
+.btn,.btn-sm,.send-button,.submit-btn{transition:background-color 150ms var(--ease),color 150ms var(--ease),border-color 150ms var(--ease),transform 150ms var(--ease)}.btn:active,.btn-sm:active,.send-button:active,.submit-btn:active{transform:scale(.96)}
 .btn-sm:hover{border-color:var(--ink);text-decoration:underline}.line-link{padding-inline:0;border-width:0 0 1px}
 .btn:disabled,.submit-btn:disabled{background:var(--surface);border-color:var(--rule);color:var(--muted)}
 .field{display:flex;flex-direction:column;gap:8px;min-width:0}.field label,.form-label{font-size:14px}.field small{color:var(--muted);font-size:13px}

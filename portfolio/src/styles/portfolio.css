@@ -7,16 +7,23 @@
 
 .intro{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:8%;align-items:start}
 .intro h1{font-size:clamp(48px,7vw,88px);letter-spacing:-.03em;line-height:1.04}.intro .where{font-size:14px;color:var(--muted);margin-top:20px}.intro .tagline{font:400 clamp(22px,2.4vw,28px)/1.35 var(--font-serif);margin-top:32px}.intro .prose{margin-top:24px;max-width:46ch}
-.intro figure img{display:block;width:100%;height:auto}.intro figcaption{font-size:13px;color:var(--muted);margin-top:12px}
+.intro figure img{display:block;width:100%;height:auto}
+/* The one piece of motion on the site: the homepage settles in once on load. */
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}@keyframes appear{from{opacity:0}to{opacity:1}}
+.intro h1,.intro .where,.intro .tagline,.intro .prose,.intro .actions{animation:rise var(--intro) var(--ease) both}.intro .where{animation-delay:70ms}.intro .tagline{animation-delay:140ms}.intro .prose{animation-delay:210ms}.intro .actions{animation-delay:280ms}.intro figure{animation:appear 700ms var(--ease) 140ms both}
 .actions{display:flex;flex-wrap:wrap;gap:12px 24px;margin-top:32px}
 
-.facts>div{display:flex;justify-content:space-between;gap:16px;border-top:1px solid var(--rule);padding-block:12px;font-size:15px}.facts>div:last-child{border-bottom:1px solid var(--rule)}.facts dt{color:var(--muted)}.facts dd{text-align:right}.facts small{display:block;color:var(--muted);font-size:13px}
+.facts>div{display:flex;justify-content:space-between;gap:16px;border-top:1px solid var(--rule);padding-block:12px;font-size:15px}.facts>div:last-child{border-bottom:1px solid var(--rule)}.facts dt{color:var(--muted)}.facts dd{text-align:right;font-variant-numeric:tabular-nums}.facts small{display:block;color:var(--muted);font-size:13px}
 .columns{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:32px}.columns h3{font:500 16px/1.5 var(--font-sans);margin-bottom:8px}.columns ul,.plain{list-style:none}.columns li{font-size:15px;padding-block:4px;color:var(--muted)}
 .entries{list-style:none}.entry{display:grid;grid-template-columns:1fr 2fr;gap:16px 48px;padding-block:32px;border-top:1px solid var(--rule)}.entry:last-child{border-bottom:1px solid var(--rule)}
 .entry h2,.entry h3{font-size:28px}.entry .meta{font-size:14px;color:var(--muted);margin-top:8px}.entry .body p{max-width:60ch}.entry img{display:block;width:100%;height:auto;margin-top:20px}.entry .links{display:flex;flex-wrap:wrap;gap:8px 24px;margin-top:16px}.entry ul{padding-left:18px;margin-top:8px}.entry li{font-size:15px;padding-block:2px}
+/* Inside a ruled section the section line is enough: no second line above the first row or below the last. */
+.block .facts>div:first-child,.block .entry:first-child{border-top:0;padding-top:0}.block .facts>div:last-child,.block .entry:last-child{border-bottom:0;padding-bottom:0}
+.r-items{list-style:none;display:grid;gap:28px}.r-row{display:flex;justify-content:space-between;align-items:baseline;gap:8px 24px;flex-wrap:wrap}.r-row h3{font:500 17px/1.5 var(--font-sans)}.r-row span{font-size:14px;color:var(--muted)}.r-items ul{list-style:disc;padding-left:18px;margin-top:8px}.r-items ul li{font-size:15px;padding-block:2px}
 .tags{display:flex;flex-wrap:wrap;gap:8px 12px;list-style:none}.tags li{border:1px solid var(--control);padding:8px 14px;font-size:14px}
 .contact-form{display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:720px}.contact-form .full{grid-column:1/-1}.contact-form .btn{justify-self:start}.contact-form label span{color:var(--muted);font-size:12px}
 .note{font-size:14px;color:var(--muted);max-width:60ch}
+@media(min-width:601px){.footer-directory{display:grid;grid-template-columns:repeat(2,auto);column-gap:40px}}
 @media(max-width:760px){.page{padding-block:40px 64px}.intro{grid-template-columns:1fr;gap:32px}.intro figure{order:-1}.split,.entry{grid-template-columns:1fr;gap:12px}.contact-form{grid-template-columns:1fr}}
 /* Printable resume (/resume-pdf): a white sheet on screen, the whole page in print. */
 .pdf-bar{display:flex;justify-content:space-between;align-items:flex-start;gap:16px 24px;flex-wrap:wrap;margin-bottom:32px}.pdf-bar .note{margin-top:8px}

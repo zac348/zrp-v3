@@ -9,7 +9,7 @@ import sites from '../../../src/shared/sites.json';
 import themeInit from '../../../src/shared/theme-init.js?raw';
 import themeControls from '../../../src/shared/theme-controls.js?raw';
 import appearance from '../../../src/shared/appearance.html?raw';
-import site from '../content/site.json';
+import site from '../lib/content.js';
 interface Props { title: string; description?: string; }
 const { title, description = `${site.name} — student portfolio. ${site.location}.` } = Astro.props;
 const path = Astro.url.pathname.replace(/\/$/, '') || '/';
@@ -35,6 +35,10 @@ const links = [
     <meta property="og:title" content={title}/>
     <meta property="og:description" content={description}/>
     <meta property="og:url" content={`${sites.portfolio}${path === '/' ? '' : path}`}/>
+    <meta property="og:image" content={`${sites.portfolio}/zachary-800.jpg`}/>
+    <meta name="twitter:card" content="summary_large_image"/>
+    <link rel="canonical" href={`${sites.portfolio}${path === '/' ? '/' : path}`}/>
+    <link rel="sitemap" href="/sitemap.xml"/>
     <slot name="head"/>
     <script is:inline set:html={themeInit}></script>
   </head>

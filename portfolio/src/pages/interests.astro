@@ -1,16 +1,18 @@
 ---
 import Base from '../layouts/Base.astro';
-import site from '../content/site.json';
+import site from '../lib/content.js';
 const i = site.interests;
+const side = i.sideProjects.length > 0;
+const heading = side ? 'Side projects & interests' : 'Interests';
 ---
-<Base title={`Side projects & interests — ${site.name}`}>
+<Base title={`${heading} — ${site.name}`}>
   <div class="page">
-    <header class="page-head"><h1>Side projects &amp; interests</h1></header>
-    <section class="block" aria-labelledby="side"><h2 id="side">Side projects</h2>
+    <header class="page-head"><h1>{heading}</h1>{!side && <p>What I’m into outside class.</p>}</header>
+    {side && <section class="block" aria-labelledby="side"><h2 id="side">Side projects</h2>
       <ul class="entries">{i.sideProjects.map(p => <li class="entry"><div><h3>{p.title}</h3></div><div class="body"><p>{p.summary}</p>{p.href && <div class="links"><a class="line-link" href={p.href}>View</a></div>}</div></li>)}</ul>
-    </section>
-    <section class="block split" aria-labelledby="interests"><h2 id="interests">Interests</h2>
-      <ul class="tags">{i.interests.map(name => <li>{name}</li>)}</ul>
-    </section>
+    </section>}
+    {side
+      ? <section class="block split" aria-labelledby="interests"><h2 id="interests">Interests</h2><ul class="tags">{i.interests.map(name => <li>{name}</li>)}</ul></section>
+      : <ul class="tags" aria-label="Interests">{i.interests.map(name => <li>{name}</li>)}</ul>}
   </div>
 </Base>
